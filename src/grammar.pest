@@ -1,0 +1,3 @@
+number = { ASCII_DIGIT+ }
+sum = { number ~ " + " ~ number }
+minus = { number ~ " - " ~ number }
