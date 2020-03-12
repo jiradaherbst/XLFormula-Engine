@@ -1,18 +1,11 @@
 extern crate pest;
-//#[macro_use]
-//extern crate pest_derive;
-
 use pest::Parser;
-//use std::mem;
-
 #[derive(Parser)]
 #[grammar = "grammar.pest"]
 pub struct GrammarParser;
 
-// extern crate calculator;
-// use calculator::calculate;
-
 use crate::types;
+use std::string::String;
 
 fn build_formula(parse_str: pest::iterators::Pair<Rule>) -> types::Formula {
     match parse_str.as_rule() {
@@ -46,8 +39,28 @@ fn build_formula(parse_str: pest::iterators::Pair<Rule>) -> types::Formula {
     }
 }
 
-pub fn parse_string_to_formula(s: &str) -> types::Formula {
-    let parse_result = GrammarParser::parse(Rule::sum, s).unwrap().next().unwrap();
-    let _formula = build_formula(parse_result);
-    _formula
+pub fn parse_string_to_formula(op: String, s: &str) -> types::Formula {
+    match op.as_str() {
+        "sum" => {
+            let parse_result = GrammarParser::parse(Rule::sum, s).unwrap().next().unwrap();
+            let _formula = build_formula(parse_result);
+            _formula
+        }
+        "minus" => {
+            let parse_result = GrammarParser::parse(Rule::minus, s)
+                .unwrap()
+                .next()
+                .unwrap();
+            let _formula = build_formula(parse_result);
+            _formula
+        }
+        _ => {
+            let error = types::Value::Error(String::from("Error"));
+            types::Formula::Value(error)
+        }
+    }
+
+    // let parse_result = GrammarParser::parse(Rule::sum, s).unwrap().next().unwrap();
+    // let _formula = build_formula(parse_result);
+    // _formula
 }

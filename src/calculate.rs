@@ -62,38 +62,3 @@ pub fn result_to_string(_value: types::Value) -> String {
         types::Value::Error(error) => error, // String::from("Error: "),
     }
 }
-
-// #[derive(Debug)]
-// pub enum Operator {
-//     Plus,
-//     Minus,
-// }
-
-// #[derive(Debug)]
-// pub enum Value {
-//     Number(f32),
-//     Text(String),
-//     Error(String),
-// }
-
-// #[derive(Debug)]
-// pub enum Formula {
-//     Operation(Expression),
-//     Value(Value),
-// }
-
-// #[derive(Debug)]
-// pub struct Expression {
-//     pub lhs: Box<Formula>,
-//     pub rhs: Box<Formula>,
-//     pub op: Operator,
-// }
-
-// fn calculate_plus_operator_explicit(lhs: Value, rhs: Value) -> Value {
-//     let l = cast_value_to_number(lhs);
-//     let r = cast_value_to_number(rhs);
-//     match option_map2(l, r, calculate_plus_operator) {
-//         Some(result) => Value::Number(result),
-//         None => Value::Error(String::from("Error")),
-//     }
-// }
