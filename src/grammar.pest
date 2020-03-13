@@ -1,3 +1,11 @@
 number = { ASCII_DIGIT+ }
-sum = { number ~ " + " ~ number }
-minus = { number ~ " - " ~ number }
+//sum = { number ~ " + " ~ number }
+//minus = { number ~ " - " ~ number }
+
+
+operator = { " + " | " - " }
+formula = {"= " ~ number ~ operator ~ number}
+
+//formula = { SOI  ~ "=" ~ number | operator ~ EOI}
+//constant = BOF + number + EOF
+//full = constant | formula

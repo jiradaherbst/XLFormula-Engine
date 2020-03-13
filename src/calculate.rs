@@ -49,6 +49,7 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                 types::Operator::Minus => {
                     calculate_numeric_operator(value1, value2, calculate_minus_operator)
                 }
+                types::Operator::Null => types::Value::Error(String::from("Error")),
             }
         }
         types::Formula::Value(val) => val,

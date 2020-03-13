@@ -2,6 +2,7 @@
 pub enum Operator {
     Plus,
     Minus,
+    Null,
 }
 
 #[derive(Debug)]
