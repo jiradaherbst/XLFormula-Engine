@@ -11,17 +11,17 @@ fn evaluate_formula(s: &str) -> f32 {
 
 #[test]
 fn it_evaluate_add_operator1() {
-    assert_eq!(evaluate_formula(&"= 1 + 2"), 3.0,);
+    assert_eq!(evaluate_formula(&" = 1 + 2 "), 3.0,);
 }
 
 #[test]
 fn it_evaluate_minus_operator1() {
-    assert_eq!(evaluate_formula(&"= 123 - 23"), 100.0,);
+    assert_eq!(evaluate_formula(&"=123 - 23"), 100.0,);
 }
 
 #[test]
 fn it_evaluate_add_operator2() {
-    assert_eq!(evaluate_formula(&"= 15 + 25"), 40.0,);
+    assert_eq!(evaluate_formula(&" =15 +  25"), 40.0,);
 }
 
 #[test]

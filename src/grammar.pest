@@ -1,10 +1,12 @@
 number = { ASCII_DIGIT+ }
 //sum = { number ~ " + " ~ number }
 //minus = { number ~ " - " ~ number }
-
-add = {"+"}
-subtract = {"-"}
-operator = {add | subtract}
+operator = _{add | subtract }
+    add         = {"+"}
+    subtract    = {"-"}
+//    multiply    = {"*"}
+//    divide      = {"/"}
+    
 formula = {" "* ~"=" ~ " "*  ~ number ~ " "* ~ operator ~ " "* ~ number}
 
 //formula = { SOI  ~ "=" ~ number | operator ~ EOI}
