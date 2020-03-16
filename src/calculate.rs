@@ -1,19 +1,19 @@
 use crate::types;
 
-fn calculate_plus_operator(num1: f32, num2: f32) -> f32 {
-    num1 + num2
-}
-
-fn calculate_minus_operator(num1: f32, num2: f32) -> f32 {
-    num1 - num2
-}
-
-fn calculate_multiply_operator(num1: f32, num2: f32) -> f32 {
-    num1 * num2
-}
-
 fn calculate_divide_operator(num1: f32, num2: f32) -> f32 {
     num1 / num2
+}
+
+fn is_float_int(num: f32) -> bool {
+    ((num as i32) as f32) == num
+}
+
+fn calculate_power_operator(num1: f32, num2: f32) -> f32 {
+    if is_float_int(num2) {
+        num1.powi(num2 as i32)
+    } else {
+        num1.powf(num2)
+    }
 }
 
 fn cast_value_to_number(value: types::Value) -> Option<f32> {
@@ -52,16 +52,19 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
 
             match exp.op {
                 types::Operator::Plus => {
-                    calculate_numeric_operator(value1, value2, calculate_plus_operator)
+                    calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
                 }
                 types::Operator::Minus => {
-                    calculate_numeric_operator(value1, value2, calculate_minus_operator)
+                    calculate_numeric_operator(value1, value2, |n1, n2| n1 - n2)
                 }
                 types::Operator::Multiply => {
-                    calculate_numeric_operator(value1, value2, calculate_multiply_operator)
+                    calculate_numeric_operator(value1, value2, |n1, n2| n1 * n2)
                 }
                 types::Operator::Divide => {
                     calculate_numeric_operator(value1, value2, calculate_divide_operator)
+                }
+                types::Operator::Power => {
+                    calculate_numeric_operator(value1, value2, calculate_power_operator)
                 }
                 types::Operator::Null => types::Value::Error(String::from("Error")),
             }

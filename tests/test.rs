@@ -10,8 +10,27 @@ fn evaluate_formula(s: &str) -> f32 {
 }
 
 #[test]
-fn it_evaluate_add_operator1() {
-    assert_eq!(evaluate_formula(&" = 1 + 2 "), 3.0,);
+fn it_evaluate_add_operator_simple_addition() {
+    assert_eq!(evaluate_formula(&"=1+2"), 3.0,);
+}
+#[test]
+fn it_evaluate_add_operator_spaces_between_operators() {
+    assert_eq!(evaluate_formula(&"=1 +  2"), 3.0,);
+}
+
+#[test]
+fn it_evaluate_add_operator_spaces_before_number() {
+    assert_eq!(evaluate_formula(&"=  1+2"), 3.0,);
+}
+
+#[test]
+fn it_evaluate_add_operator_with_large_numbers() {
+    assert_eq!(evaluate_formula(&"=1234567890 + 1234567890"), 2469135780.0);
+}
+
+#[test]
+fn it_evaluate_add_operator_with_negative_numbers() {
+    assert_eq!(evaluate_formula(&"=-1 + -2"), -3.0);
 }
 
 #[test]
@@ -20,18 +39,13 @@ fn it_evaluate_minus_operator1() {
 }
 
 #[test]
-fn it_evaluate_add_operator2() {
-    assert_eq!(evaluate_formula(&" =15 +  25"), 40.0,);
-}
-
-#[test]
-fn it_evaluate_minus_operator2() {
-    assert_eq!(evaluate_formula(&"= 12 - 6"), 6.0,);
+fn it_evaluate_minus_operator_with_negative_numbers() {
+    assert_eq!(evaluate_formula(&"=-12--6"), -6.0,);
 }
 
 #[test]
 fn it_evaluate_multiply_operator() {
-    assert_eq!(evaluate_formula(&"=1 * 2"), 2.0,);
+    assert_eq!(evaluate_formula(&"=3 * 2"), 6.0,);
 }
 
 #[test]
@@ -40,11 +54,16 @@ fn it_evaluate_divide_operator() {
 }
 
 #[test]
-fn it_evaluate_negative1() {
-    assert_eq!(evaluate_formula(&"=-1+5"), 4.0,);
+fn it_evaluate_negative() {
+    assert_eq!(evaluate_formula(&"=-1 * -5"), 5.0,);
 }
 
 #[test]
-fn it_evaluate_negative2() {
-    assert_eq!(evaluate_formula(&"=-1 * -5"), 5.0,);
+fn it_evaluate_power_int() {
+    assert_eq!(evaluate_formula(&"=2^3"), 8.0,);
 }
+
+// #[test]
+// fn it_evaluate_power_float() {
+//     assert_eq!(evaluate_formula(&"=4^0.5"), 2.0,);
+// }
