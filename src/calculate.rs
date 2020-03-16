@@ -60,9 +60,12 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                 types::Operator::Multiply => {
                     calculate_numeric_operator(value1, value2, |n1, n2| n1 * n2)
                 }
-                types::Operator::Divide => {
-                    calculate_numeric_operator(value1, value2, calculate_divide_operator)
-                }
+                types::Operator::Divide => match value2 {
+                    types::Value::Number(x) if x == 0.0 => {
+                        types::Value::Error(String::from("DIV/0!"))
+                    }
+                    _ => calculate_numeric_operator(value1, value2, calculate_divide_operator),
+                },
                 types::Operator::Power => {
                     calculate_numeric_operator(value1, value2, calculate_power_operator)
                 }
