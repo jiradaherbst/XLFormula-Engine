@@ -28,3 +28,23 @@ fn it_evaluate_add_operator2() {
 fn it_evaluate_minus_operator2() {
     assert_eq!(evaluate_formula(&"= 12 - 6"), 6.0,);
 }
+
+#[test]
+fn it_evaluate_multiply_operator() {
+    assert_eq!(evaluate_formula(&"=1 * 2"), 2.0,);
+}
+
+#[test]
+fn it_evaluate_divide_operator() {
+    assert_eq!(evaluate_formula(&"=6 / 3"), 2.0,);
+}
+
+#[test]
+fn it_evaluate_negative1() {
+    assert_eq!(evaluate_formula(&"=-1+5"), 4.0,);
+}
+
+#[test]
+fn it_evaluate_negative2() {
+    assert_eq!(evaluate_formula(&"=-1 * -5"), 5.0,);
+}

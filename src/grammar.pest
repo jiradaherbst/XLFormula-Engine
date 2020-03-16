@@ -1,11 +1,11 @@
-number = { ASCII_DIGIT+ }
+number = { ("+" | "-")? ~ ASCII_DIGIT+ }
 //sum = { number ~ " + " ~ number }
 //minus = { number ~ " - " ~ number }
-operator = _{add | subtract }
+operator = _{add | subtract | multiply | divide}
     add         = {"+"}
     subtract    = {"-"}
-//    multiply    = {"*"}
-//    divide      = {"/"}
+    multiply    = {"*"}
+    divide      = {"/"}
     
 formula = {" "* ~"=" ~ " "*  ~ number ~ " "* ~ operator ~ " "* ~ number}
 

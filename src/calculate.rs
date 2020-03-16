@@ -8,6 +8,14 @@ fn calculate_minus_operator(num1: f32, num2: f32) -> f32 {
     num1 - num2
 }
 
+fn calculate_multiply_operator(num1: f32, num2: f32) -> f32 {
+    num1 * num2
+}
+
+fn calculate_divide_operator(num1: f32, num2: f32) -> f32 {
+    num1 / num2
+}
+
 fn cast_value_to_number(value: types::Value) -> Option<f32> {
     match value {
         types::Value::Number(number) => Some(number),
@@ -48,6 +56,12 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                 }
                 types::Operator::Minus => {
                     calculate_numeric_operator(value1, value2, calculate_minus_operator)
+                }
+                types::Operator::Multiply => {
+                    calculate_numeric_operator(value1, value2, calculate_multiply_operator)
+                }
+                types::Operator::Divide => {
+                    calculate_numeric_operator(value1, value2, calculate_divide_operator)
                 }
                 types::Operator::Null => types::Value::Error(String::from("Error")),
             }

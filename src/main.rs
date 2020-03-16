@@ -22,4 +22,13 @@ fn main() {
         "Result from result_to_string is {}",
         calculate::result_to_string(result)
     );
+
+    let formula = parse_formula::parse_string_to_formula(&"= 1 * 2");
+    println!("{:?}", formula);
+    let result = calculate::calculate_formula(formula);
+    println!("{:?}", result);
+    println!(
+        "Result from result_to_string is {}",
+        calculate::result_to_string(result)
+    );
 }

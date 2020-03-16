@@ -71,6 +71,22 @@ fn build_formula(parse_str: pest::iterators::Pair<Rule>) -> types::Formula {
                     };
                     types::Formula::Operation(operation)
                 }
+                Rule::multiply => {
+                    let operation = types::Expression {
+                        lhs: Box::new(build_formula(num1)),
+                        rhs: Box::new(build_formula(num2)),
+                        op: types::Operator::Multiply,
+                    };
+                    types::Formula::Operation(operation)
+                }
+                Rule::divide => {
+                    let operation = types::Expression {
+                        lhs: Box::new(build_formula(num1)),
+                        rhs: Box::new(build_formula(num2)),
+                        op: types::Operator::Divide,
+                    };
+                    types::Formula::Operation(operation)
+                }
                 _ => {
                     let value = types::Value::Error(String::from("Null Formula"));
                     types::Formula::Value(value)
@@ -91,6 +107,14 @@ fn build_formula(parse_str: pest::iterators::Pair<Rule>) -> types::Formula {
             types::Formula::Value(value)
         }
         Rule::subtract => {
+            let value = types::Value::Error(String::from("Null Formula"));
+            types::Formula::Value(value)
+        }
+        Rule::multiply => {
+            let value = types::Value::Error(String::from("Null Formula"));
+            types::Formula::Value(value)
+        }
+        Rule::divide => {
             let value = types::Value::Error(String::from("Null Formula"));
             types::Formula::Value(value)
         }
