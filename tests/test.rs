@@ -2,6 +2,8 @@ extern crate calculator;
 use calculator::calculate;
 use calculator::parse_formula;
 
+use assert_approx_eq::assert_approx_eq;
+
 fn evaluate_formula_number(s: &str) -> f32 {
     let formula = parse_formula::parse_string_to_formula(s);
     let result = calculate::calculate_formula(formula);
@@ -75,59 +77,59 @@ fn it_evaluate_power_int() {
     assert_eq!(evaluate_formula_number(&"=2^3"), 8.0,);
 }
 
-// #[test]
-// fn it_evaluate_float() {
-//     assert_eq!(evaluate_formula_number(&"=1.2+0.5"), 1.7,);
-// }
+#[test]
+fn it_evaluate_float() {
+    assert_eq!(evaluate_formula_number(&"=1.2+0.5"), 1.7,);
+}
+
+#[test]
+fn it_evaluate_negative_float() {
+    assert_approx_eq!(evaluate_formula_number(&"=-1.2+0.5"), -0.7); // left: `-0.70000005`, right: `-0.7`'
+}
+
+#[test]
+fn it_evaluate_power_float() {
+    assert_eq!(evaluate_formula_number(&"=4^0.5"), 2.0,);
+}
 
 // #[test]
-// fn it_evaluate_negative_float() {
-//     assert_eq!(evaluate_formula_number(&"=-1.2+0.5"), -0.7,);
-// }
-
-// #[test]
-// fn it_evaluate_power_float() {
-//     assert_eq!(evaluate_formula_number(&"=4^0.5"), 2.0,);
-// }
-
-// #[test]
-// fn it_evaluate_multiple_operations) {
+// fn it_evaluate_multiple_operations() {
 //     assert_eq!(evaluate_formula_number(&"=1+2+3"), 6.0,);
 // }
 
 // #[test]
-// fn it_evaluate_multiple_operations2) {
+// fn it_evaluate_multiple_operations2() {
 //     assert_eq!(evaluate_formula_number(&"=1+2-3"), 0.0,);
 // }
 // #[test]
-// fn it_evaluate_multiple_operations_in_right_order) {
+// fn it_evaluate_multiple_operations_in_right_order() {
 //     assert_eq!(evaluate_formula_number(&"=1+2*3"), 7.0,);
 // }
 // #[test]
-// fn it_evaluate_multiple_operations_in_right_order2) {
+// fn it_evaluate_multiple_operations_in_right_order2() {
 //     assert_eq!(evaluate_formula_number(&"=1+3/3"), 2.0,);
 // }
 // #[test]
-// fn it_evaluate_multiple_operations_with_errors) {
+// fn it_evaluate_multiple_operations_with_errors() {
 //     assert_eq!(evaluate_formula_string(&"=1+3/0"), "#DIV/0!",);
 // }
 
 // #[test]
-// fn it_evaluate_parens) {
+// fn it_evaluate_parens() {
 //     assert_eq!(evaluate_formula_number(&"=(1+2)"), 3.0,);
 // }
 
 // #[test]
-// fn it_evaluate_multiple_parens) {
+// fn it_evaluate_multiple_parens() {
 //     assert_eq!(evaluate_formula_number(&"=(1+2)+(3+4)"), 10.0,);
 // }
 
 // #[test]
-// fn it_evaluate_nested_parens) {
+// fn it_evaluate_nested_parens() {
 //     assert_eq!(evaluate_formula_number(&"=(1*(2+3))*2"), 10.0,);
 // }
 
 // #[test]
-// fn it_evaluate_wrong_parens) {
+// fn it_evaluate_wrong_parens() {
 //     assert_eq!(evaluate_formula_number(&"=(2+3"), "#PARENS!,);
 // }

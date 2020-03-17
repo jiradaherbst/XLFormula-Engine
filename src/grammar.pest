@@ -1,4 +1,5 @@
-number = { ("+" | "-")? ~ ASCII_DIGIT+ }
+number = @{ int ~ ("." ~ ASCII_DIGIT*)?  }
+    int = {("+" | "-")? ~ ASCII_DIGIT+}
 //sum = { number ~ " + " ~ number }
 //minus = { number ~ " - " ~ number }
 operator = _{add | subtract | multiply | divide | power}
