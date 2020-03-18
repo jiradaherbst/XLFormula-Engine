@@ -1,16 +1,16 @@
 number = @{ int ~ ("." ~ ASCII_DIGIT*)?  }
-    int = {("+" | "-")? ~ ASCII_DIGIT+}
-//sum = { number ~ " + " ~ number }
-//minus = { number ~ " - " ~ number }
-operator = _{add | subtract | multiply | divide | power}
-    add         = {"+"}
-    subtract    = {"-"}
-    multiply    = {"*"}
-    divide      = {"/"}
-    power       = {"^"}
-    
-formula = {" "* ~"=" ~ " "*  ~ number ~ " "* ~ operator ~ " "* ~ number}
+    int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 
-//formula = { SOI  ~ "=" ~ number | operator ~ EOI}
-//constant = BOF + number + EOF
-//full = constant | formula
+operator = _{ add | subtract | multiply | divide | power }
+    add         = { "+" }
+    subtract    = { "-" }
+    multiply    = { "*" }
+    divide      = { "/" }
+    power       = { "^" }
+ 
+expr = { term ~ (operator ~ term)* }
+term = _{ number | "(" ~ expr ~ ")" }
+formula = _{ SOI ~ "=" ~ expr ~ EOI }
+
+WHITESPACE = _{ " " }
+
