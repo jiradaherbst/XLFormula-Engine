@@ -18,6 +18,7 @@ fn evaluate_formula_string(s: &str) -> String {
 fn it_evaluate_add_operator_simple_addition() {
     assert_eq!(evaluate_formula_number(&"=1+2"), 3.0,);
 }
+
 #[test]
 fn it_evaluate_add_operator_spaces_between_operators() {
     assert_eq!(evaluate_formula_number(&"=1 +  2"), 3.0,);
@@ -125,6 +126,12 @@ fn it_evaluate_nested_parens() {
     assert_eq!(evaluate_formula_number(&"=(1*(2+3))*2"), 10.0,);
 }
 
+// #[test]
+// fn it_support_basic_math_function() {
+//     assert_eq!(evaluate_formula_number(&"=ABS(-1)"), 1.0,);
+// }
+
+// #[test]
 // fn it_evaluate_wrong_parens() {
-//     assert_eq!(evaluate_formula_number(&"=(2+3"), "#PARENS!,);
+//     assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARENS!",);
 // }

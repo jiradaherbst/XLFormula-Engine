@@ -1,5 +1,5 @@
 extern crate calculator;
-use calculator::calculate;
+//use calculator::calculate;
 use calculator::parse_formula;
 
 fn main() {
