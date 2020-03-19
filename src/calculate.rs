@@ -46,9 +46,17 @@ fn calculate_numeric_operator(
 
 pub fn calculate_formula(formula: types::Formula) -> types::Value {
     match formula {
-        types::Formula::Operation(exp) => {
-            let value1 = calculate_formula(*exp.lhs);
-            let value2 = calculate_formula(*exp.rhs);
+        types::Formula::Operation(mut exp) => {
+            let value2 = match exp.values.pop() {
+                Some(formula) => calculate_formula(formula),
+                None => types::Value::Error(String::from("Null Formula")),
+            };
+            let value1 = match exp.values.pop() {
+                Some(formula) => calculate_formula(formula),
+                None => types::Value::Error(String::from("Null Formula")),
+            };
+            //let value1 = calculate_formula(*exp.lhs);
+            //let value2 = calculate_formula(*exp.rhs);
 
             match exp.op {
                 types::Operator::Plus => {
