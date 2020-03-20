@@ -92,42 +92,42 @@ fn it_evaluate_power_float() {
     assert_eq!(evaluate_formula_number(&"=4^0.5"), 2.0,);
 }
 
-// #[test]
-// fn it_evaluate_multiple_operations() {
-//     assert_eq!(evaluate_formula_number(&"=1+2+3"), 6.0,);
-// }
+#[test]
+fn it_evaluate_multiple_operations() {
+    assert_eq!(evaluate_formula_number(&"=1+2+3"), 6.0,);
+}
 
-// #[test]
-// fn it_evaluate_multiple_operations2() {
-//     assert_eq!(evaluate_formula_number(&"=1+2-3"), 0.0,);
-// }
-// #[test]
-// fn it_evaluate_multiple_operations_in_right_order() {
-//     assert_eq!(evaluate_formula_number(&"=1+2*3"), 7.0,);
-// }
-// #[test]
-// fn it_evaluate_multiple_operations_in_right_order2() {
-//     assert_eq!(evaluate_formula_number(&"=1+3/3"), 2.0,);
-// }
-// #[test]
-// fn it_evaluate_multiple_operations_with_errors() {
-//     assert_eq!(evaluate_formula_string(&"=1+3/0"), "#DIV/0!",);
-// }
+#[test]
+fn it_evaluate_multiple_operations2() {
+    assert_eq!(evaluate_formula_number(&"=1+2-3"), 0.0,);
+}
+#[test]
+fn it_evaluate_multiple_operations_in_right_order() {
+    assert_eq!(evaluate_formula_number(&"=1+2*3"), 7.0,);
+}
+#[test]
+fn it_evaluate_multiple_operations_in_right_order2() {
+    assert_eq!(evaluate_formula_number(&"=1+3/3"), 2.0,);
+}
+#[test]
+fn it_evaluate_multiple_operations_with_errors() {
+    assert_eq!(evaluate_formula_string(&"=1+3/0"), "#DIV/0!",);
+}
 
-// #[test]
-// fn it_evaluate_parens() {
-//     assert_eq!(evaluate_formula_number(&"=(1+2)"), 3.0,);
-// }
+#[test]
+fn it_evaluate_parens() {
+    assert_eq!(evaluate_formula_number(&"=(1+2)"), 3.0,);
+}
 
-// #[test]
-// fn it_evaluate_multiple_parens() {
-//     assert_eq!(evaluate_formula_number(&"=(1+2)+(3+4)"), 10.0,);
-// }
+#[test]
+fn it_evaluate_multiple_parens() {
+    assert_eq!(evaluate_formula_number(&"=(1+2)+(3+4)"), 10.0,);
+}
 
-// #[test]
-// fn it_evaluate_nested_parens() {
-//     assert_eq!(evaluate_formula_number(&"=(1*(2+3))*2"), 10.0,);
-// }
+#[test]
+fn it_evaluate_nested_parens() {
+    assert_eq!(evaluate_formula_number(&"=(1*(2+3))*2"), 10.0,);
+}
 
 // #[test]
 // fn it_support_basic_math_function() {

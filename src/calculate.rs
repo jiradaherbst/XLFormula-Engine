@@ -8,6 +8,13 @@ fn is_float_int(num: f32) -> bool {
     ((num as i32) as f32) == num
 }
 
+fn is_value_number(value: &types::Value) -> bool {
+    match value {
+        types::Value::Number(_) => true,
+        _ => false,
+    }
+}
+
 fn calculate_power_operator(num1: f32, num2: f32) -> f32 {
     if is_float_int(num2) {
         num1.powi(num2 as i32)
@@ -40,7 +47,7 @@ fn calculate_numeric_operator(
     let r = cast_value_to_number(rhs);
     match option_map2(l, r, f) {
         Some(result) => types::Value::Number(result),
-        None => types::Value::Error(String::from("Error")),
+        None => types::Value::Error(String::from("Error1")),
     }
 }
 
@@ -55,29 +62,33 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                 Some(formula) => calculate_formula(formula),
                 None => types::Value::Error(String::from("Null Formula")),
             };
-            //let value1 = calculate_formula(*exp.lhs);
-            //let value2 = calculate_formula(*exp.rhs);
 
-            match exp.op {
-                types::Operator::Plus => {
-                    calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
-                }
-                types::Operator::Minus => {
-                    calculate_numeric_operator(value1, value2, |n1, n2| n1 - n2)
-                }
-                types::Operator::Multiply => {
-                    calculate_numeric_operator(value1, value2, |n1, n2| n1 * n2)
-                }
-                types::Operator::Divide => match value2 {
-                    types::Value::Number(x) if x == 0.0 => {
-                        types::Value::Error(String::from("#DIV/0!"))
+            if is_value_number(&value1) && is_value_number(&value2) {
+                match exp.op {
+                    types::Operator::Plus => {
+                        calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
                     }
-                    _ => calculate_numeric_operator(value1, value2, calculate_divide_operator),
-                },
-                types::Operator::Power => {
-                    calculate_numeric_operator(value1, value2, calculate_power_operator)
+                    types::Operator::Minus => {
+                        calculate_numeric_operator(value1, value2, |n1, n2| n1 - n2)
+                    }
+                    types::Operator::Multiply => {
+                        calculate_numeric_operator(value1, value2, |n1, n2| n1 * n2)
+                    }
+                    types::Operator::Divide => match value2 {
+                        types::Value::Number(x) if x == 0.0 => {
+                            types::Value::Error(String::from("#DIV/0!"))
+                        }
+                        _ => calculate_numeric_operator(value1, value2, calculate_divide_operator),
+                    },
+                    types::Operator::Power => {
+                        calculate_numeric_operator(value1, value2, calculate_power_operator)
+                    }
+                    types::Operator::Null => types::Value::Error(String::from("Error2")),
                 }
-                types::Operator::Null => types::Value::Error(String::from("Error")),
+            } else if is_value_number(&value1) {
+                value2
+            } else {
+                value1
             }
         }
         types::Formula::Value(val) => val,

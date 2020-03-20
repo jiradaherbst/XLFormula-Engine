@@ -12,9 +12,12 @@ fn main() {
         calculate::result_to_string(result)
     );
 
-    // let result = parse_formula::parse_string_to_formula_and_evaluate(&"= 1773 + 1362");
-    // println!("{:?}", result);
-
-    // let result = parse_formula::parse_string_to_formula_and_evaluate(&"=4^0.5");
-    // println!("{:?}", result);
+    let formula = parse_formula::parse_string_to_formula(&"=1+2+3");
+    println!("{:?}", formula);
+    let result = calculate::calculate_formula(formula);
+    println!("{:?}", result);
+    println!(
+        "Result from result_to_string is {}",
+        calculate::result_to_string(result)
+    );
 }
