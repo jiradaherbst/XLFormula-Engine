@@ -1,19 +1,20 @@
 number = @{ int ~ ("." ~ ASCII_DIGIT*)?  }
     int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 
-string = @{ ASCII_ALPHANUMERIC+ }
-
-operator = _{ add | subtract | multiply | divide | power } //| concat }
+string = ${ "\"" ~ inner ~ "\"" }
+inner = @{ char* }
+char = { !("\"") ~ ANY }
+    
+operator = _{ add | subtract | multiply | divide | power | concat }
     add         = { "+" }
     subtract    = { "-" }
     multiply    = { "*" }
     divide      = { "/" }
     power       = { "^" }
-    // concat     =  { "&" }
+    concat     =  { "&" }
  
 expr = { term ~ (operator ~ term)* }
-term = _{ number | "(" ~ expr ~ ")" | string }
+term = _{ number | string | "(" ~ expr ~ ")" }
 formula = _{ SOI ~ "=" ~ expr ~ EOI }
 
-WHITESPACE = _{ " " | "\"" }
-
+WHITESPACE = _{ " "  }

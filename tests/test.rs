@@ -131,7 +131,7 @@ fn it_evaluate_nested_parens() {
 
 #[test]
 fn it_evaluate_strings() {
-    assert_eq!(evaluate_formula_string(&"=\"Hello\""), "Hello",);
+    assert_eq!(evaluate_formula_string(&"=\"Hello!  \""), "Hello!  ",);
 }
 
 #[test]
@@ -144,20 +144,53 @@ fn it_evaluate_strings_in_numeric_operator2() {
     assert_eq!(evaluate_formula_string(&"=1 + \"Hello\""), "#CAST!",);
 }
 
-// #[test]
-// fn it_evaluate_concat_operator() {
-//     assert_eq!(evaluate_formula_string(&"=\"Hello \"&\"World!\""), "Hello World!",);
-// }
+#[test]
+fn it_evaluate_concat_operator1() {
+    assert_eq!(
+        evaluate_formula_string(&"=\"Hello\" & \"World!\""),
+        "HelloWorld!",
+    );
+}
 
-// #[test]
-// fn it_evaluate_concat_operator_with_casting() {
-//     assert_eq!(evaluate_formula_string(&"=\"Hello\"&1"), "Hello1",);
-// }
+#[test]
+fn it_evaluate_concat_operator2() {
+    assert_eq!(
+        evaluate_formula_string(&"=\"Hello \" & \"World!\""),
+        "Hello World!",
+    );
+}
 
-// #[test]
-// fn it_evaluate_concat_operator_with_casting2() {
-//     assert_eq!(evaluate_formula_string(&"=\"Hello\"&1.2"), "Hello1.2",);
-//}
+#[test]
+fn it_evaluate_concat_operator3() {
+    assert_eq!(
+        evaluate_formula_string(&"=\"Hello \" & \" World!\""),
+        "Hello  World!",
+    );
+}
+
+#[test]
+fn it_evaluate_concat_operator4() {
+    assert_eq!(
+        evaluate_formula_string(&"=\"Hello\" & \" World!\""),
+        "Hello World!",
+    );
+}
+
+#[test]
+fn it_evaluate_concat_operator_with_casting() {
+    assert_eq!(evaluate_formula_string(&"=\"Hello\"&1"), "Hello1",);
+}
+
+#[test]
+fn it_evaluate_concat_operator_with_casting2() {
+    assert_eq!(evaluate_formula_string(&"=\"Hello \"&1.2"), "Hello 1.2",);
+}
+
+#[test]
+fn it_evaluate_concat_operator_with_numberic() {
+    assert_eq!(evaluate_formula_string(&"=1 & 2"), "12",);
+}
+
 // #[test]
 // fn it_support_basic_math_function() {
 //     assert_eq!(evaluate_formula_number(&"=ABS(-1)"), 1.0,);

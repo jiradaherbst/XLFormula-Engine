@@ -11,6 +11,7 @@ pub enum Operator {
     Multiply,
     Divide,
     Power,
+    Concat,
     Null, //?
           // Function(Function)
 }

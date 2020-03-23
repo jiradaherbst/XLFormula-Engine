@@ -16,13 +16,15 @@ pub fn parse_string_to_formula(s: &str) -> types::Formula {
         .unwrap()
         .next()
         .unwrap();
-    //println!("{:?}", parse_result);
+    println!("{:?}", parse_result);
     build_formula_with_climber(parse_result.into_inner())
 }
 
 fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types::Formula {
     let climber = PrecClimber::new(vec![
-        Operator::new(Rule::add, Assoc::Left) | Operator::new(Rule::subtract, Assoc::Left),
+        Operator::new(Rule::add, Assoc::Left)
+            | Operator::new(Rule::subtract, Assoc::Left)
+            | Operator::new(Rule::concat, Assoc::Left),
         Operator::new(Rule::multiply, Assoc::Left) | Operator::new(Rule::divide, Assoc::Left),
         Operator::new(Rule::power, Assoc::Right),
     ]);
@@ -35,7 +37,7 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 types::Formula::Value(value)
             }
             Rule::string => {
-                let string = pair.as_str().parse::<String>().unwrap();
+                let string = pair.into_inner().as_str().parse::<String>().unwrap();
                 let value = types::Value::Text(string);
                 types::Formula::Value(value)
             }
@@ -81,6 +83,14 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             Rule::power => {
                 let operation = types::Expression {
                     op: types::Operator::Power,
+                    values: vec![lhs, rhs],
+                };
+
+                types::Formula::Operation(operation)
+            }
+            Rule::concat => {
+                let operation = types::Expression {
+                    op: types::Operator::Concat,
                     values: vec![lhs, rhs],
                 };
 

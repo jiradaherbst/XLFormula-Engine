@@ -8,12 +8,12 @@ fn is_float_int(num: f32) -> bool {
     ((num as i32) as f32) == num
 }
 
-fn is_value_number(value: &types::Value) -> bool {
-    match value {
-        types::Value::Number(_) => true,
-        _ => false,
-    }
-}
+// fn is_value_number(value: &types::Value) -> bool {
+//     match value {
+//         types::Value::Number(_) => true,
+//         _ => false,
+//     }
+// }
 
 fn calculate_power_operator(num1: f32, num2: f32) -> f32 {
     if is_float_int(num2) {
@@ -23,13 +23,17 @@ fn calculate_power_operator(num1: f32, num2: f32) -> f32 {
     }
 }
 
-fn cast_value_to_number(value: types::Value) -> Option<f32> {
-    match value {
-        types::Value::Number(number) => Some(number),
-        types::Value::Text(_) => None,
-        types::Value::Error(_) => None,
-    }
+fn calculate_concat_operator(str1: &String, str2: &String) -> String {
+    str1.to_owned() + str2
 }
+
+// fn cast_value_to_number(value: types::Value) -> Option<f32> {
+//     match value {
+//         types::Value::Number(number) => Some(number),
+//         types::Value::Text(_) => None,
+//         types::Value::Error(_) => None,
+//     }
+// }
 
 // fn option_map2<T, U, V>(a: Option<T>, b: Option<U>, f: fn(a1: T, b1: U) -> V) -> Option<V> {
 //     if let (Some(value_a), Some(value_b)) = (a, b) {
@@ -38,6 +42,27 @@ fn cast_value_to_number(value: types::Value) -> Option<f32> {
 //         None
 //     }
 // }
+
+fn calculate_string_operator(
+    lhs: types::Value,
+    rhs: types::Value,
+    f: fn(str1: &String, str2: &String) -> String,
+) -> types::Value {
+    match lhs {
+        types::Value::Error(_) => lhs,
+        types::Value::Number(l) => match rhs {
+            types::Value::Error(_) => rhs,
+            types::Value::Number(r) => types::Value::Text(f(&l.to_string(), &r.to_string())),
+            types::Value::Text(r) => types::Value::Text(f(&l.to_string(), &r)),
+        },
+        types::Value::Text(l) => match rhs {
+            types::Value::Error(_) => rhs,
+            types::Value::Number(r) => types::Value::Text(f(&l, &r.to_string())),
+            types::Value::Text(r) => types::Value::Text(f(&l, &r)),
+        },
+    }
+}
+
 fn calculate_numeric_operator(
     lhs: types::Value,
     rhs: types::Value,
@@ -85,6 +110,10 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                 types::Operator::Power => {
                     calculate_numeric_operator(value1, value2, calculate_power_operator)
                 }
+                types::Operator::Concat => {
+                    calculate_string_operator(value1, value2, calculate_concat_operator)
+                }
+
                 types::Operator::Null => types::Value::Error(String::from("Error2")),
             }
             // } else if is_value_number(&value1) {
