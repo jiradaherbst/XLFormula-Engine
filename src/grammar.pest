@@ -1,15 +1,18 @@
 number = @{ int ~ ("." ~ ASCII_DIGIT*)?  }
     int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 
-operator = _{ add | subtract | multiply | divide | power }
+string = @{ASCII_ALPHANUMERIC+}
+
+operator = _{ add | subtract | multiply | divide | power } //| concat }
     add         = { "+" }
     subtract    = { "-" }
     multiply    = { "*" }
     divide      = { "/" }
     power       = { "^" }
+    // concat     =  { "&" }
  
 expr = { term ~ (operator ~ term)* }
-term = _{ number | "(" ~ expr ~ ")" }
+term = _{ number | "(" ~ expr ~ ")" | string }
 formula = _{ SOI ~ "=" ~ expr ~ EOI }
 
 WHITESPACE = _{ " " }

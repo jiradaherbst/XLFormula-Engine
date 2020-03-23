@@ -129,6 +129,35 @@ fn it_evaluate_nested_parens() {
     assert_eq!(evaluate_formula_number(&"=(1*(2+3))*2"), 10.0,);
 }
 
+#[test]
+fn it_evaluate_strings() {
+    assert_eq!(evaluate_formula_string(&"=Hello"), "Hello",);
+}
+
+#[test]
+fn it_evaluate_strings_in_numeric_operator() {
+    assert_eq!(evaluate_formula_string(&"=Hello+1"), "#CAST!",);
+}
+
+#[test]
+fn it_evaluate_strings_in_numeric_operator2() {
+    assert_eq!(evaluate_formula_string(&"=1 + Hello"), "#CAST!",);
+}
+
+// #[test]
+// fn it_evaluate_concat_operator() {
+//     assert_eq!(evaluate_formula_string(&"=\"Hello \"&\"World!\""), "Hello World!",);
+// }
+
+// #[test]
+// fn it_evaluate_concat_operator_with_casting() {
+//     assert_eq!(evaluate_formula_string(&"=\"Hello\"&1"), "Hello1",);
+// }
+
+// #[test]
+// fn it_evaluate_concat_operator_with_casting2() {
+//     assert_eq!(evaluate_formula_string(&"=\"Hello\"&1.2"), "Hello1.2",);
+//}
 // #[test]
 // fn it_support_basic_math_function() {
 //     assert_eq!(evaluate_formula_number(&"=ABS(-1)"), 1.0,);
