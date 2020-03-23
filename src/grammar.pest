@@ -1,7 +1,7 @@
 number = @{ int ~ ("." ~ ASCII_DIGIT*)?  }
     int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 
-string = @{ASCII_ALPHANUMERIC+}
+string = @{ ASCII_ALPHANUMERIC+ }
 
 operator = _{ add | subtract | multiply | divide | power } //| concat }
     add         = { "+" }
@@ -15,5 +15,5 @@ expr = { term ~ (operator ~ term)* }
 term = _{ number | "(" ~ expr ~ ")" | string }
 formula = _{ SOI ~ "=" ~ expr ~ EOI }
 
-WHITESPACE = _{ " " }
+WHITESPACE = _{ " " | "\"" }
 

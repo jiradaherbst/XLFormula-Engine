@@ -14,7 +14,7 @@ fn main() {
     // );
 
     //parse_formula::parse_string_to_formula(&"= Hello");
-    let formula = parse_formula::parse_string_to_formula(&"= Hello + 1");
+    let formula = parse_formula::parse_string_to_formula(&"= \"Hello\"");
     println!("{:?}", formula);
     // let result = calculate::calculate_formula(formula);
     // println!("{:?}", result);

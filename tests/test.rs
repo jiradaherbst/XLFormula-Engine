@@ -131,17 +131,17 @@ fn it_evaluate_nested_parens() {
 
 #[test]
 fn it_evaluate_strings() {
-    assert_eq!(evaluate_formula_string(&"=Hello"), "Hello",);
+    assert_eq!(evaluate_formula_string(&"=\"Hello\""), "Hello",);
 }
 
 #[test]
 fn it_evaluate_strings_in_numeric_operator() {
-    assert_eq!(evaluate_formula_string(&"=Hello+1"), "#CAST!",);
+    assert_eq!(evaluate_formula_string(&"=\"Hello\"+1"), "#CAST!",);
 }
 
 #[test]
 fn it_evaluate_strings_in_numeric_operator2() {
-    assert_eq!(evaluate_formula_string(&"=1 + Hello"), "#CAST!",);
+    assert_eq!(evaluate_formula_string(&"=1 + \"Hello\""), "#CAST!",);
 }
 
 // #[test]
