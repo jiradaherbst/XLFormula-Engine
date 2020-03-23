@@ -44,8 +44,6 @@ pub enum Formula {
 
 #[derive(Debug)]
 pub struct Expression {
-    //pub lhs: Box<Formula>,
     pub op: Operator,
-    //pub rhs: Box<Formula>,
     pub values: Vec<Formula>,
 }

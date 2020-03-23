@@ -8,13 +8,6 @@ fn is_float_int(num: f32) -> bool {
     ((num as i32) as f32) == num
 }
 
-// fn is_value_number(value: &types::Value) -> bool {
-//     match value {
-//         types::Value::Number(_) => true,
-//         _ => false,
-//     }
-// }
-
 fn calculate_power_operator(num1: f32, num2: f32) -> f32 {
     if is_float_int(num2) {
         num1.powi(num2 as i32)
@@ -26,22 +19,6 @@ fn calculate_power_operator(num1: f32, num2: f32) -> f32 {
 fn calculate_concat_operator(str1: &String, str2: &String) -> String {
     str1.to_owned() + str2
 }
-
-// fn cast_value_to_number(value: types::Value) -> Option<f32> {
-//     match value {
-//         types::Value::Number(number) => Some(number),
-//         types::Value::Text(_) => None,
-//         types::Value::Error(_) => None,
-//     }
-// }
-
-// fn option_map2<T, U, V>(a: Option<T>, b: Option<U>, f: fn(a1: T, b1: U) -> V) -> Option<V> {
-//     if let (Some(value_a), Some(value_b)) = (a, b) {
-//         Some(f(value_a, value_b))
-//     } else {
-//         None
-//     }
-// }
 
 fn calculate_string_operator(
     lhs: types::Value,
@@ -90,7 +67,6 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                 Some(formula) => calculate_formula(formula),
                 None => types::Value::Error(String::from("Null Formula")),
             };
-            // if is_value_number(&value1) && is_value_number(&value2) {
             match exp.op {
                 types::Operator::Plus => {
                     calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
@@ -116,11 +92,6 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
 
                 types::Operator::Null => types::Value::Error(String::from("Error2")),
             }
-            // } else if is_value_number(&value1) {
-            //     value2
-            // } else {
-            //     value1
-            // }
         }
         types::Formula::Value(val) => val,
     }
@@ -130,6 +101,6 @@ pub fn result_to_string(_value: types::Value) -> String {
     match _value {
         types::Value::Number(number) => number.to_string(),
         types::Value::Text(text) => text,
-        types::Value::Error(error) => error, // String::from("Error: "),
+        types::Value::Error(error) => error,
     }
 }
