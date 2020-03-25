@@ -21,9 +21,8 @@ pub fn parse_string_to_formula(s: &str) -> types::Formula {
 
 fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types::Formula {
     let climber = PrecClimber::new(vec![
-        Operator::new(Rule::add, Assoc::Left)
-            | Operator::new(Rule::subtract, Assoc::Left)
-            | Operator::new(Rule::concat, Assoc::Left),
+        Operator::new(Rule::concat, Assoc::Left),
+        Operator::new(Rule::add, Assoc::Left) | Operator::new(Rule::subtract, Assoc::Left),
         Operator::new(Rule::multiply, Assoc::Left) | Operator::new(Rule::divide, Assoc::Left),
         Operator::new(Rule::power, Assoc::Right),
     ]);

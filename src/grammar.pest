@@ -1,10 +1,12 @@
 number = @{ int ~ ("." ~ ASCII_DIGIT*)?  }
     int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 
-string = ${ "\"" ~ inner ~ "\"" }
-inner = @{ char* }
-char = { !("\"") ~ ANY }
-    
+string = ${ "\"" ~ str_inner ~ "\"" }
+str_inner = @{ char* }
+char = { !("\"") ~ ANY
+         | "\"" ~ ( "\"")  
+       }
+
 operator = _{ add | subtract | multiply | divide | power | concat }
     add         = { "+" }
     subtract    = { "-" }
@@ -14,7 +16,7 @@ operator = _{ add | subtract | multiply | divide | power | concat }
     concat     =  { "&" }
  
 expr = { term ~ (operator ~ term)* }
-term = _{ number | string | "(" ~ expr ~ ")" }
+term = _{ number | "(" ~ expr ~ ")" | string }
 formula = _{ SOI ~ "=" ~ expr ~ EOI }
 
 WHITESPACE = _{ " "  }

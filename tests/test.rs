@@ -16,6 +16,7 @@ fn evaluate_formula_string(s: &str) -> String {
     calculate::result_to_string(result)
 }
 
+/////////////////// Simple math operators with floats and integer ///////////////////
 #[test]
 fn it_evaluate_add_operator_simple_addition() {
     assert_eq!(evaluate_formula_number(&"=1+2"), 3.0,);
@@ -63,10 +64,12 @@ fn it_evaluate_multiply_operator() {
 fn it_evaluate_divide_operator() {
     assert_eq!(evaluate_formula_number(&"=6 / 3"), 2.0,);
 }
+
 #[test]
 fn it_evaluate_divide_operator_divsion_by_zero() {
     assert_eq!(evaluate_formula_string(&"=6 / 0"), "#DIV/0!");
 }
+
 #[test]
 fn it_evaluate_negative() {
     assert_eq!(evaluate_formula_number(&"=-1 * -5"), 5.0,);
@@ -105,10 +108,12 @@ fn it_evaluate_multiple_operations2() {
 fn it_evaluate_multiple_operations_in_right_order() {
     assert_eq!(evaluate_formula_number(&"=1+2*3"), 7.0,);
 }
+
 #[test]
 fn it_evaluate_multiple_operations_in_right_order2() {
     assert_eq!(evaluate_formula_number(&"=1+3/3"), 2.0,);
 }
+
 #[test]
 fn it_evaluate_multiple_operations_with_errors() {
     assert_eq!(evaluate_formula_string(&"=1+3/0"), "#DIV/0!",);
@@ -129,6 +134,7 @@ fn it_evaluate_nested_parens() {
     assert_eq!(evaluate_formula_number(&"=(1*(2+3))*2"), 10.0,);
 }
 
+/////////////////// Strings ///////////////////
 #[test]
 fn it_evaluate_strings() {
     assert_eq!(evaluate_formula_string(&"=\"Hello!  \""), "Hello!  ",);
@@ -153,26 +159,10 @@ fn it_evaluate_concat_operator1() {
 }
 
 #[test]
-fn it_evaluate_concat_operator2() {
-    assert_eq!(
-        evaluate_formula_string(&"=\"Hello \" & \"World!\""),
-        "Hello World!",
-    );
-}
-
-#[test]
 fn it_evaluate_concat_operator3() {
     assert_eq!(
         evaluate_formula_string(&"=\"Hello \" & \" World!\""),
         "Hello  World!",
-    );
-}
-
-#[test]
-fn it_evaluate_concat_operator4() {
-    assert_eq!(
-        evaluate_formula_string(&"=\"Hello\" & \" World!\""),
-        "Hello World!",
     );
 }
 
@@ -188,9 +178,83 @@ fn it_evaluate_concat_operator_with_casting2() {
 
 #[test]
 fn it_evaluate_concat_operator_with_numberic() {
-    assert_eq!(evaluate_formula_string(&"=1 & 2"), "12",);
+    assert_eq!(evaluate_formula_string(&"=1   &  2"), "12",);
 }
 
+#[test]
+fn it_evaluate_strings_with_quoted_quotes1() {
+    assert_eq!(
+        evaluate_formula_string(&"=\"Hello 'World'\""),
+        "Hello 'World'",
+    );
+}
+
+#[test]
+fn it_evaluate_strings_with_quoted_quotes() {
+    assert_eq!(
+        evaluate_formula_string(&"=\"Hello \"\"World\"\"\""),
+        "Hello \"World\"",
+    );
+}
+
+// ="Hello ""World""" -> Hello "World" (required)
+// ='Hello "World"' (optional!)
+// ='Hello ''World''' (optional!)
+// ="Hello 'World'"
+
+// #[test]
+// fn it_evaluate_strings_with_single_quotes() {
+//     assert_eq!(
+//         evaluate_formula_string(&"=\"Hello \"&'World'"),
+//         "Hello \"World\"",
+//     );
+// }
+
+// #[test]
+// fn it_evaluate_strings_with_quotes() {
+//     assert_eq!(
+//         evaluate_formula_string(&"='Hello \"World\"'"),
+//         "Hello \"World\"",
+//     );
+// }
+
+// #[test]
+// fn it_evaluate_strings_with_quotes2() {
+//     assert_eq!(
+//         evaluate_formula_string(&"='Hello ''World''"),
+//         "Hello 'World'",
+//     );
+// }
+
+/////////////////// Constants  ///////////////////
+// #[test]
+// fn it_evaluate_constant_number() {
+//     assert_eq!(evaluate_formula_number(&"1"), 1.0,);
+// }
+// #[test]
+// fn it_evaluate_constant_number_float() {
+//     assert_eq!(evaluate_formula_number(&"1.2"), 1.2,);
+// }
+
+// #[test]
+// fn it_evaluate_constant_text() {
+//     assert_eq!(evaluate_formula_string(&"Hello World"), "Hello World",);
+// }
+
+// #[test]
+// fn it_evaluate_constant_text_with_quotes() {
+//     assert_eq!(evaluate_formula_string(&"Hello \"World'"), "Hello \"World'",);
+// }
+
+// // 01309 -> 1309
+// // '01309 -> 01309
+// // '=1+2 -> =1+2
+// #[test]
+// fn it_evaluate_constant_starting_with_equal() {
+//     assert_eq!(evaluate_formula_string(&"'="), "=",);
+// }
+
+/////////////////// Formulas ///////////////////
 // #[test]
 // fn it_support_basic_math_function() {
 //     assert_eq!(evaluate_formula_number(&"=ABS(-1)"), 1.0,);

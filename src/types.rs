@@ -17,10 +17,17 @@ pub enum Operator {
 }
 
 #[derive(Debug)]
+pub enum Error {
+    Div0,
+    Cast,
+    Formula,
+}
+
+#[derive(Debug)]
 pub enum Value {
     Number(f32),
     Text(String),
-    Error(String),
+    Error(Error),
 }
 
 #[derive(Debug)]

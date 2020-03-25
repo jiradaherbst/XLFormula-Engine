@@ -47,10 +47,10 @@ fn calculate_numeric_operator(
 ) -> types::Value {
     match lhs {
         types::Value::Error(_) => lhs,
-        types::Value::Text(_) => types::Value::Error(String::from("#CAST!")),
+        types::Value::Text(_) => types::Value::Error(types::Error::Cast),
         types::Value::Number(l) => match rhs {
             types::Value::Error(_) => rhs,
-            types::Value::Text(_) => types::Value::Error(String::from("#CAST!")),
+            types::Value::Text(_) => types::Value::Error(types::Error::Cast),
             types::Value::Number(r) => types::Value::Number(f(l, r)),
         },
     }
@@ -61,11 +61,11 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
         types::Formula::Operation(mut exp) => {
             let value2 = match exp.values.pop() {
                 Some(formula) => calculate_formula(formula),
-                None => types::Value::Error(String::from("Null Formula")),
+                None => types::Value::Error(types::Error::Formula),
             };
             let value1 = match exp.values.pop() {
                 Some(formula) => calculate_formula(formula),
-                None => types::Value::Error(String::from("Null Formula")),
+                None => types::Value::Error(types::Error::Formula),
             };
             match exp.op {
                 types::Operator::Plus => {
@@ -78,9 +78,7 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                     calculate_numeric_operator(value1, value2, |n1, n2| n1 * n2)
                 }
                 types::Operator::Divide => match value2 {
-                    types::Value::Number(x) if x == 0.0 => {
-                        types::Value::Error(String::from("#DIV/0!"))
-                    }
+                    types::Value::Number(x) if x == 0.0 => types::Value::Error(types::Error::Div0),
                     _ => calculate_numeric_operator(value1, value2, calculate_divide_operator),
                 },
                 types::Operator::Power => {
@@ -90,7 +88,7 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                     calculate_string_operator(value1, value2, calculate_concat_operator)
                 }
 
-                types::Operator::Null => types::Value::Error(String::from("Error2")),
+                types::Operator::Null => types::Value::Error(types::Error::Formula),
             }
         }
         types::Formula::Value(val) => val,
@@ -100,7 +98,11 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
 pub fn result_to_string(_value: types::Value) -> String {
     match _value {
         types::Value::Number(number) => number.to_string(),
-        types::Value::Text(text) => text,
-        types::Value::Error(error) => error,
+        types::Value::Text(text) => text.replace("\"\"", "\""),
+        types::Value::Error(error) => match error {
+            types::Error::Div0 => String::from("#DIV/0!"),
+            types::Error::Cast => String::from("#CAST!"),
+            types::Error::Formula => String::from("Null Formula"),
+        },
     }
 }
