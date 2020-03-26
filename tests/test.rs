@@ -227,34 +227,34 @@ fn it_evaluate_strings_with_quotes2() {
 }
 
 /////////////////// Constants  ///////////////////
-// #[test]
-// fn it_evaluate_constant_number() {
-//     assert_eq!(evaluate_formula_number(&"1"), 1.0,);
-// }
+#[test]
+fn it_evaluate_constant_number() {
+    assert_eq!(evaluate_formula_number(&"1"), 1.0,);
+}
 
-// #[test]
-// fn it_evaluate_constant_number_float() {
-//     assert_eq!(evaluate_formula_number(&"1.2"), 1.2,);
-// }
+#[test]
+fn it_evaluate_constant_number_float() {
+    assert_eq!(evaluate_formula_number(&"1.2"), 1.2,);
+}
 
-// #[test]
-// fn it_evaluate_constant_text() {
-//     assert_eq!(evaluate_formula_string(&"Hello World"), "Hello World",);
-// }
+#[test]
+fn it_evaluate_constant_text() {
+    assert_eq!(evaluate_formula_string(&"Hello World"), "Hello World",);
+}
 
-// #[test]
-// fn it_evaluate_constant_text_with_quotes() {
-//     assert_eq!(evaluate_formula_string(&"Hello \"World'"), "Hello \"World'",);
-// }
+#[test]
+fn it_evaluate_constant_text_with_quotes() {
+    assert_eq!(evaluate_formula_string(&"Hello \"World'"), "Hello \"World'",);
+}
 
 // // 01309 -> 1309
 // // '01309 -> 01309
 // // '=1+2 -> =1+2
 
-// #[test]
-// fn it_evaluate_constant_starting_with_equal() {
-//     assert_eq!(evaluate_formula_string(&"'="), "=",);
-// }
+#[test]
+fn it_evaluate_constant_starting_with_equal() {
+    assert_eq!(evaluate_formula_string(&"'="), "=",);
+}
 
 /////////////////// Formulas ///////////////////
 // #[test]

@@ -1,15 +1,23 @@
-number = @{ int ~ ("." ~ ASCII_DIGIT*)?  }
+number  = @{ int ~ ("." ~ ASCII_DIGIT*)?  }
     int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 
 string_double_quote = ${ "\"" ~ str_inner_double ~ "\"" }
-str_inner_double = @{ char_double* }
-char_double = { !("\"") ~ ANY
-         | "\"" ~ ( "\"")  
-       }
+str_inner_double    = @{ char_double* }
+char_double         = { !("\"") ~ ANY
+                        | "\"" ~ ( "\"")  
+                      }
 
 string_single_quote = ${ "\'" ~ str_inner_single ~ "\'" }
-str_inner_single = @{ char_single* }
-char_single = { !("\'") ~ ANY }
+str_inner_single    = @{ char_single* }
+char_single         = { !("\'") ~ ANY }
+
+string_constant     = ${ str_inner_constant }
+str_inner_constant  = @{ char_constant* }
+char_constant       = { ANY }
+
+// string_constant_quote       = ${ "\'" ~ str_inner_constant_quote }
+// str_inner_constant_quote    = @{ char_constant_quote* }
+// char_constant_quote         = { !("\'") ~ ANY }
 
 operator = _{ add | subtract | multiply | divide | power | concat }
     add         = { "+" }
@@ -20,7 +28,7 @@ operator = _{ add | subtract | multiply | divide | power | concat }
     concat     =  { "&" }
  
 expr = { term ~ (operator ~ term)* }
-term = _{ number | "(" ~ expr ~ ")" | string_double_quote | string_single_quote }
-formula = _{ SOI ~ "=" ~ expr ~ EOI }
+term = _{ number | "(" ~ expr ~ ")" | string_double_quote | string_single_quote | string_constant }
+formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ expr ~ EOI }
 
 WHITESPACE = _{ " "  }

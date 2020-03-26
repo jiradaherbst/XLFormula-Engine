@@ -46,6 +46,12 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 types::Formula::Value(value)
             }
 
+            Rule::string_constant => {
+                let string = pair.into_inner().as_str().parse::<String>().unwrap();
+                let value = types::Value::Text(string.trim_start_matches('\'').to_string());
+                types::Formula::Value(value)
+            }
+
             Rule::expr => build_formula_with_climber(pair.into_inner()),
             _ => unreachable!(),
         },
