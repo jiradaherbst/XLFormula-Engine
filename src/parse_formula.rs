@@ -34,7 +34,13 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 let value = types::Value::Number(x);
                 types::Formula::Value(value)
             }
-            Rule::string => {
+            Rule::string_double_quote => {
+                let string = pair.into_inner().as_str().parse::<String>().unwrap();
+                let value = types::Value::Text(string.replace("\"\"", "\""));
+                types::Formula::Value(value)
+            }
+
+            Rule::string_single_quote => {
                 let string = pair.into_inner().as_str().parse::<String>().unwrap();
                 let value = types::Value::Text(string);
                 types::Formula::Value(value)

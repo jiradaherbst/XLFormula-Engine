@@ -98,7 +98,7 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
 pub fn result_to_string(_value: types::Value) -> String {
     match _value {
         types::Value::Number(number) => number.to_string(),
-        types::Value::Text(text) => text.replace("\"\"", "\""),
+        types::Value::Text(text) => text,
         types::Value::Error(error) => match error {
             types::Error::Div0 => String::from("#DIV/0!"),
             types::Error::Cast => String::from("#CAST!"),
