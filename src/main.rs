@@ -12,7 +12,7 @@ fn main() {
         calculate::result_to_string(result)
     );
 
-    let formula = parse_formula::parse_string_to_formula(&"Hello \"World'");
+    let formula = parse_formula::parse_string_to_formula(&"1");
     println!("{:?}", formula);
     let result = calculate::calculate_formula(formula);
     println!("{:?}", result);

@@ -12,11 +12,23 @@ use pest::prec_climber::PrecClimber;
 
 pub fn parse_string_to_formula(s: &str) -> types::Formula {
     let parse_result = GrammarParser::parse(Rule::formula, s)
-        .unwrap()
+        .expect("unsuccessful parse")
         .next()
         .unwrap();
     println!("{:?}", parse_result);
-    build_formula_with_climber(parse_result.into_inner())
+    match parse_result.as_rule() {
+        Rule::expr => build_formula_with_climber(parse_result.into_inner()),
+        Rule::string_constant => {
+            let string = parse_result
+                .into_inner()
+                .as_str()
+                .parse::<String>()
+                .unwrap();
+            let value = types::Value::Text(string.trim_start_matches('\'').to_string());
+            types::Formula::Value(value)
+        }
+        _ => unreachable!(),
+    }
 }
 
 fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types::Formula {
@@ -43,12 +55,6 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             Rule::string_single_quote => {
                 let string = pair.into_inner().as_str().parse::<String>().unwrap();
                 let value = types::Value::Text(string);
-                types::Formula::Value(value)
-            }
-
-            Rule::string_constant => {
-                let string = pair.into_inner().as_str().parse::<String>().unwrap();
-                let value = types::Value::Text(string.trim_start_matches('\'').to_string());
                 types::Formula::Value(value)
             }
 

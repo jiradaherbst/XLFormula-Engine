@@ -15,10 +15,6 @@ string_constant     = ${ str_inner_constant }
 str_inner_constant  = @{ char_constant* }
 char_constant       = { ANY }
 
-// string_constant_quote       = ${ "\'" ~ str_inner_constant_quote }
-// str_inner_constant_quote    = @{ char_constant_quote* }
-// char_constant_quote         = { !("\'") ~ ANY }
-
 operator = _{ add | subtract | multiply | divide | power | concat }
     add         = { "+" }
     subtract    = { "-" }
@@ -28,7 +24,8 @@ operator = _{ add | subtract | multiply | divide | power | concat }
     concat     =  { "&" }
  
 expr = { term ~ (operator ~ term)* }
-term = _{ number | "(" ~ expr ~ ")" | string_double_quote | string_single_quote | string_constant }
-formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ expr ~ EOI }
+term = _{ number | "(" ~ expr ~ ")" | string_double_quote | string_single_quote } // | string_constant }
+term_constant = _{ string_constant }
+formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI } // SOI ~ expr ~ EOI
 
 WHITESPACE = _{ " "  }
