@@ -22,9 +22,12 @@ operator = _{ add | subtract | multiply | divide | power | concat }
     divide      = { "/" }
     power       = { "^" }
     concat     =  { "&" }
+
+function = _{ abs }
+    abs     = { "ABS" ~ "(" ~ number ~ ")"}
  
 expr = { term ~ (operator ~ term)* }
-term = _{ number | "(" ~ expr ~ ")" | string_double_quote | string_single_quote } // | string_constant }
+term = _{ number | "(" ~ expr ~ ")" | string_double_quote | string_single_quote | function } // | string_constant }
 term_constant = _{ string_constant }
 formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI } // SOI ~ expr ~ EOI
 

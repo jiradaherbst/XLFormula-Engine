@@ -56,6 +56,14 @@ fn calculate_numeric_operator(
     }
 }
 
+fn calculate_abs(value: types::Value) -> types::Value {
+    match value {
+        types::Value::Error(_) => value,
+        types::Value::Text(_) => types::Value::Error(types::Error::Cast),
+        types::Value::Number(l) => types::Value::Number(l.abs()),
+    }
+}
+
 pub fn calculate_formula(formula: types::Formula) -> types::Value {
     match formula {
         types::Formula::Operation(mut exp) => {
@@ -87,8 +95,9 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                 types::Operator::Concat => {
                     calculate_string_operator(value1, value2, calculate_concat_operator)
                 }
-
-                types::Operator::Null => types::Value::Error(types::Error::Formula),
+                types::Operator::Function(f) => match f {
+                    types::Function::Abs => calculate_abs(value2),
+                }, //types::Operator::Null => types::Value::Error(types::Error::Formula),
             }
         }
         types::Formula::Value(val) => val,

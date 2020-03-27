@@ -1,9 +1,10 @@
-// #[derive(Debug)]
-// pub enum Function {
-//     Sum,
-//     Product,
-//     Abs
-// }
+#[derive(Debug)]
+pub enum Function {
+    Abs,
+    //Sum,
+    //Product,
+}
+
 #[derive(Debug)]
 pub enum Operator {
     Plus,
@@ -12,8 +13,8 @@ pub enum Operator {
     Divide,
     Power,
     Concat,
-    Null, //?
-          // Function(Function)
+    Function(Function),
+    //Null,
 }
 
 #[derive(Debug)]
@@ -36,6 +37,13 @@ pub enum Formula {
     Value(Value),
     // Reference
 }
+
+#[derive(Debug)]
+pub struct Expression {
+    pub op: Operator,
+    pub values: Vec<Formula>,
+}
+
 //1+2 -> Expression(lhs:Value(1), rhs:Value(2), op: +)
 //1+2+3 -> Expression(lhs:Value(1), rhs:Expression(lhs:2, rhs: 3, op: +), op: +)
 //1+2*3 -> Expression(lhs:Value(1), rhs:Expression(lhs:2, rhs: 3, op: *), op: +)
@@ -48,9 +56,3 @@ pub enum Formula {
 //1*2+3 -> Expression(op: +, values: vec[Expression(op: *, values: [1, 2]), V(3)])
 //1*(2+3) -> Expression(op: *, values: vec[V(1), Expression(op: +, values: [2, 3])])
 //SUM(1,2,3) -> Expression(fn: SUM, values: vec[Value(1), Value(2), Value(3)])
-
-#[derive(Debug)]
-pub struct Expression {
-    pub op: Operator,
-    pub values: Vec<Formula>,
-}

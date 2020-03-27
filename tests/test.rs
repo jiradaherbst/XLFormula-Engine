@@ -257,10 +257,10 @@ fn it_evaluate_constant_starting_with_equal() {
 }
 
 /////////////////// Formulas ///////////////////
-// #[test]
-// fn it_support_basic_math_function() {
-//     assert_eq!(evaluate_formula_number(&"=ABS(-1)"), 1.0,);
-// }
+#[test]
+fn it_support_basic_math_function() {
+    assert_eq!(evaluate_formula_number(&"=ABS(-1)"), 1.0,);
+}
 
 // #[test]
 // fn it_evaluate_wrong_parens() {
