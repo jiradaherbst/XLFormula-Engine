@@ -67,37 +67,109 @@ fn calculate_abs(value: types::Value) -> types::Value {
 pub fn calculate_formula(formula: types::Formula) -> types::Value {
     match formula {
         types::Formula::Operation(mut exp) => {
-            let value2 = match exp.values.pop() {
-                Some(formula) => calculate_formula(formula),
-                None => types::Value::Error(types::Error::Formula),
-            };
-            let value1 = match exp.values.pop() {
-                Some(formula) => calculate_formula(formula),
-                None => types::Value::Error(types::Error::Formula),
-            };
+            // let value2 = match exp.values.pop() {
+            //     Some(formula) => calculate_formula(formula),
+            //     None => types::Value::Error(types::Error::Formula),
+            // };
+            // let value1 = match exp.values.pop() {
+            //     Some(formula) => calculate_formula(formula),
+            //     None => types::Value::Error(types::Error::Formula),
+            // };
             match exp.op {
                 types::Operator::Plus => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
                     calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
                 }
+
                 types::Operator::Minus => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
                     calculate_numeric_operator(value1, value2, |n1, n2| n1 - n2)
                 }
+
                 types::Operator::Multiply => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
                     calculate_numeric_operator(value1, value2, |n1, n2| n1 * n2)
                 }
-                types::Operator::Divide => match value2 {
-                    types::Value::Number(x) if x == 0.0 => types::Value::Error(types::Error::Div0),
-                    _ => calculate_numeric_operator(value1, value2, calculate_divide_operator),
-                },
+                types::Operator::Divide => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    match value2 {
+                        types::Value::Number(x) if x == 0.0 => {
+                            types::Value::Error(types::Error::Div0)
+                        }
+                        _ => calculate_numeric_operator(value1, value2, calculate_divide_operator),
+                    }
+                }
                 types::Operator::Power => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
                     calculate_numeric_operator(value1, value2, calculate_power_operator)
                 }
                 types::Operator::Concat => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
                     calculate_string_operator(value1, value2, calculate_concat_operator)
                 }
                 types::Operator::Function(f) => match f {
-                    types::Function::Abs => calculate_abs(value2),
-                    types::Function::Sum => types::Value::Error(types::Error::Formula),
+                    types::Function::Abs => {
+                        let value2 = match exp.values.pop() {
+                            Some(formula) => calculate_formula(formula),
+                            None => types::Value::Error(types::Error::Formula),
+                        };
+                        calculate_abs(value2)
+                    }
+                    types::Function::Sum => {
+                        let mut sum = types::Value::Number(0.00);
+                        while let Some(top) = exp.values.pop() {
+                            let value = calculate_formula(top);
+                            // Prints 3, 2, 1
+                            //println!("{:?}", value);
+                            sum = calculate_numeric_operator(sum, value, |n1, n2| n1 + n2);
+                        }
+                        sum
+                        //types::Value::Number(100.00)
+                        //types::Value::Error(types::Error::Formula)
+                        //calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
+                    }
                 }, //types::Operator::Null => types::Value::Error(types::Error::Formula),
             }
         }

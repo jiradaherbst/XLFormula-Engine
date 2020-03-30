@@ -59,6 +59,8 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             }
             Rule::abs => {
                 let operation = types::Expression {
+                    // op: types::Operator::Null,
+                    // func: types::Function::Abs,
                     op: types::Operator::Function(types::Function::Abs),
                     values: vec![build_formula_with_climber(pair.into_inner())],
                 };
@@ -71,6 +73,8 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                     vec.push(build_formula_with_climber(term.into_inner()));
                 }
                 let operation = types::Expression {
+                    // op: types::Operator::Null,
+                    // func: types::Function::Sum,
                     op: types::Operator::Function(types::Function::Sum),
                     values: vec,
                 };
@@ -86,6 +90,7 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             Rule::add => {
                 let operation = types::Expression {
                     op: types::Operator::Plus,
+                    //func: types::Function::Null,
                     values: vec![lhs, rhs],
                 };
 
@@ -94,6 +99,7 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             Rule::subtract => {
                 let operation = types::Expression {
                     op: types::Operator::Minus,
+                    //func: types::Function::Null,
                     values: vec![lhs, rhs],
                 };
 
@@ -102,6 +108,7 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             Rule::multiply => {
                 let operation = types::Expression {
                     op: types::Operator::Multiply,
+                    //func: types::Function::Null,
                     values: vec![lhs, rhs],
                 };
 
@@ -110,6 +117,7 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             Rule::divide => {
                 let operation = types::Expression {
                     op: types::Operator::Divide,
+                    //func: types::Function::Null,
                     values: vec![lhs, rhs],
                 };
 
@@ -118,6 +126,7 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             Rule::power => {
                 let operation = types::Expression {
                     op: types::Operator::Power,
+                    //func: types::Function::Null,
                     values: vec![lhs, rhs],
                 };
 
@@ -126,6 +135,7 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             Rule::concat => {
                 let operation = types::Expression {
                     op: types::Operator::Concat,
+                    //func: types::Function::Null,
                     values: vec![lhs, rhs],
                 };
 

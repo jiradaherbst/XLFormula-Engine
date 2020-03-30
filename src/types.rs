@@ -14,7 +14,6 @@ pub enum Operator {
     Power,
     Concat,
     Function(Function),
-    //Null,
 }
 
 #[derive(Debug)]
