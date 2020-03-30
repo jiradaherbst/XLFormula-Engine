@@ -65,6 +65,18 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 types::Formula::Operation(operation)
             }
 
+            Rule::sum => {
+                let mut vec = Vec::new();
+                for term in pair.into_inner() {
+                    vec.push(build_formula_with_climber(term.into_inner()));
+                }
+                let operation = types::Expression {
+                    op: types::Operator::Function(types::Function::Sum),
+                    values: vec,
+                };
+                types::Formula::Operation(operation)
+            }
+
             Rule::expr => build_formula_with_climber(pair.into_inner()),
             _ => unreachable!(),
         },

@@ -97,6 +97,7 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                 }
                 types::Operator::Function(f) => match f {
                     types::Function::Abs => calculate_abs(value2),
+                    types::Function::Sum => types::Value::Error(types::Error::Formula),
                 }, //types::Operator::Null => types::Value::Error(types::Error::Formula),
             }
         }

@@ -272,10 +272,10 @@ fn it_support_basic_math_function_with_nested_functions() {
     assert_eq!(evaluate_formula_number(&"=ABS(ABS(-1))"), 1.0,);
 }
 
-// #[test]
-// fn it_evaluate_functions() {
-//     assert_eq!(evaluate_formula_number(&"=SUM(1, 2, 3, 4)"), 10.0,);
-// }
+#[test]
+fn it_evaluate_functions() {
+    assert_eq!(evaluate_formula_number(&"=SUM(1, 2, 3, 4)"), 10.0,);
+}
 
 // #[test]
 // fn it_evaluate_wrong_parens() {

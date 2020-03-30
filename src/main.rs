@@ -12,7 +12,7 @@ fn main() {
         calculate::result_to_string(result)
     );
 
-    let formula = parse_formula::parse_string_to_formula(&"=ABS(1+2)");
+    let formula = parse_formula::parse_string_to_formula(&"=ABS(-1-4)");
     println!("{:?}", formula);
     let result = calculate::calculate_formula(formula);
     println!("{:?}", result);
@@ -21,7 +21,7 @@ fn main() {
         calculate::result_to_string(result)
     );
 
-    let formula = parse_formula::parse_string_to_formula(&"=ABS(-1-4)");
+    let formula = parse_formula::parse_string_to_formula(&"=SUM(1+2, 2, 3,4)");
     println!("{:?}", formula);
     let result = calculate::calculate_formula(formula);
     println!("{:?}", result);
