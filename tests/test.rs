@@ -199,7 +199,7 @@ fn it_evaluate_strings_with_quoted_quotes() {
 
 // ="Hello ""World""" -> Hello "World" (required)
 // ='Hello "World"' (optional!)
-// ='Hello ''World''' (optional!) <--- not valid in JS and also this ---> =''Hello' 'World''
+// ='Hello \'World''' (optional!) <--- not valid in JS and also this ---> =''Hello' 'World''
 // ="Hello 'World'"
 
 #[test]
@@ -262,14 +262,24 @@ fn it_support_basic_math_function() {
     assert_eq!(evaluate_formula_number(&"=ABS(-1)"), 1.0,);
 }
 
-// #[test]
-// fn it_evaluate_wrong_parens() {
-//     assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARENS!",);
-// }
+#[test]
+fn it_support_basic_math_function_with_nested_formulas() {
+    assert_eq!(evaluate_formula_number(&"=ABS(-1-4)"), 5.0,);
+}
+
+#[test]
+fn it_support_basic_math_function_with_nested_functions() {
+    assert_eq!(evaluate_formula_number(&"=ABS(ABS(-1))"), 1.0,);
+}
 
 // #[test]
 // fn it_evaluate_functions() {
 //     assert_eq!(evaluate_formula_number(&"=SUM(1, 2, 3, 4)"), 10.0,);
+// }
+
+// #[test]
+// fn it_evaluate_wrong_parens() {
+//     assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARENS!",);
 // }
 
 // #[test]

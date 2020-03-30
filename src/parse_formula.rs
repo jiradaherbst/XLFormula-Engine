@@ -58,11 +58,9 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 types::Formula::Value(value)
             }
             Rule::abs => {
-                let x = pair.into_inner().as_str().parse::<f32>().unwrap();
-                let value = types::Value::Number(x);
                 let operation = types::Expression {
                     op: types::Operator::Function(types::Function::Abs),
-                    values: vec![types::Formula::Value(value)],
+                    values: vec![build_formula_with_climber(pair.into_inner())],
                 };
                 types::Formula::Operation(operation)
             }
