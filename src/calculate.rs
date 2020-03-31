@@ -47,10 +47,23 @@ fn calculate_numeric_operator(
 ) -> types::Value {
     match lhs {
         types::Value::Error(_) => lhs,
-        types::Value::Text(_) => types::Value::Error(types::Error::Cast),
+        types::Value::Text(t) => match t.parse::<f32>() {
+            Ok(nl) => match rhs {
+                types::Value::Error(_) => rhs,
+                types::Value::Text(t) => match t.parse::<f32>() {
+                    Ok(nr) => types::Value::Number(f(nl, nr)),
+                    Err(_) => types::Value::Error(types::Error::Cast),
+                },
+                types::Value::Number(r) => types::Value::Number(f(nl, r)),
+            },
+            Err(_) => types::Value::Error(types::Error::Cast),
+        },
         types::Value::Number(l) => match rhs {
             types::Value::Error(_) => rhs,
-            types::Value::Text(_) => types::Value::Error(types::Error::Cast),
+            types::Value::Text(t) => match t.parse::<f32>() {
+                Ok(nr) => types::Value::Number(f(l, nr)),
+                Err(_) => types::Value::Error(types::Error::Cast),
+            },
             types::Value::Number(r) => types::Value::Number(f(l, r)),
         },
     }

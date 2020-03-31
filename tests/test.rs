@@ -288,6 +288,16 @@ fn it_evaluate_functions_product() {
     );
 }
 
+#[test]
+fn it_evaluate_operators_with_casting() {
+    assert_eq!(evaluate_formula_number(&"=\"1\"+2+\"3\""), 6.0,);
+}
+
+#[test]
+fn it_evaluate_functions_with_casting() {
+    assert_eq!(evaluate_formula_number(&"=SUM(1,2,\"3\")"), 6.0,);
+}
+
 // #[test]
 // fn it_evaluate_wrong_parens() {
 //     assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARENS!",);
