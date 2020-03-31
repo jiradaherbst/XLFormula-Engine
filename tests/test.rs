@@ -273,8 +273,19 @@ fn it_support_basic_math_function_with_nested_functions() {
 }
 
 #[test]
-fn it_evaluate_functions() {
-    assert_eq!(evaluate_formula_number(&"=SUM(1, 2, 3, 4)"), 10.0,);
+fn it_evaluate_functions_sum() {
+    assert_eq!(
+        evaluate_formula_number(&"=SUM(1*1, ABS(2), ABS(2+1), 4*1)"),
+        10.0,
+    );
+}
+
+#[test]
+fn it_evaluate_functions_product() {
+    assert_eq!(
+        evaluate_formula_number(&"=PRODUCT(ABS(1),2*1, 3*1,4*1)"),
+        24.0,
+    );
 }
 
 // #[test]

@@ -161,14 +161,17 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                         let mut sum = types::Value::Number(0.00);
                         while let Some(top) = exp.values.pop() {
                             let value = calculate_formula(top);
-                            // Prints 3, 2, 1
-                            //println!("{:?}", value);
                             sum = calculate_numeric_operator(sum, value, |n1, n2| n1 + n2);
                         }
                         sum
-                        //types::Value::Number(100.00)
-                        //types::Value::Error(types::Error::Formula)
-                        //calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
+                    }
+                    types::Function::Product => {
+                        let mut product = types::Value::Number(1.00);
+                        while let Some(top) = exp.values.pop() {
+                            let value = calculate_formula(top);
+                            product = calculate_numeric_operator(product, value, |n1, n2| n1 * n2);
+                        }
+                        product
                     }
                 }, //types::Operator::Null => types::Value::Error(types::Error::Formula),
             }

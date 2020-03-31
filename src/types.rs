@@ -2,7 +2,7 @@
 pub enum Function {
     Abs,
     Sum,
-    //Product,
+    Product,
 }
 
 #[derive(Debug)]
