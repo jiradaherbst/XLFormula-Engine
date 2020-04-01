@@ -6,28 +6,42 @@ pub struct GrammarParser;
 
 use crate::types;
 
+//use pest::error::Error;
 use pest::prec_climber::Assoc;
 use pest::prec_climber::Operator;
 use pest::prec_climber::PrecClimber;
 
+fn parse_string(s: &str) -> Option<pest::iterators::Pair<Rule>> {
+    let parse_result = GrammarParser::parse(Rule::formula, s);
+    match parse_result {
+        Ok(mut result) => Some(result.next().unwrap()),
+        Err(_) => None,
+    }
+}
+
 pub fn parse_string_to_formula(s: &str) -> types::Formula {
-    let parse_result = GrammarParser::parse(Rule::formula, s)
-        .expect("unsuccessful parse")
-        .next()
-        .unwrap();
-    println!("{:?}", parse_result);
-    match parse_result.as_rule() {
-        Rule::expr => build_formula_with_climber(parse_result.into_inner()),
-        Rule::string_constant => {
-            let string = parse_result
-                .into_inner()
-                .as_str()
-                .parse::<String>()
-                .unwrap();
-            let value = types::Value::Text(string.trim_start_matches('\'').to_string());
+    let parse_result = parse_string(&s);
+    match parse_result {
+        Some(parse_result) => {
+            println!("{:?}", parse_result);
+            match parse_result.as_rule() {
+                Rule::expr => build_formula_with_climber(parse_result.into_inner()),
+                Rule::string_constant => {
+                    let string = parse_result
+                        .into_inner()
+                        .as_str()
+                        .parse::<String>()
+                        .unwrap();
+                    let value = types::Value::Text(string.trim_start_matches('\'').to_string());
+                    types::Formula::Value(value)
+                }
+                _ => unreachable!(),
+            }
+        }
+        None => {
+            let value = types::Value::Error(types::Error::Parse);
             types::Formula::Value(value)
         }
-        _ => unreachable!(),
     }
 }
 

@@ -10,14 +10,7 @@ use calculator::parse_formula;
 // }
 
 fn main() {
-    // let parse_string = "3.0".to_string();
-    // if is_string_number(parse_string) {
-    //     println!("hello");
-    // } else {
-    //     println!("world");
-    // }
-
-    let formula = parse_formula::parse_string_to_formula(&"=PRODUCT(1*1, 2*1,3*1, 4*1)");
+    let formula = parse_formula::parse_string_to_formula(&"=PRODUCT(1*1, 2*1,3*1, 4*1");
     println!("{:?}", formula);
     let result = calculate::calculate_formula(formula);
     println!("{:?}", result);
@@ -25,4 +18,11 @@ fn main() {
         "Result from result_to_string is {}",
         calculate::result_to_string(result)
     );
+
+    // let parse_string = "3.0".to_string();
+    // if is_string_number(parse_string) {
+    //     println!("hello");
+    // } else {
+    //     println!("world");
+    // }
 }

@@ -275,7 +275,7 @@ fn it_support_basic_math_function_with_nested_functions() {
 #[test]
 fn it_evaluate_functions_sum() {
     assert_eq!(
-        evaluate_formula_number(&"=SUM(1*1, ABS(2), ABS(2+1), 4*1)"),
+        evaluate_formula_number(&"=SUM(1*1, ABS(2), ABS(2+1), 4)"),
         10.0,
     );
 }
@@ -283,7 +283,7 @@ fn it_evaluate_functions_sum() {
 #[test]
 fn it_evaluate_functions_product() {
     assert_eq!(
-        evaluate_formula_number(&"=PRODUCT(ABS(1),2*1, 3*1,4*1)"),
+        evaluate_formula_number(&"=PRODUCT(ABS(1),2*1, 3,4*1)"),
         24.0,
     );
 }
@@ -298,11 +298,33 @@ fn it_evaluate_functions_with_casting() {
     assert_eq!(evaluate_formula_number(&"=SUM(1,2,\"3\")"), 6.0,);
 }
 
-// #[test]
-// fn it_evaluate_wrong_parens() {
-//     assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARENS!",);
-// }
+#[test]
+fn it_evaluate_wrong_parens1() {
+    assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARSE!",);
+    //assert_eq!(evaluate_formula_string(&"=\"Hello World"), "#PARSE!",);
+    //assert_eq!(evaluate_formula_string(&"=Hello World"), "#PARSE!",);
+}
 
+#[test]
+fn it_evaluate_wrong_parens2() {
+    //assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARSE!",);
+    assert_eq!(evaluate_formula_string(&"=\"Hello World"), "#PARSE!",);
+    //assert_eq!(evaluate_formula_string(&"=Hello World"), "#PARSE!",);
+}
+
+#[test]
+fn it_evaluate_wrong_parens3() {
+    //assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARSE!",);
+    //assert_eq!(evaluate_formula_string(&"=\"Hello World"), "#PARSE!",);
+    assert_eq!(evaluate_formula_string(&"=Hello World"), "#PARSE!",);
+}
+
+// #[test]
+// fn it_evaluate_boolean() {
+//     assert_eq!(evaluate_formula_string(&"=(2+3", "#PARSE!",);
+//     assert_eq!(evaluate_formula_string(&"=\"Hello World", "#PARSE!",);
+//     assert_eq!(evaluate_formula_string(&"=Hello World", "#PARSE!",);
+// }
 // #[test]
 // fn it_evaluate_references() {
 //     assert_eq!(evaluate_formula_number(&"=A+B", {A: 1, B: 2}), 3.0,);
@@ -311,10 +333,4 @@ fn it_evaluate_functions_with_casting() {
 // #[test]
 // fn it_evaluate_references_other_formulas() {
 //     assert_eq!(evaluate_formula_number(&"=A+B", {A: &"=1+B", B: 3}), 7.0);
-// }
-
-// #[test]
-// fn it_evaluate_functions_and_operators_differently() {
-//     assert_eq!(evaluate_formula_string(&"=1+2+""3"""}),"Error.. ");
-//     assert_eq!(evaluate_formula_number(&"=SUM(1,2,""3"")"}),3.0);
 // }

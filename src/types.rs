@@ -21,6 +21,7 @@ pub enum Error {
     Div0,
     Cast,
     Formula,
+    Parse,
 }
 
 #[derive(Debug)]

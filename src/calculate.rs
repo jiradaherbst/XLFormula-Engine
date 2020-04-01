@@ -201,6 +201,7 @@ pub fn result_to_string(_value: types::Value) -> String {
             types::Error::Div0 => String::from("#DIV/0!"),
             types::Error::Cast => String::from("#CAST!"),
             types::Error::Formula => String::from("Null Formula"),
+            types::Error::Parse => String::from("#PARSE!"),
         },
     }
 }
