@@ -26,13 +26,16 @@ fn calculate_string_operator(
     f: fn(str1: &String, str2: &String) -> String,
 ) -> types::Value {
     match lhs {
+        types::Value::Boolean(_) => lhs,
         types::Value::Error(_) => lhs,
         types::Value::Number(l) => match rhs {
+            types::Value::Boolean(_) => rhs,
             types::Value::Error(_) => rhs,
             types::Value::Number(r) => types::Value::Text(f(&l.to_string(), &r.to_string())),
             types::Value::Text(r) => types::Value::Text(f(&l.to_string(), &r)),
         },
         types::Value::Text(l) => match rhs {
+            types::Value::Boolean(_) => rhs,
             types::Value::Error(_) => rhs,
             types::Value::Number(r) => types::Value::Text(f(&l, &r.to_string())),
             types::Value::Text(r) => types::Value::Text(f(&l, &r)),
@@ -46,9 +49,11 @@ fn calculate_numeric_operator(
     f: fn(num1: f32, num2: f32) -> f32,
 ) -> types::Value {
     match lhs {
+        types::Value::Boolean(_) => lhs,
         types::Value::Error(_) => lhs,
         types::Value::Text(t) => match t.parse::<f32>() {
             Ok(nl) => match rhs {
+                types::Value::Boolean(_) => rhs,
                 types::Value::Error(_) => rhs,
                 types::Value::Text(t) => match t.parse::<f32>() {
                     Ok(nr) => types::Value::Number(f(nl, nr)),
@@ -59,6 +64,7 @@ fn calculate_numeric_operator(
             Err(_) => types::Value::Error(types::Error::Cast),
         },
         types::Value::Number(l) => match rhs {
+            types::Value::Boolean(_) => rhs,
             types::Value::Error(_) => rhs,
             types::Value::Text(t) => match t.parse::<f32>() {
                 Ok(nr) => types::Value::Number(f(l, nr)),
@@ -69,8 +75,32 @@ fn calculate_numeric_operator(
     }
 }
 
+fn calculate_comparison_operator(
+    lhs: types::Value,
+    rhs: types::Value,
+    f: fn(num1: f32, num2: f32) -> bool,
+) -> types::Value {
+    match lhs {
+        types::Value::Boolean(_) => lhs,
+        //types::Value::Boolean(f(l, r)),
+        //types::Value::Boolean(types::Boolean::True),
+        types::Value::Error(_) => lhs,
+        types::Value::Text(_) => types::Value::Error(types::Error::Cast),
+        types::Value::Number(l) => match rhs {
+            types::Value::Boolean(_) => rhs,
+            types::Value::Error(_) => rhs,
+            types::Value::Text(_) => types::Value::Error(types::Error::Cast),
+            types::Value::Number(r) => match f(l, r) {
+                true => types::Value::Boolean(types::Boolean::True),
+                false => types::Value::Boolean(types::Boolean::False),
+            },
+        },
+    }
+}
+
 fn calculate_abs(value: types::Value) -> types::Value {
     match value {
+        types::Value::Boolean(_) => value,
         types::Value::Error(_) => value,
         types::Value::Text(_) => types::Value::Error(types::Error::Cast),
         types::Value::Number(l) => types::Value::Number(l.abs()),
@@ -162,6 +192,72 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                     };
                     calculate_string_operator(value1, value2, calculate_concat_operator)
                 }
+                types::Operator::Equal => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 == n2)
+                }
+                types::Operator::NotEqual => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 != n2)
+                }
+                types::Operator::Greater => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 > n2)
+                }
+                types::Operator::Less => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 < n2)
+                }
+                types::Operator::GreaterOrEqual => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 >= n2)
+                }
+                types::Operator::LessOrEqual => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 <= n2)
+                }
                 types::Operator::Function(f) => match f {
                     types::Function::Abs => {
                         let value2 = match exp.values.pop() {
@@ -202,6 +298,10 @@ pub fn result_to_string(_value: types::Value) -> String {
             types::Error::Cast => String::from("#CAST!"),
             types::Error::Formula => String::from("Null Formula"),
             types::Error::Parse => String::from("#PARSE!"),
+        },
+        types::Value::Boolean(boolean) => match boolean {
+            types::Boolean::True => String::from("TRUE"),
+            types::Boolean::False => String::from("FALSE"),
         },
     }
 }

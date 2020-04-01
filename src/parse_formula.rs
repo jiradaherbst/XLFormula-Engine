@@ -76,6 +76,12 @@ pub fn parse_string_to_formula(s: &str) -> types::Formula {
 fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types::Formula {
     let climber = PrecClimber::new(vec![
         Operator::new(Rule::concat, Assoc::Left),
+        Operator::new(Rule::equal, Assoc::Left)
+            | Operator::new(Rule::not_equal, Assoc::Left)
+            | Operator::new(Rule::greater, Assoc::Left)
+            | Operator::new(Rule::less, Assoc::Left)
+            | Operator::new(Rule::greater_or_equal, Assoc::Left)
+            | Operator::new(Rule::less_or_equal, Assoc::Left),
         Operator::new(Rule::add, Assoc::Left) | Operator::new(Rule::subtract, Assoc::Left),
         Operator::new(Rule::multiply, Assoc::Left) | Operator::new(Rule::divide, Assoc::Left),
         Operator::new(Rule::power, Assoc::Right),
@@ -180,6 +186,54 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             Rule::concat => {
                 let operation = types::Expression {
                     op: types::Operator::Concat,
+                    values: vec![lhs, rhs],
+                };
+
+                types::Formula::Operation(operation)
+            }
+            Rule::equal => {
+                let operation = types::Expression {
+                    op: types::Operator::Equal,
+                    values: vec![lhs, rhs],
+                };
+
+                types::Formula::Operation(operation)
+            }
+            Rule::not_equal => {
+                let operation = types::Expression {
+                    op: types::Operator::NotEqual,
+                    values: vec![lhs, rhs],
+                };
+
+                types::Formula::Operation(operation)
+            }
+            Rule::greater => {
+                let operation = types::Expression {
+                    op: types::Operator::Greater,
+                    values: vec![lhs, rhs],
+                };
+
+                types::Formula::Operation(operation)
+            }
+            Rule::less => {
+                let operation = types::Expression {
+                    op: types::Operator::Less,
+                    values: vec![lhs, rhs],
+                };
+
+                types::Formula::Operation(operation)
+            }
+            Rule::greater_or_equal => {
+                let operation = types::Expression {
+                    op: types::Operator::GreaterOrEqual,
+                    values: vec![lhs, rhs],
+                };
+
+                types::Formula::Operation(operation)
+            }
+            Rule::less_or_equal => {
+                let operation = types::Expression {
+                    op: types::Operator::LessOrEqual,
                     values: vec![lhs, rhs],
                 };
 

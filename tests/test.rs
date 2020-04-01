@@ -255,7 +255,6 @@ fn it_evaluate_constant_text_with_quotes() {
 fn it_evaluate_constant_starting_with_equal() {
     assert_eq!(evaluate_formula_string(&"'="), "=",);
     assert_eq!(evaluate_formula_string(&"'=hello"), "=hello",);
-    assert_eq!(evaluate_formula_string(&"'hello"), "hello",);
 }
 
 /////////////////// Formulas ///////////////////
@@ -300,6 +299,7 @@ fn it_evaluate_functions_with_casting() {
     assert_eq!(evaluate_formula_number(&"=SUM(1,2,\"3\")"), 6.0,);
 }
 
+/////////////////////// Parse error //////////////////////////////////
 #[test]
 fn it_evaluate_wrong_parens1() {
     assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARSE!",);
@@ -307,12 +307,17 @@ fn it_evaluate_wrong_parens1() {
     assert_eq!(evaluate_formula_string(&"=Hello World"), "#PARSE!",);
 }
 
-// #[test]
-// fn it_evaluate_boolean() {
-//     assert_eq!(evaluate_formula_string(&"=(2+3", "#PARSE!",);
-//     assert_eq!(evaluate_formula_string(&"=\"Hello World", "#PARSE!",);
-//     assert_eq!(evaluate_formula_string(&"=Hello World", "#PARSE!",);
-// }
+//////////////////////////// Boolean //////////////////////////////////
+#[test]
+fn it_evaluate_boolean() {
+    assert_eq!(evaluate_formula_string(&"=1*1=1/1"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=1^1<>1"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=1*2>1"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=1*1/1+2<1^1"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=2>=1"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=11<=3"), "FALSE",);
+}
+
 // #[test]
 // fn it_evaluate_references() {
 //     assert_eq!(evaluate_formula_number(&"=A+B", {A: 1, B: 2}), 3.0,);

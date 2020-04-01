@@ -17,13 +17,21 @@ char_constant       = { "\'" ~  ("=")
                         |!("=") ~ ANY    
                       } 
 
-operator = _{ add | subtract | multiply | divide | power | concat }
+operator = _{ add | subtract | multiply | divide | power | concat | comparison_operator }
     add         = { "+" }
     subtract    = { "-" }
     multiply    = { "*" }
     divide      = { "/" }
     power       = { "^" }
     concat     =  { "&" }
+    
+comparison_operator = _{ equal | not_equal | greater_or_equal | greater | less_or_equal | less  }
+    equal           = { "=" }
+    not_equal       = { "<>"}
+    greater         = { ">" } 
+    less            = { "<" }
+    greater_or_equal= { ">=" }
+    less_or_equal   = { "<=" }
 
 function = _{ abs | sum | product }
     abs     = { "ABS" ~ "(" ~ expr ~ ")" }

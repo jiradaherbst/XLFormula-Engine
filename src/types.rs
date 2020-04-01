@@ -13,6 +13,12 @@ pub enum Operator {
     Divide,
     Power,
     Concat,
+    Equal,
+    NotEqual,
+    Greater,
+    Less,
+    GreaterOrEqual,
+    LessOrEqual,
     Function(Function),
 }
 
@@ -25,9 +31,16 @@ pub enum Error {
 }
 
 #[derive(Debug)]
+pub enum Boolean {
+    True,
+    False,
+}
+
+#[derive(Debug)]
 pub enum Value {
     Number(f32),
     Text(String),
+    Boolean(Boolean),
     Error(Error),
 }
 
