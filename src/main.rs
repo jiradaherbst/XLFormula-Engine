@@ -10,7 +10,7 @@ use calculator::parse_formula;
 // }
 
 fn main() {
-    let formula = parse_formula::parse_string_to_formula(&"=PRODUCT(1*1, 2*1,3*1, 4*1");
+    let formula = parse_formula::parse_string_to_formula(&"'=");
     println!("{:?}", formula);
     let result = calculate::calculate_formula(formula);
     println!("{:?}", result);

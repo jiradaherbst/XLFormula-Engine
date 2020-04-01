@@ -254,6 +254,8 @@ fn it_evaluate_constant_text_with_quotes() {
 #[test]
 fn it_evaluate_constant_starting_with_equal() {
     assert_eq!(evaluate_formula_string(&"'="), "=",);
+    assert_eq!(evaluate_formula_string(&"'=hello"), "=hello",);
+    assert_eq!(evaluate_formula_string(&"'hello"), "hello",);
 }
 
 /////////////////// Formulas ///////////////////
@@ -301,21 +303,7 @@ fn it_evaluate_functions_with_casting() {
 #[test]
 fn it_evaluate_wrong_parens1() {
     assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARSE!",);
-    //assert_eq!(evaluate_formula_string(&"=\"Hello World"), "#PARSE!",);
-    //assert_eq!(evaluate_formula_string(&"=Hello World"), "#PARSE!",);
-}
-
-#[test]
-fn it_evaluate_wrong_parens2() {
-    //assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARSE!",);
     assert_eq!(evaluate_formula_string(&"=\"Hello World"), "#PARSE!",);
-    //assert_eq!(evaluate_formula_string(&"=Hello World"), "#PARSE!",);
-}
-
-#[test]
-fn it_evaluate_wrong_parens3() {
-    //assert_eq!(evaluate_formula_string(&"=(2+3"), "#PARSE!",);
-    //assert_eq!(evaluate_formula_string(&"=\"Hello World"), "#PARSE!",);
     assert_eq!(evaluate_formula_string(&"=Hello World"), "#PARSE!",);
 }
 

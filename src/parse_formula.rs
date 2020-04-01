@@ -11,38 +11,66 @@ use pest::prec_climber::Assoc;
 use pest::prec_climber::Operator;
 use pest::prec_climber::PrecClimber;
 
+/////////////////////////// use this function to catch parse error ////////////////////////
 fn parse_string(s: &str) -> Option<pest::iterators::Pair<Rule>> {
     let parse_result = GrammarParser::parse(Rule::formula, s);
     match parse_result {
-        Ok(mut result) => Some(result.next().unwrap()),
-        Err(_) => None,
+        Ok(mut result) => {
+            let parse_result = result.next().unwrap();
+            println!("{:?}", parse_result);
+            Some(parse_result)
+        }
+        Err(error) => {
+            println!("{:?}", error);
+            None
+        }
     }
 }
 
 pub fn parse_string_to_formula(s: &str) -> types::Formula {
+    //////////////////////////////// use this block for debugging parse message /////////////////////
+    // let parse_result = GrammarParser::parse(Rule::formula, s)
+    //     .expect("unsuccessful parse")
+    //     .next()
+    //     .unwrap();
+    // println!("{:?}", parse_result);
+    // match parse_result.as_rule() {
+    //     Rule::expr => build_formula_with_climber(parse_result.into_inner()),
+    //     Rule::string_constant => {
+    //         let string = parse_result
+    //             .into_inner()
+    //             .as_str()
+    //             .parse::<String>()
+    //             .unwrap();
+    //         let value = types::Value::Text(string.trim_start_matches('\'').to_string());
+    //         types::Formula::Value(value)
+    //     }
+    //     _ => unreachable!(),
+    // }
+    ////////////////////////////// end of debugging block //////////////////////////////////////////
+
+    /////////////////////////////////// use this block to catch parse error ///////////////////////////
     let parse_result = parse_string(&s);
     match parse_result {
-        Some(parse_result) => {
-            println!("{:?}", parse_result);
-            match parse_result.as_rule() {
-                Rule::expr => build_formula_with_climber(parse_result.into_inner()),
-                Rule::string_constant => {
-                    let string = parse_result
-                        .into_inner()
-                        .as_str()
-                        .parse::<String>()
-                        .unwrap();
-                    let value = types::Value::Text(string.trim_start_matches('\'').to_string());
-                    types::Formula::Value(value)
-                }
-                _ => unreachable!(),
+        Some(parse_result) => match parse_result.as_rule() {
+            Rule::expr => build_formula_with_climber(parse_result.into_inner()),
+            Rule::string_constant => {
+                let string = parse_result
+                    .into_inner()
+                    .as_str()
+                    .parse::<String>()
+                    .unwrap();
+                let value = types::Value::Text(string.trim_start_matches('\'').to_string());
+                types::Formula::Value(value)
             }
-        }
+            _ => unreachable!(),
+        },
         None => {
             let value = types::Value::Error(types::Error::Parse);
             types::Formula::Value(value)
         }
     }
+    ///////////////////////////////// end of catch error block ////////////////////////////////////////////
 }
 
 fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types::Formula {
