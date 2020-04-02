@@ -4,6 +4,8 @@ pub enum Function {
     Sum,
     Product,
     Or,
+    And,
+    Xor,
 }
 
 #[derive(Debug)]

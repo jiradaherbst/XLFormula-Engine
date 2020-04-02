@@ -40,9 +40,11 @@ function = _{ abs | sum | product }
     sum     = { "SUM" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }   
     product = { "PRODUCT" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
 
-logical_function = _{ or | and } 
+logical_function = _{ or | and | xor } 
     or      =  { "OR" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" } 
-    and      =  { "AND" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
+    and     =  { "AND" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
+    xor     =  { "XOR" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
+
 expr = { term ~ (operator ~ term)* }
 term = _{ number | "(" ~ expr ~ ")" | string_double_quote 
         | string_single_quote | function | logical_function }

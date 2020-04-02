@@ -309,7 +309,6 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                         product
                     }
                     types::Function::Or => {
-                        //let mut result = types::Value::Boolean(types::Boolean::True);
                         let mut result = match exp.values.pop() {
                             Some(formula) => calculate_formula(formula),
                             None => types::Value::Error(types::Error::Formula),
@@ -317,6 +316,28 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                         while let Some(top) = exp.values.pop() {
                             let value = calculate_formula(top);
                             result = calculate_boolean_operator(result, value, |n1, n2| n1 || n2);
+                        }
+                        result
+                    }
+                    types::Function::And => {
+                        let mut result = match exp.values.pop() {
+                            Some(formula) => calculate_formula(formula),
+                            None => types::Value::Error(types::Error::Formula),
+                        };
+                        while let Some(top) = exp.values.pop() {
+                            let value = calculate_formula(top);
+                            result = calculate_boolean_operator(result, value, |n1, n2| n1 && n2);
+                        }
+                        result
+                    }
+                    types::Function::Xor => {
+                        let mut result = match exp.values.pop() {
+                            Some(formula) => calculate_formula(formula),
+                            None => types::Value::Error(types::Error::Formula),
+                        };
+                        while let Some(top) = exp.values.pop() {
+                            let value = calculate_formula(top);
+                            result = calculate_boolean_operator(result, value, |n1, n2| n1 ^ n2);
                         }
                         result
                     }

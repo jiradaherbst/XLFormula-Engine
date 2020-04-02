@@ -319,9 +319,21 @@ fn it_evaluate_comparison_operators() {
 }
 
 #[test]
-fn it_evaluate_boolean_functions() {
+fn it_evaluate_boolean_or() {
     assert_eq!(evaluate_formula_string(&"=OR(1>1,1<>1)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=OR(1=1,2<=4)"), "TRUE",);
+}
+
+#[test]
+fn it_evaluate_boolean_and() {
+    assert_eq!(evaluate_formula_string(&"=AND(1>1,1=1)"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=AND(1=1,2<=4)"), "TRUE",);
+}
+
+#[test]
+fn it_evaluate_boolean_xor() {
+    assert_eq!(evaluate_formula_string(&"=XOR(2=2,1=1)"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=XOR(1=1,2>4)"), "TRUE",);
 }
 
 // #[test]
