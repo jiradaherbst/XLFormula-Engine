@@ -76,6 +76,8 @@ pub fn parse_string_to_formula(s: &str) -> types::Formula {
 fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types::Formula {
     let climber = PrecClimber::new(vec![
         Operator::new(Rule::concat, Assoc::Left),
+        //Operator::new(Rule::or, Assoc::Left),
+        //Operator::new(Rule::and, Assoc::Left),
         Operator::new(Rule::equal, Assoc::Left) | Operator::new(Rule::not_equal, Assoc::Left),
         Operator::new(Rule::greater, Assoc::Left)
             | Operator::new(Rule::less, Assoc::Left)
@@ -111,7 +113,6 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 };
                 types::Formula::Operation(operation)
             }
-
             Rule::sum => {
                 let mut vec = Vec::new();
                 for term in pair.into_inner() {
@@ -131,6 +132,17 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 }
                 let operation = types::Expression {
                     op: types::Operator::Function(types::Function::Product),
+                    values: vec,
+                };
+                types::Formula::Operation(operation)
+            }
+            Rule::or => {
+                let mut vec = Vec::new();
+                for term in pair.into_inner() {
+                    vec.push(build_formula_with_climber(term.into_inner()));
+                }
+                let operation = types::Expression {
+                    op: types::Operator::Function(types::Function::Or),
                     values: vec,
                 };
                 types::Formula::Operation(operation)

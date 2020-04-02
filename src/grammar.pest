@@ -17,7 +17,8 @@ char_constant       = { "\'" ~  ("=")
                         |!("=") ~ ANY    
                       } 
 
-operator = _{ add | subtract | multiply | divide | power | concat | comparison_operator }
+operator = _{ add | subtract | multiply | divide | power 
+            | concat | comparison_operator }
     add         = { "+" }
     subtract    = { "-" }
     multiply    = { "*" }
@@ -25,7 +26,8 @@ operator = _{ add | subtract | multiply | divide | power | concat | comparison_o
     power       = { "^" }
     concat     =  { "&" }
     
-comparison_operator = _{ equal | not_equal | greater_or_equal | greater | less_or_equal | less  }
+comparison_operator = _{ equal | not_equal | greater_or_equal | greater 
+                       | less_or_equal | less }
     equal           = { "=" }
     not_equal       = { "<>"}
     greater         = { ">" } 
@@ -36,10 +38,15 @@ comparison_operator = _{ equal | not_equal | greater_or_equal | greater | less_o
 function = _{ abs | sum | product }
     abs     = { "ABS" ~ "(" ~ expr ~ ")" }
     sum     = { "SUM" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }   
-    product = { "PRODUCT" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" } 
+    product = { "PRODUCT" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
 
+logical_function = _{ or | and } 
+    or      =  { "OR" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" } 
+    and      =  { "AND" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
 expr = { term ~ (operator ~ term)* }
-term = _{ number | "(" ~ expr ~ ")" | string_double_quote | string_single_quote | function } 
+term = _{ number | "(" ~ expr ~ ")" | string_double_quote 
+        | string_single_quote | function | logical_function }
 term_constant = _{ string_constant }
-formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI } 
+formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI }
+
 WHITESPACE = _{ " "  }

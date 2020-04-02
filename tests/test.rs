@@ -309,13 +309,19 @@ fn it_evaluate_wrong_parens1() {
 
 //////////////////////////// Boolean //////////////////////////////////
 #[test]
-fn it_evaluate_boolean() {
+fn it_evaluate_comparison_operators() {
     assert_eq!(evaluate_formula_string(&"=1*1=1/1"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=1^1<>1"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=1*2>1"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=1*1/1+2<1^1"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=2>=1"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=11<=3"), "FALSE",);
+}
+
+#[test]
+fn it_evaluate_boolean_functions() {
+    assert_eq!(evaluate_formula_string(&"=OR(1>1,1<>1)"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=OR(1=1,2<=4)"), "TRUE",);
 }
 
 // #[test]

@@ -3,6 +3,7 @@ pub enum Function {
     Abs,
     Sum,
     Product,
+    Or,
 }
 
 #[derive(Debug)]

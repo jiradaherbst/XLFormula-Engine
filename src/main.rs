@@ -10,7 +10,7 @@ use calculator::parse_formula;
 // }
 
 fn main() {
-    let formula = parse_formula::parse_string_to_formula(&"=1>1");
+    let formula = parse_formula::parse_string_to_formula(&"=OR(1>1,1<>1)");
     println!("{:?}", formula);
     let result = calculate::calculate_formula(formula);
     println!("{:?}", result);
@@ -19,16 +19,7 @@ fn main() {
         calculate::result_to_string(result)
     );
 
-    let formula = parse_formula::parse_string_to_formula(&"=2>=1");
-    println!("{:?}", formula);
-    let result = calculate::calculate_formula(formula);
-    println!("{:?}", result);
-    println!(
-        "Result from result_to_string is {}",
-        calculate::result_to_string(result)
-    );
-
-    // let formula = parse_formula::parse_string_to_formula(&"=1<>1");
+    // let formula = parse_formula::parse_string_to_formula(&"=2>=1");
     // println!("{:?}", formula);
     // let result = calculate::calculate_formula(formula);
     // println!("{:?}", result);
@@ -36,11 +27,4 @@ fn main() {
     //     "Result from result_to_string is {}",
     //     calculate::result_to_string(result)
     // );
-
-    // let parse_string = "3.0".to_string();
-    // if is_string_number(parse_string) {
-    //     println!("hello");
-    // } else {
-    //     println!("world");
-    // }
 }

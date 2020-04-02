@@ -82,19 +82,45 @@ fn calculate_comparison_operator(
 ) -> types::Value {
     match lhs {
         types::Value::Boolean(_) => lhs,
-        //types::Value::Boolean(f(l, r)),
-        //types::Value::Boolean(types::Boolean::True),
         types::Value::Error(_) => lhs,
-        types::Value::Text(_) => types::Value::Error(types::Error::Cast),
+        types::Value::Text(_) => lhs,
         types::Value::Number(l) => match rhs {
             types::Value::Boolean(_) => rhs,
             types::Value::Error(_) => rhs,
-            types::Value::Text(_) => types::Value::Error(types::Error::Cast),
+            types::Value::Text(_) => rhs,
             types::Value::Number(r) => match f(l, r) {
                 true => types::Value::Boolean(types::Boolean::True),
                 false => types::Value::Boolean(types::Boolean::False),
             },
         },
+    }
+}
+
+fn to_bool(value: types::Boolean) -> bool {
+    match value {
+        types::Boolean::True => true,
+        types::Boolean::False => false,
+    }
+}
+
+fn calculate_boolean_operator(
+    lhs: types::Value,
+    rhs: types::Value,
+    f: fn(bool1: bool, bool2: bool) -> bool,
+) -> types::Value {
+    match lhs {
+        types::Value::Boolean(l) => match rhs {
+            types::Value::Boolean(r) => match f(to_bool(l), to_bool(r)) {
+                true => types::Value::Boolean(types::Boolean::True),
+                false => types::Value::Boolean(types::Boolean::False),
+            },
+            types::Value::Error(_) => rhs,
+            types::Value::Text(_) => rhs,
+            types::Value::Number(_) => rhs,
+        },
+        types::Value::Error(_) => lhs,
+        types::Value::Text(_) => lhs,
+        types::Value::Number(_) => lhs,
     }
 }
 
@@ -281,6 +307,18 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                             product = calculate_numeric_operator(product, value, |n1, n2| n1 * n2);
                         }
                         product
+                    }
+                    types::Function::Or => {
+                        //let mut result = types::Value::Boolean(types::Boolean::True);
+                        let mut result = match exp.values.pop() {
+                            Some(formula) => calculate_formula(formula),
+                            None => types::Value::Error(types::Error::Formula),
+                        };
+                        while let Some(top) = exp.values.pop() {
+                            let value = calculate_formula(top);
+                            result = calculate_boolean_operator(result, value, |n1, n2| n1 || n2);
+                        }
+                        result
                     }
                 }, //types::Operator::Null => types::Value::Error(types::Error::Formula),
             }
