@@ -4,8 +4,7 @@ number  = @{ int ~ ("." ~ ASCII_DIGIT*)?  }
 string_double_quote = ${ "\"" ~ str_inner_double ~ "\"" }
 str_inner_double    = @{ char_double* }
 char_double         = { !("\"") ~ ANY
-                        | "\"" ~ ( "\"")  
-                      }
+                        | "\"" ~ ( "\"")  }
 
 string_single_quote = ${ "\'" ~ str_inner_single ~ "\'" }
 str_inner_single    = @{ char_single* }
@@ -14,18 +13,20 @@ char_single         = { !("\'") ~ ANY }
 string_constant     = ${ str_inner_constant }
 str_inner_constant  = @{ char_constant* }
 char_constant       = { "\'" ~  ("=")
-                        |!("=") ~ ANY    
-                      } 
+                        |!("=") ~ ANY    } 
 
-operator = _{ add | subtract | multiply | divide | power 
-            | concat | comparison_operator }
+operator = _{ arithmetic_operator | string_operator | comparison_operator }
+    
+arithmetic_operator = _{ add | subtract | multiply | divide | power }     
     add         = { "+" }
     subtract    = { "-" }
     multiply    = { "*" }
     divide      = { "/" }
     power       = { "^" }
-    concat     =  { "&" }
     
+string_operator = _{ concat }
+    concat     =  { "&" }
+
 comparison_operator = _{ equal | not_equal | greater_or_equal | greater 
                        | less_or_equal | less }
     equal           = { "=" }
@@ -37,13 +38,15 @@ comparison_operator = _{ equal | not_equal | greater_or_equal | greater
 
 function = _{ abs | sum | product }
     abs     = { "ABS" ~ "(" ~ expr ~ ")" }
-    sum     = { "SUM" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }   
-    product = { "PRODUCT" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
+    sum     = { "SUM" ~ function_param }   
+    product = { "PRODUCT" ~ function_param }
 
 logical_function = _{ or | and | xor } 
-    or      =  { "OR" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" } 
-    and     =  { "AND" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
-    xor     =  { "XOR" ~ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
+    or      =  { "OR" ~ function_param } 
+    and     =  { "AND" ~ function_param }
+    xor     =  { "XOR" ~ function_param }
+
+function_param = _{ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
 
 expr = { term ~ (operator ~ term)* }
 term = _{ number | "(" ~ expr ~ ")" | string_double_quote 
