@@ -32,6 +32,7 @@ pub enum Error {
     Cast,
     Formula,
     Parse,
+    Value,
 }
 
 #[derive(Debug)]

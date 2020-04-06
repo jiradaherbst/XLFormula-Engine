@@ -322,8 +322,16 @@ fn it_evaluate_comparison_operators() {
 fn it_evaluate_boolean_or() {
     assert_eq!(evaluate_formula_string(&"=OR(1>1,1<>1)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=OR(1=1,2<=4)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=OR(\"True\")"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=OR(True)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=OR(1)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=OR(\"test\")"), "#CAST!",);
     assert_eq!(
         evaluate_formula_string(&"=OR(\"false\",\"FALSE\", 1, FALSE)"),
+        "TRUE",
+    );
+    assert_eq!(
+        evaluate_formula_string(&"=OR(\"True\",1,\"test\",  true) "),
         "TRUE",
     );
 }
@@ -333,12 +341,23 @@ fn it_evaluate_boolean_and() {
     assert_eq!(evaluate_formula_string(&"=AND(1>1,1=1)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=AND(1=1,2<=4)"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=AND(\"true\", 0)"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=AND(\"True\")"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=AND(false)"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=AND(1)"), "TRUE",);
     assert_eq!(
-        evaluate_formula_string(&"=AND(\"True\", 1, true, \"test\")"),
-        "TRUE",
+        evaluate_formula_string(&"=AND(\"test\", \"test\")"),
+        "#CAST!",
     );
     assert_eq!(
         evaluate_formula_string(&"=AND(\"test\",\"True\", 1, true) "),
+        "TRUE",
+    );
+    assert_eq!(
+        evaluate_formula_string(&"=AND(\"True\",\"test\", 1, true) "),
+        "TRUE",
+    );
+    assert_eq!(
+        evaluate_formula_string(&"=AND(\"True\", 1, true, \"test\")"),
         "TRUE",
     );
 }
@@ -347,6 +366,9 @@ fn it_evaluate_boolean_and() {
 fn it_evaluate_boolean_xor() {
     assert_eq!(evaluate_formula_string(&"=XOR(2=2,1=1)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=XOR(1=1,2>4)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=XOR(\"True\")"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=XOR(True)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=XOR(1)"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=XOR(1=1,\"test\")"), "TRUE",);
 }
 
@@ -354,6 +376,10 @@ fn it_evaluate_boolean_xor() {
 fn it_evaluate_boolean_not() {
     assert_eq!(evaluate_formula_string(&"=NOT(11<=3)"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=NOT(1=1)"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=NOT(True)"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=NOT(\"false\")"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=NOT(\"test\")"), "#VALUE!",);
+    assert_eq!(evaluate_formula_string(&"=NOT(0)"), "TRUE",);
 }
 
 // #[test]

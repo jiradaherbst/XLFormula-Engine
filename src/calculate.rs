@@ -103,92 +103,65 @@ fn to_bool(value: types::Boolean) -> bool {
     }
 }
 
-fn cast_text_to_boolean(s: &String) -> Option<types::Boolean> {
-    match s.eq_ignore_ascii_case("TRUE") {
-        true => Some(types::Boolean::True),
-        false => match s.eq_ignore_ascii_case("FALSE") {
-            true => Some(types::Boolean::False),
-            false => None,
-        },
-    }
-}
-
 fn calculate_boolean_operator(
     lhs: types::Value,
     rhs: types::Value,
     f: fn(bool1: bool, bool2: bool) -> bool,
 ) -> types::Value {
     match lhs {
-        types::Value::Boolean(l) => match rhs {
-            types::Value::Boolean(r) => match f(to_bool(l), to_bool(r)) {
-                true => types::Value::Boolean(types::Boolean::True),
-                false => types::Value::Boolean(types::Boolean::False),
-            },
-            types::Value::Error(_) => rhs,
-            types::Value::Text(r) => {
-                // let rh = match r.eq_ignore_ascii_case("TRUE") {
-                //     true => true,
-                //     false => false,
-                // };
-                let rh = cast_text_to_boolean(&r);
-                match rh {
-                    Some(rh) => match f(to_bool(l), to_bool(rh)) {
-                        true => types::Value::Boolean(types::Boolean::True),
-                        false => types::Value::Boolean(types::Boolean::False),
-                    },
-                    None => match to_bool(l) {
-                        true => types::Value::Boolean(types::Boolean::True),
-                        false => types::Value::Boolean(types::Boolean::False),
-                    },
-                }
-            }
-            types::Value::Number(r) => {
-                let rh = match r == 0.0 {
-                    true => false,
-                    false => true,
-                };
-                match f(to_bool(l), rh) {
+        types::Value::Boolean(l) => {
+            let rh = calculate_boolean(rhs);
+            match rh {
+                types::Value::Boolean(r) => match f(to_bool(l), to_bool(r)) {
                     true => types::Value::Boolean(types::Boolean::True),
                     false => types::Value::Boolean(types::Boolean::False),
-                }
+                },
+                types::Value::Error(_) => match l {
+                    types::Boolean::True => types::Value::Boolean(types::Boolean::True),
+                    types::Boolean::False => types::Value::Boolean(types::Boolean::False),
+                },
+                _ => unreachable!(),
             }
-        },
-        types::Value::Error(_) => lhs,
+        }
+        types::Value::Error(_) => {
+            let rh = calculate_boolean(rhs);
+            match rh {
+                types::Value::Boolean(r) => match to_bool(r) {
+                    true => types::Value::Boolean(types::Boolean::True),
+                    false => types::Value::Boolean(types::Boolean::False),
+                },
+                types::Value::Error(_) => types::Value::Error(types::Error::Cast),
+                _ => unreachable!(),
+            }
+        }
         types::Value::Text(l) => {
-            // let lh = match l.eq_ignore_ascii_case("TRUE") {
-            //     true => true,
-            //     false => false,
-            // };
             let lh = cast_text_to_boolean(&l);
             match lh {
-                Some(lh) => match rhs {
-                    types::Value::Boolean(r) => match f(to_bool(lh), to_bool(r)) {
-                        true => types::Value::Boolean(types::Boolean::True),
-                        false => types::Value::Boolean(types::Boolean::False),
-                    },
-                    types::Value::Error(_) => rhs,
-                    types::Value::Text(r) => {
-                        let rh = match r.eq_ignore_ascii_case("TRUE") {
-                            true => true,
-                            false => false,
-                        };
-                        match f(to_bool(lh), rh) {
+                Some(l) => {
+                    let rh = calculate_boolean(rhs);
+                    match rh {
+                        types::Value::Boolean(r) => match f(to_bool(l), to_bool(r)) {
                             true => types::Value::Boolean(types::Boolean::True),
                             false => types::Value::Boolean(types::Boolean::False),
-                        }
+                        },
+                        types::Value::Error(_) => match l {
+                            types::Boolean::True => types::Value::Boolean(types::Boolean::True),
+                            types::Boolean::False => types::Value::Boolean(types::Boolean::False),
+                        },
+                        _ => unreachable!(),
                     }
-                    types::Value::Number(r) => {
-                        let rh = match r == 0.0 {
-                            true => false,
-                            false => true,
-                        };
-                        match f(to_bool(lh), rh) {
+                }
+                None => {
+                    let rh = calculate_boolean(rhs);
+                    match rh {
+                        types::Value::Boolean(r) => match to_bool(r) {
                             true => types::Value::Boolean(types::Boolean::True),
                             false => types::Value::Boolean(types::Boolean::False),
-                        }
+                        },
+                        types::Value::Error(_) => types::Value::Error(types::Error::Cast),
+                        _ => unreachable!(),
                     }
-                },
-                None => rhs,
+                }
             }
         }
         types::Value::Number(l) => {
@@ -196,32 +169,17 @@ fn calculate_boolean_operator(
                 true => false,
                 false => false,
             };
-            match rhs {
+            let rh = calculate_boolean(rhs);
+            match rh {
                 types::Value::Boolean(r) => match f(lh, to_bool(r)) {
                     true => types::Value::Boolean(types::Boolean::True),
                     false => types::Value::Boolean(types::Boolean::False),
                 },
-                types::Value::Error(_) => rhs,
-                types::Value::Text(r) => {
-                    let rh = match r.eq_ignore_ascii_case("TRUE") {
-                        true => true,
-                        false => false,
-                    };
-                    match f(lh, rh) {
-                        true => types::Value::Boolean(types::Boolean::True),
-                        false => types::Value::Boolean(types::Boolean::False),
-                    }
-                }
-                types::Value::Number(r) => {
-                    let rh = match r == 0.0 {
-                        true => false,
-                        false => true,
-                    };
-                    match f(lh, rh) {
-                        true => types::Value::Boolean(types::Boolean::True),
-                        false => types::Value::Boolean(types::Boolean::False),
-                    }
-                }
+                types::Value::Error(_) => match lh {
+                    true => types::Value::Boolean(types::Boolean::True),
+                    false => types::Value::Boolean(types::Boolean::False),
+                },
+                _ => unreachable!(),
             }
         }
     }
@@ -243,8 +201,51 @@ fn calculate_negation(value: types::Value) -> types::Value {
             false => types::Value::Boolean(types::Boolean::False),
         },
         types::Value::Error(_) => value,
-        types::Value::Text(_) => value,
-        types::Value::Number(_) => value,
+        types::Value::Text(t) => {
+            let l = cast_text_to_boolean(&t);
+            match l {
+                Some(l) => match !(to_bool(l)) {
+                    true => types::Value::Boolean(types::Boolean::True),
+                    false => types::Value::Boolean(types::Boolean::False),
+                },
+                None => types::Value::Error(types::Error::Value),
+            }
+        }
+        types::Value::Number(l) => match l == 0.0 {
+            true => types::Value::Boolean(types::Boolean::True),
+            false => types::Value::Boolean(types::Boolean::False),
+        },
+    }
+}
+
+fn cast_text_to_boolean(s: &String) -> Option<types::Boolean> {
+    match s.eq_ignore_ascii_case("TRUE") {
+        true => Some(types::Boolean::True),
+        false => match s.eq_ignore_ascii_case("FALSE") {
+            true => Some(types::Boolean::False),
+            false => None,
+        },
+    }
+}
+
+fn calculate_boolean(value: types::Value) -> types::Value {
+    match value {
+        types::Value::Boolean(_) => value,
+        types::Value::Error(_) => value,
+        types::Value::Text(t) => {
+            let l = cast_text_to_boolean(&t);
+            match l {
+                Some(l) => match to_bool(l) {
+                    true => types::Value::Boolean(types::Boolean::True),
+                    false => types::Value::Boolean(types::Boolean::False),
+                },
+                None => types::Value::Error(types::Error::Cast),
+            }
+        }
+        types::Value::Number(l) => match l != 0.0 {
+            true => types::Value::Boolean(types::Boolean::True),
+            false => types::Value::Boolean(types::Boolean::False),
+        },
     }
 }
 
@@ -428,6 +429,7 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                             Some(formula) => calculate_formula(formula),
                             None => types::Value::Error(types::Error::Formula),
                         };
+                        result = calculate_boolean(result);
                         while let Some(top) = exp.values.pop() {
                             let value = calculate_formula(top);
                             result = calculate_boolean_operator(result, value, |n1, n2| n1 || n2);
@@ -439,6 +441,7 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                             Some(formula) => calculate_formula(formula),
                             None => types::Value::Error(types::Error::Formula),
                         };
+                        result = calculate_boolean(result);
                         while let Some(top) = exp.values.pop() {
                             let value = calculate_formula(top);
                             result = calculate_boolean_operator(result, value, |n1, n2| n1 && n2);
@@ -450,6 +453,7 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                             Some(formula) => calculate_formula(formula),
                             None => types::Value::Error(types::Error::Formula),
                         };
+                        result = calculate_boolean(result);
                         while let Some(top) = exp.values.pop() {
                             let value = calculate_formula(top);
                             result = calculate_boolean_operator(result, value, |n1, n2| n1 ^ n2);
@@ -479,6 +483,7 @@ pub fn result_to_string(_value: types::Value) -> String {
             types::Error::Cast => String::from("#CAST!"),
             types::Error::Formula => String::from("Null Formula"),
             types::Error::Parse => String::from("#PARSE!"),
+            types::Error::Value => String::from("#VALUE!"),
         },
         types::Value::Boolean(boolean) => match boolean {
             types::Boolean::True => String::from("TRUE"),
