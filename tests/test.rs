@@ -334,7 +334,11 @@ fn it_evaluate_boolean_and() {
     assert_eq!(evaluate_formula_string(&"=AND(1=1,2<=4)"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=AND(\"true\", 0)"), "FALSE",);
     assert_eq!(
-        evaluate_formula_string(&"=AND(\"True\", 1, true,\"test\")"),
+        evaluate_formula_string(&"=AND(\"True\", 1, true, \"test\")"),
+        "TRUE",
+    );
+    assert_eq!(
+        evaluate_formula_string(&"=AND(\"test\",\"True\", 1, true) "),
         "TRUE",
     );
 }
