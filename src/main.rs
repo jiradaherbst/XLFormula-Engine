@@ -10,7 +10,7 @@ use calculator::parse_formula;
 // }
 
 fn main() {
-    let formula = parse_formula::parse_string_to_formula(&"=OR(1=1, \"false\")");
+    let formula = parse_formula::parse_string_to_formula(&"=OR(\"false\",\"FALSE\", 1, FALSE)");
     println!("{:?}", formula);
     let result = calculate::calculate_formula(formula);
     println!("{:?}", result);

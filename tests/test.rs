@@ -322,10 +322,10 @@ fn it_evaluate_comparison_operators() {
 fn it_evaluate_boolean_or() {
     assert_eq!(evaluate_formula_string(&"=OR(1>1,1<>1)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=OR(1=1,2<=4)"), "TRUE",);
-    // assert_eq!(
-    //     evaluate_formula_string(&"=OR(\"false\",\"FALSE\", 1, FALSE)"),
-    //     "TRUE",
-    // );
+    assert_eq!(
+        evaluate_formula_string(&"=OR(\"false\",\"FALSE\", 1, FALSE)"),
+        "TRUE",
+    );
 }
 
 #[test]
@@ -333,12 +333,17 @@ fn it_evaluate_boolean_and() {
     assert_eq!(evaluate_formula_string(&"=AND(1>1,1=1)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=AND(1=1,2<=4)"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=AND(\"true\", 0)"), "FALSE",);
+    assert_eq!(
+        evaluate_formula_string(&"=AND(\"True\", 1, true,\"test\")"),
+        "TRUE",
+    );
 }
 
 #[test]
 fn it_evaluate_boolean_xor() {
     assert_eq!(evaluate_formula_string(&"=XOR(2=2,1=1)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=XOR(1=1,2>4)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=XOR(1=1,\"test\")"), "TRUE",);
 }
 
 #[test]

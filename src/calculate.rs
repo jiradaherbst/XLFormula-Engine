@@ -128,7 +128,7 @@ fn calculate_boolean_operator(
             types::Value::Number(r) => {
                 let rh = match r == 0.0 {
                     true => false,
-                    false => false,
+                    false => true,
                 };
                 match f(to_bool(l), rh) {
                     true => types::Value::Boolean(types::Boolean::True),
@@ -161,7 +161,7 @@ fn calculate_boolean_operator(
                 types::Value::Number(r) => {
                     let rh = match r == 0.0 {
                         true => false,
-                        false => false,
+                        false => true,
                     };
                     match f(lh, rh) {
                         true => types::Value::Boolean(types::Boolean::True),
@@ -194,7 +194,7 @@ fn calculate_boolean_operator(
                 types::Value::Number(r) => {
                     let rh = match r == 0.0 {
                         true => false,
-                        false => false,
+                        false => true,
                     };
                     match f(lh, rh) {
                         true => types::Value::Boolean(types::Boolean::True),

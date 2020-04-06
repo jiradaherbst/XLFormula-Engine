@@ -49,9 +49,13 @@ logical_function = _{ or | and | xor | not }
 
 function_param = _{ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
 
+boolean = _{ t | f }
+    t    = { ( "T" | "t") ~ ( "R" | "r") ~ ( "U" | "u") ~ ( "E" | "e") }
+    f    = { ( "F" | "f") ~ ( "A" | "a") ~ ( "L" | "l") ~ ( "S" | "s") ~ ( "E" | "e") }
+
 expr = { term ~ (operator ~ term)* }
 term = _{ number | "(" ~ expr ~ ")" | string_double_quote 
-        | string_single_quote | function | logical_function }
+        | string_single_quote | function | logical_function | boolean }
 term_constant = _{ string_constant }
 formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI }
 

@@ -104,6 +104,14 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 let value = types::Value::Text(string);
                 types::Formula::Value(value)
             }
+            Rule::t => {
+                let value = types::Value::Boolean(types::Boolean::True);
+                types::Formula::Value(value)
+            }
+            Rule::f => {
+                let value = types::Value::Boolean(types::Boolean::False);
+                types::Formula::Value(value)
+            }
             Rule::abs => {
                 let operation = types::Expression {
                     op: types::Operator::Function(types::Function::Abs),
