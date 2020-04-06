@@ -6,6 +6,7 @@ pub enum Function {
     Or,
     And,
     Xor,
+    Not,
 }
 
 #[derive(Debug)]
