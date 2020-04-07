@@ -370,6 +370,16 @@ fn it_evaluate_boolean_xor() {
     assert_eq!(evaluate_formula_string(&"=XOR(True)"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=XOR(1)"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=XOR(1=1,\"test\")"), "TRUE",);
+    assert_eq!(
+        evaluate_formula_string(&"=XOR(TRUE, TRUE, TRUE, TRUE)"),
+        "FALSE"
+    );
+    assert_eq!(
+        evaluate_formula_string(&"=XOR(false, FALSE, \"false\", false)"),
+        "FALSE"
+    );
+    assert_eq!(evaluate_formula_string(&"=XOR(true)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=XOR(false)"), "FALSE",);
 }
 
 #[test]
@@ -378,13 +388,15 @@ fn it_evaluate_boolean_not() {
     assert_eq!(evaluate_formula_string(&"=NOT(1=1)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=NOT(True)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=NOT(\"false\")"), "TRUE",);
-    assert_eq!(evaluate_formula_string(&"=NOT(\"test\")"), "#VALUE!",);
+    assert_eq!(evaluate_formula_string(&"=NOT(\"test\")"), "#CAST!",);
     assert_eq!(evaluate_formula_string(&"=NOT(0)"), "TRUE",);
 }
 
-// #[test]
+//  #[test]
 // fn it_evaluate_references() {
-//     assert_eq!(evaluate_formula_number(&"=A+B", {A: 1, B: 2}), 3.0,);
+//      assert_eq!(evaluate_formula_number(&"=B+A+B", {A: 1, B: 2, C: "Hello", D: true, E: {X: 1}, F: "=1+2"}), 3.0,);
+//     let dataFunction = | x: String | if x == "A" { types::Value::Number(1.0)} else if x == "B" { types::Value::Number(2.0)} else {types::Values:Error("#Value")}
+//      assert_eq!(evaluate_formula_wit_reference_number(&"=B+A", dataFunction), 3.0,);
 // }
 
 // #[test]
