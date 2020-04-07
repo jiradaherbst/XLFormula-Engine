@@ -203,16 +203,6 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
     }
 }
 
-fn count_true_boolean(value: types::Value) -> i32 {
-    match cast_value_to_boolean(value) {
-        types::Value::Boolean(l) => match to_bool(l) {
-            true => 1,
-            false => 0,
-        },
-        _ => 0,
-    }
-}
-
 pub fn calculate_formula(formula: types::Formula) -> types::Value {
     match formula {
         types::Formula::Operation(mut exp) => {
@@ -413,21 +403,16 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
                         result
                     }
                     types::Function::Xor => {
-                        let mut count = 0;
                         let mut result = match exp.values.pop() {
                             Some(formula) => calculate_formula(formula),
                             None => types::Value::Error(types::Error::Formula),
                         };
-                        count = count + count_true_boolean(result);
+                        result = cast_value_to_boolean(result);
                         while let Some(top) = exp.values.pop() {
-                            result = calculate_formula(top);
-                            count = count + count_true_boolean(result);
+                            let value = calculate_formula(top);
+                            result = calculate_boolean_operator(result, value, |n1, n2| n1 ^ n2);
                         }
-                        if count % 2 == 0 {
-                            types::Value::Boolean(types::Boolean::False)
-                        } else {
-                            types::Value::Boolean(types::Boolean::True)
-                        }
+                        result
                     }
                     types::Function::Not => {
                         let value = match exp.values.pop() {

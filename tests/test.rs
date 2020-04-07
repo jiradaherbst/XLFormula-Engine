@@ -374,6 +374,7 @@ fn it_evaluate_boolean_xor() {
         evaluate_formula_string(&"=XOR(TRUE, TRUE, TRUE, TRUE)"),
         "FALSE"
     );
+    assert_eq!(evaluate_formula_string(&"=XOR(TRUE, TRUE)"), "FALSE");
     assert_eq!(
         evaluate_formula_string(&"=XOR(false, FALSE, \"false\", false)"),
         "FALSE"
