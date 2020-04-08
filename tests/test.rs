@@ -7,13 +7,13 @@ use assert_approx_eq::assert_approx_eq;
 
 fn evaluate_formula_number(s: &str) -> f32 {
     let formula = parse_formula::parse_string_to_formula(s);
-    let result = calculate::calculate_formula(formula);
+    let result = calculate::calculate_formula(formula, None);
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
 fn evaluate_formula_string(s: &str) -> String {
     let formula = parse_formula::parse_string_to_formula(s);
-    let result = calculate::calculate_formula(formula);
+    let result = calculate::calculate_formula(formula, None);
     calculate::result_to_string(result)
 }
 
@@ -22,7 +22,7 @@ fn evaluate_formula_number_with_reference(
     f: Option<fn(s: String) -> types::Value>,
 ) -> f32 {
     let formula = parse_formula::parse_string_to_formula(s);
-    let result = calculate::calculate_formula_with_reference(formula, f);
+    let result = calculate::calculate_formula(formula, f);
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
@@ -415,7 +415,6 @@ fn it_evaluate_references() {
         evaluate_formula_number_with_reference(&"=A+B", Some(data_function)),
         3.0,
     );
-    assert_eq!(evaluate_formula_number_with_reference(&"=1+2", None), 3.0,);
 }
 
 // #[test]
