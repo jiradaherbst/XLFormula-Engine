@@ -182,6 +182,11 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 };
                 types::Formula::Operation(operation)
             }
+            Rule::reference => {
+                let string = pair.as_str().parse::<String>().unwrap();
+                //let value = types::Value::Reference(string);
+                types::Formula::Reference(string)
+            }
 
             Rule::expr => build_formula_with_climber(pair.into_inner()),
             _ => unreachable!(),

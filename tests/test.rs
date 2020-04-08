@@ -1,6 +1,7 @@
 extern crate calculator;
 use calculator::calculate;
 use calculator::parse_formula;
+//use calculator::types;
 
 use assert_approx_eq::assert_approx_eq;
 
@@ -15,6 +16,12 @@ fn evaluate_formula_string(s: &str) -> String {
     let result = calculate::calculate_formula(formula);
     calculate::result_to_string(result)
 }
+
+// fn evaluate_formula_number_with_reference(s: &str, f: fn(s: String) -> types::Value) -> f32 {
+//     let formula = parse_formula::parse_string_to_formula(s);
+//     let result = calculate::calculate_formula(formula);
+//     calculate::result_to_string(result).parse::<f32>().unwrap()
+// }
 
 /////////////////// Simple math operators with floats and integer ///////////////////
 #[test]
@@ -367,7 +374,7 @@ fn it_evaluate_boolean_xor() {
     assert_eq!(evaluate_formula_string(&"=XOR(2=2,1=1)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=XOR(1=1,2>4)"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=XOR(\"True\")"), "TRUE",);
-    assert_eq!(evaluate_formula_string(&"=XOR(True)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=XOR(False)"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=XOR(1)"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=XOR(1=1,\"test\")"), "TRUE",);
     assert_eq!(
@@ -393,11 +400,23 @@ fn it_evaluate_boolean_not() {
     assert_eq!(evaluate_formula_string(&"=NOT(0)"), "TRUE",);
 }
 
-//  #[test]
+//////////////////////////// References //////////////////////////////////
+#[test]
+fn it_evaluate_references() {
+    assert_eq!(evaluate_formula_number(&"=B+A"), 3.0,);
+}
+
+// #[test]
 // fn it_evaluate_references() {
-//      assert_eq!(evaluate_formula_number(&"=B+A+B", {A: 1, B: 2, C: "Hello", D: true, E: {X: 1}, F: "=1+2"}), 3.0,);
-//     let dataFunction = | x: String | if x == "A" { types::Value::Number(1.0)} else if x == "B" { types::Value::Number(2.0)} else {types::Values:Error("#Value")}
-//      assert_eq!(evaluate_formula_wit_reference_number(&"=B+A", dataFunction), 3.0,);
+//     let data_function = |s: String| match s.as_str() {
+//         "A" => types::Value::Number(1.0),
+//         "B" => types::Value::Number(2.0),
+//         _ => types::Value::Error(types::Error::Value),
+//     };
+//     assert_eq!(
+//         evaluate_formula_number_with_reference(&"=B+A", dataFunction),
+//         3.0,
+//     );
 // }
 
 // #[test]

@@ -53,9 +53,14 @@ boolean = _{ t | f }
     t    = { ( "T" | "t") ~ ( "R" | "r") ~ ( "U" | "u") ~ ( "E" | "e") }
     f    = { ( "F" | "f") ~ ( "A" | "a") ~ ( "L" | "l") ~ ( "S" | "s") ~ ( "E" | "e") }
 
+reference = ${ str_inner_reference }
+str_inner_reference = @{ char_reference* }
+char_reference = { !("\\" | "/" | "*" | "?" | ":" | "[" | "]"  
+                    | arithmetic_operator | logical_operator ) ~ ANY }
+
 expr = { term ~ (operator ~ term)* }
 term = _{ number | "(" ~ expr ~ ")" | string_double_quote 
-        | string_single_quote | function | logical_function | boolean }
+        | string_single_quote | function | logical_function | boolean | reference }
 term_constant = _{ string_constant }
 formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI }
 

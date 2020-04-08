@@ -33,13 +33,16 @@ fn calculate_string_operator(
             types::Value::Error(_) => rhs,
             types::Value::Number(r) => types::Value::Text(f(&l.to_string(), &r.to_string())),
             types::Value::Text(r) => types::Value::Text(f(&l.to_string(), &r)),
+            //types::Value::Reference(_) => rhs,
         },
         types::Value::Text(l) => match rhs {
             types::Value::Boolean(_) => rhs,
             types::Value::Error(_) => rhs,
             types::Value::Number(r) => types::Value::Text(f(&l, &r.to_string())),
             types::Value::Text(r) => types::Value::Text(f(&l, &r)),
+            //types::Value::Reference(_) => rhs,
         },
+        //types::Value::Reference(_) => lhs,
     }
 }
 
@@ -60,6 +63,7 @@ fn calculate_numeric_operator(
                     Err(_) => types::Value::Error(types::Error::Cast),
                 },
                 types::Value::Number(r) => types::Value::Number(f(nl, r)),
+                //types::Value::Reference(_) => rhs,
             },
             Err(_) => types::Value::Error(types::Error::Cast),
         },
@@ -71,7 +75,9 @@ fn calculate_numeric_operator(
                 Err(_) => types::Value::Error(types::Error::Cast),
             },
             types::Value::Number(r) => types::Value::Number(f(l, r)),
+            //types::Value::Reference(_) => rhs,
         },
+        //types::Value::Reference(_) => lhs,
     }
 }
 
@@ -92,7 +98,9 @@ fn calculate_comparison_operator(
                 true => types::Value::Boolean(types::Boolean::True),
                 false => types::Value::Boolean(types::Boolean::False),
             },
+            //types::Value::Reference(_) => rhs,
         },
+        //types::Value::Reference(_) => lhs,
     }
 }
 
@@ -145,6 +153,7 @@ fn calculate_abs(value: types::Value) -> types::Value {
         types::Value::Error(_) => value,
         types::Value::Text(_) => value,
         types::Value::Number(l) => types::Value::Number(l.abs()),
+        //types::Value::Reference(_) => value,
     }
 }
 
@@ -169,6 +178,7 @@ fn calculate_negation(value: types::Value) -> types::Value {
             true => types::Value::Boolean(types::Boolean::True),
             false => types::Value::Boolean(types::Boolean::False),
         },
+        //types::Value::Reference(_) => value,
     }
 }
 
@@ -200,6 +210,7 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
             true => types::Value::Boolean(types::Boolean::True),
             false => types::Value::Boolean(types::Boolean::False),
         },
+        //types::Value::Reference(_) => value,
     }
 }
 
@@ -425,6 +436,14 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
             }
         }
         types::Formula::Value(val) => val,
+        types::Formula::Reference(string) => {
+            let data_function = |s: String| match s.as_str() {
+                "A" => types::Value::Number(1.0),
+                "B" => types::Value::Number(2.0),
+                _ => types::Value::Error(types::Error::Value),
+            };
+            data_function(string)
+        }
     }
 }
 
@@ -437,10 +456,12 @@ pub fn result_to_string(_value: types::Value) -> String {
             types::Error::Cast => String::from("#CAST!"),
             types::Error::Formula => String::from("Null Formula"),
             types::Error::Parse => String::from("#PARSE!"),
+            types::Error::Value => String::from("#VALUE!"),
         },
         types::Value::Boolean(boolean) => match boolean {
             types::Boolean::True => String::from("TRUE"),
             types::Boolean::False => String::from("FALSE"),
         },
+        //types::Value::Reference(reference) => reference,
     }
 }

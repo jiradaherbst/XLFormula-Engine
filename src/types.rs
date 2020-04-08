@@ -32,6 +32,7 @@ pub enum Error {
     Cast,
     Formula,
     Parse,
+    Value,
 }
 
 #[derive(Debug)]
@@ -52,7 +53,7 @@ pub enum Value {
 pub enum Formula {
     Operation(Expression),
     Value(Value),
-    // Reference
+    Reference(String),
 }
 
 #[derive(Debug)]
