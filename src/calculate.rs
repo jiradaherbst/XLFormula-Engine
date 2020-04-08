@@ -436,14 +436,231 @@ pub fn calculate_formula(formula: types::Formula) -> types::Value {
             }
         }
         types::Formula::Value(val) => val,
-        types::Formula::Reference(string) => {
-            let data_function = |s: String| match s.as_str() {
-                "A" => types::Value::Number(1.0),
-                "B" => types::Value::Number(2.0),
-                _ => types::Value::Error(types::Error::Value),
-            };
-            data_function(string)
+        _ => unreachable!(),
+    }
+}
+
+pub fn calculate_formula_with_reference(
+    formula: types::Formula,
+    f: Option<fn(str1: String) -> types::Value>,
+) -> types::Value {
+    match formula {
+        types::Formula::Operation(mut exp) => {
+            match exp.op {
+                types::Operator::Plus => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
+                }
+
+                types::Operator::Minus => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_numeric_operator(value1, value2, |n1, n2| n1 - n2)
+                }
+
+                types::Operator::Multiply => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_numeric_operator(value1, value2, |n1, n2| n1 * n2)
+                }
+                types::Operator::Divide => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    match value2 {
+                        types::Value::Number(x) if x == 0.0 => {
+                            types::Value::Error(types::Error::Div0)
+                        }
+                        _ => calculate_numeric_operator(value1, value2, calculate_divide_operator),
+                    }
+                }
+                types::Operator::Power => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_numeric_operator(value1, value2, calculate_power_operator)
+                }
+                types::Operator::Concat => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_string_operator(value1, value2, calculate_concat_operator)
+                }
+                types::Operator::Equal => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 == n2)
+                }
+                types::Operator::NotEqual => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 != n2)
+                }
+                types::Operator::Greater => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 > n2)
+                }
+                types::Operator::Less => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 < n2)
+                }
+                types::Operator::GreaterOrEqual => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 >= n2)
+                }
+                types::Operator::LessOrEqual => {
+                    let value2 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    let value1 = match exp.values.pop() {
+                        Some(formula) => calculate_formula_with_reference(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_comparison_operator(value1, value2, |n1, n2| n1 <= n2)
+                }
+                types::Operator::Function(func) => match func {
+                    types::Function::Abs => {
+                        let value = match exp.values.pop() {
+                            Some(formula) => calculate_formula_with_reference(formula, f),
+                            None => types::Value::Error(types::Error::Formula),
+                        };
+                        calculate_abs(value)
+                    }
+                    types::Function::Sum => {
+                        let mut sum = types::Value::Number(0.00);
+                        while let Some(top) = exp.values.pop() {
+                            let value = calculate_formula_with_reference(top, f);
+                            sum = calculate_numeric_operator(sum, value, |n1, n2| n1 + n2);
+                        }
+                        sum
+                    }
+                    types::Function::Product => {
+                        let mut product = types::Value::Number(1.00);
+                        while let Some(top) = exp.values.pop() {
+                            let value = calculate_formula_with_reference(top, f);
+                            product = calculate_numeric_operator(product, value, |n1, n2| n1 * n2);
+                        }
+                        product
+                    }
+                    types::Function::Or => {
+                        let mut result = match exp.values.pop() {
+                            Some(formula) => calculate_formula_with_reference(formula, f),
+                            None => types::Value::Error(types::Error::Formula),
+                        };
+                        result = cast_value_to_boolean(result);
+                        while let Some(top) = exp.values.pop() {
+                            let value = calculate_formula_with_reference(top, f);
+                            result = calculate_boolean_operator(result, value, |n1, n2| n1 || n2);
+                        }
+                        result
+                    }
+                    types::Function::And => {
+                        let mut result = match exp.values.pop() {
+                            Some(formula) => calculate_formula_with_reference(formula, f),
+                            None => types::Value::Error(types::Error::Formula),
+                        };
+                        result = cast_value_to_boolean(result);
+                        while let Some(top) = exp.values.pop() {
+                            let value = calculate_formula_with_reference(top, f);
+                            result = calculate_boolean_operator(result, value, |n1, n2| n1 && n2);
+                        }
+                        result
+                    }
+                    types::Function::Xor => {
+                        let mut result = match exp.values.pop() {
+                            Some(formula) => calculate_formula_with_reference(formula, f),
+                            None => types::Value::Error(types::Error::Formula),
+                        };
+                        result = cast_value_to_boolean(result);
+                        while let Some(top) = exp.values.pop() {
+                            let value = calculate_formula_with_reference(top, f);
+                            result = calculate_boolean_operator(result, value, |n1, n2| n1 ^ n2);
+                        }
+                        result
+                    }
+                    types::Function::Not => {
+                        let value = match exp.values.pop() {
+                            Some(formula) => calculate_formula_with_reference(formula, f),
+                            None => types::Value::Error(types::Error::Formula),
+                        };
+                        calculate_negation(value)
+                    }
+                }, //types::Operator::Null => types::Value::Error(types::Error::Formula),
+            }
         }
+        types::Formula::Value(val) => val,
+        types::Formula::Reference(string) => match f {
+            Some(f) => f(string),
+            None => types::Value::Error(types::Error::Formula),
+        },
     }
 }
 

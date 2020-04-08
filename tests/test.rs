@@ -1,7 +1,7 @@
 extern crate calculator;
 use calculator::calculate;
 use calculator::parse_formula;
-//use calculator::types;
+use calculator::types;
 
 use assert_approx_eq::assert_approx_eq;
 
@@ -17,11 +17,14 @@ fn evaluate_formula_string(s: &str) -> String {
     calculate::result_to_string(result)
 }
 
-// fn evaluate_formula_number_with_reference(s: &str, f: fn(s: String) -> types::Value) -> f32 {
-//     let formula = parse_formula::parse_string_to_formula(s);
-//     let result = calculate::calculate_formula(formula);
-//     calculate::result_to_string(result).parse::<f32>().unwrap()
-// }
+fn evaluate_formula_number_with_reference(
+    s: &str,
+    f: Option<fn(s: String) -> types::Value>,
+) -> f32 {
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula_with_reference(formula, f);
+    calculate::result_to_string(result).parse::<f32>().unwrap()
+}
 
 /////////////////// Simple math operators with floats and integer ///////////////////
 #[test]
@@ -403,7 +406,16 @@ fn it_evaluate_boolean_not() {
 //////////////////////////// References //////////////////////////////////
 #[test]
 fn it_evaluate_references() {
-    assert_eq!(evaluate_formula_number(&"=B+A"), 3.0,);
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Number(1.0),
+        "B" => types::Value::Number(2.0),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=A+B", Some(data_function)),
+        3.0,
+    );
+    assert_eq!(evaluate_formula_number_with_reference(&"=1+2", None), 3.0,);
 }
 
 // #[test]
