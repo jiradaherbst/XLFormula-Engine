@@ -16,11 +16,11 @@ fn parse_string(s: &str) -> Option<pest::iterators::Pair<Rule>> {
     match parse_result {
         Ok(mut result) => {
             let parse_result = result.next().unwrap();
-            println!("{:?}", parse_result);
+            //println!("{:?}", parse_result);
             Some(parse_result)
         }
-        Err(error) => {
-            println!("{:?}", error);
+        Err(_) => {
+            //println!("{:?}", error);
             None
         }
     }

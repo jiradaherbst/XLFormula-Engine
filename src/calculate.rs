@@ -1,3 +1,4 @@
+use crate::parse_formula;
 use crate::types;
 
 fn calculate_divide_operator(num1: f32, num2: f32) -> f32 {
@@ -417,7 +418,14 @@ pub fn calculate_formula(
         },
         types::Formula::Value(val) => val,
         types::Formula::Reference(string) => match f {
-            Some(f) => f(string),
+            Some(f) => match f(string) {
+                types::Value::Number(x) => types::Value::Number(x),
+                types::Value::Text(s) => {
+                    let formula = parse_formula::parse_string_to_formula(&s);
+                    calculate_formula(formula, Some(f))
+                }
+                _ => unreachable!(),
+            },
             None => types::Value::Error(types::Error::Formula),
         },
     }

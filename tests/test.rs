@@ -409,28 +409,45 @@ fn it_evaluate_references() {
     let data_function = |s: String| match s.as_str() {
         "A" => types::Value::Number(1.0),
         "B" => types::Value::Number(2.0),
+        "C" => types::Value::Number(3.0),
+        "fix_rate" => types::Value::Number(10.0),
+        "input." => types::Value::Number(2.0),
+        "D" => types::Value::Number(1.0),
+        "F" => types::Value::Text("=D+1".to_string()),
+        "G" => types::Value::Text("=F+1+D+1".to_string()),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
         evaluate_formula_number_with_reference(&"=A+B", Some(data_function)),
         3.0,
     );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=(A*(B+C))*B", Some(data_function)),
+        10.0,
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=fix_rate*input.", Some(data_function)),
+        20.0,
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=D+F", Some(data_function)),
+        3.0,
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=G+F", Some(data_function)),
+        7.0,
+    );
 }
 
-// #[test]
-// fn it_evaluate_references() {
-//     let data_function = |s: String| match s.as_str() {
-//         "A" => types::Value::Number(1.0),
-//         "B" => types::Value::Number(2.0),
-//         _ => types::Value::Error(types::Error::Value),
-//     };
-//     assert_eq!(
-//         evaluate_formula_number_with_reference(&"=B+A", dataFunction),
-//         3.0,
-//     );
-// }
-
-// #[test]
-// fn it_evaluate_references_other_formulas() {
-//     assert_eq!(evaluate_formula_number(&"=A+B", {A: &"=1+B", B: 3}), 7.0);
-// }
+#[test]
+fn it_evaluate_references_other_formulas() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Text("=1+B".to_string()),
+        "B" => types::Value::Number(3.0),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=A+B", Some(data_function)),
+        7.0
+    );
+}

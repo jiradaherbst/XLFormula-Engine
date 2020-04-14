@@ -53,8 +53,7 @@ boolean = _{ t | f }
     t    = { ( "T" | "t") ~ ( "R" | "r") ~ ( "U" | "u") ~ ( "E" | "e") }
     f    = { ( "F" | "f") ~ ( "A" | "a") ~ ( "L" | "l") ~ ( "S" | "s") ~ ( "E" | "e") }
 
-reference = ${ (ASCII_ALPHA | "_" | "\\") ~ str_inner_reference }  
-str_inner_reference = @{ char_reference* }
+reference = ${ (ASCII_ALPHA | "_" | "\\") ~ char_reference* }  
 char_reference = { ASCII_ALPHANUMERIC | "." | "_" } 
 
 expr = { term ~ (operator ~ term)* }
