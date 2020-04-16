@@ -207,11 +207,6 @@ fn it_evaluate_strings_with_quoted_quotes() {
     );
 }
 
-// ="Hello ""World""" -> Hello "World" (required)
-// ='Hello "World"' (optional!)
-// ='Hello \'World''' (optional!) <--- not valid in JS and also this ---> =''Hello' 'World''
-// ="Hello 'World'"
-
 #[test]
 fn it_evaluate_strings_with_single_quotes() {
     assert_eq!(
@@ -256,10 +251,6 @@ fn it_evaluate_constant_text() {
 fn it_evaluate_constant_text_with_quotes() {
     assert_eq!(evaluate_formula_string(&"Hello \"World'"), "Hello \"World'",);
 }
-
-// // 01309 -> 1309
-// // '01309 -> 01309
-// // '=1+2 -> =1+2
 
 #[test]
 fn it_evaluate_constant_starting_with_equal() {
