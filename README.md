@@ -17,11 +17,11 @@ It supports:
 Add the corresponding entry to your Cargo.toml dependency list:
 ```rust
 [dependencies]
-calculator = "0.1.0"
+xlformula_engine = "0.1.0"
 ```
 and add this to your crate root:
 ```rust
-extern crate calculator;
+extern crate xlformula_engine;
 ```
 
 ## Examples
