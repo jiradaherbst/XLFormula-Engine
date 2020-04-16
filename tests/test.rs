@@ -437,6 +437,10 @@ fn it_evaluate_references() {
         evaluate_formula_number_with_reference(&"=G+F", Some(data_function)),
         7.0,
     );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=SUM(A,B,C)", Some(data_function)),
+        6.0,
+    );
 }
 
 #[test]

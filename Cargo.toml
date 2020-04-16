@@ -3,8 +3,12 @@ name = "calculator"
 version = "0.1.0"
 authors = ["Jirada Herbst <jirada.herbst@data2impact.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT OR Apache-2.0"
+description = "A tool to parse and evaluate an excel formula"
+readme = "README.md"
+homepage = "https://github.com/jiradaherbst/XLFormula-Engine"
+repository = "https://github.com/jiradaherbst/XLFormula-Engine"
+keywords = ["formula", "parser", "excel", "pest"]
 
 [dependencies]
 pest = "2.1.3"

@@ -1,5 +1,0 @@
-Operation(Expression { op: Plus, values: [Value(Number(1773.0)), Valuelue(Number(1362.0))] })
-
-Operation(Expression { op: Plus, values: [Operation(Expression { op: P: Plus, values: [Value(Number(1.0)), Value(Number(2.0))] }), Value(berNumber(3.0))] })
-
-Operation(Expression { op: Plus, values: [Value(Number(1.0)), Operatiotion(Expression { op: Multiply, values: [Value(Number(2.0)), Value(berNumber(3.0))] })] })
