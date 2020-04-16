@@ -1,7 +1,7 @@
-extern crate calculator;
-use calculator::calculate;
-use calculator::parse_formula;
-use calculator::types;
+extern crate xlformula_engine;
+use xlformula_engine::calculate;
+use xlformula_engine::parse_formula;
+use xlformula_engine::types;
 
 use assert_approx_eq::assert_approx_eq;
 

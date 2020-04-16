@@ -28,9 +28,9 @@ extern crate calculator;
 
 Here is a simple example of parsing an Excel formula string and evaluating to a result:
 ```rust
-extern crate calculator;
-use calculator::calculate;
-use calculator::parse_formula;
+extern crate xlformula_engine;
+use xlformula_engine::calculate;
+use xlformula_engine::parse_formula;
 
 fn main() {
     let formula = parse_formula::parse_string_to_formula(&"=1+2");
@@ -41,10 +41,10 @@ fn main() {
 
 Another example with a formula with references:
 ```rust
-extern crate calculator;
-use calculator::calculate;
-use calculator::parse_formula;
-use calculator::types;
+extern crate xlformula_engine;
+use xlformula_engine::calculate;
+use xlformula_engine::parse_formula;
+use xlformula_engine::types;
 
 fn main() {
     let data_function = |s: String| match s.as_str() {

@@ -1,7 +1,7 @@
-extern crate calculator;
-use calculator::calculate;
-use calculator::parse_formula;
-use calculator::types;
+extern crate xlformula_engine;
+use xlformula_engine::calculate;
+use xlformula_engine::parse_formula;
+use xlformula_engine::types;
 
 fn main() {
     let formula = parse_formula::parse_string_to_formula(&"=1+2");
