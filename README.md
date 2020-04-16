@@ -1,14 +1,14 @@
 # XLFormula Engine
-XLFormula Engine is a Rust crate for parsing and evaluating excel formulas. It currently works with f32 types. 
+XLFormula Engine is a Rust crate for parsing and evaluating Excel formulas. It currently works with f32 types. 
 
 ## Features
 It supports:
 
-* Any numbers, negative and positive as float or integer;
+* Any numbers, negative and positive, as float or integer;
 * Arithmetic operations +, -, /, *, ^;
 * Logical operations AND(), OR(), NOT(), XOR();
 * Comparison operations =, >, >=, <, <=, <>;
-* String operations & (concatenation);
+* String operation & (concatenation);
 * Build-in variables TRUE, FALSE;
 * Excel functions ABS(), SUM(), PRODUCT().
 
@@ -26,7 +26,7 @@ extern crate calculator;
 
 ## Examples
 
-Here is a simple example to parse a string as an excel formula and evaluate a result:
+Here is a simple example of parsing an Excel formula string and evaluating to a result:
 ```rust
 extern crate calculator;
 use calculator::calculate;
@@ -39,7 +39,7 @@ fn main() {
 }
 ```
 
-Another example is for a formula with references:
+Another example with a formula with references:
 ```rust
 extern crate calculator;
 use calculator::calculate;
@@ -59,7 +59,7 @@ fn main() {
 ```
 
 ## License
-The MIT License (see the [LICENSE](https://github.com/jiradaherbst/XLFormula-Engine/blob/master/LICENSE) file for the full text). 
+Licensed under MIT License (see the [LICENSE](https://github.com/jiradaherbst/XLFormula-Engine/blob/master/LICENSE) file for the full text). 
 
 ## Contact
 Please feel free to contact us at jirada.herbst@data2impact.com.
