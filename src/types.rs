@@ -1,3 +1,4 @@
+/// Defines Excel Functions.
 #[derive(Debug)]
 pub enum Function {
     Abs,
@@ -9,6 +10,7 @@ pub enum Function {
     Not,
 }
 
+/// Defines Excel Operators.
 #[derive(Debug)]
 pub enum Operator {
     Plus,
@@ -26,6 +28,7 @@ pub enum Operator {
     Function(Function),
 }
 
+/// Defines error types.
 #[derive(Debug)]
 pub enum Error {
     Div0,
@@ -35,12 +38,14 @@ pub enum Error {
     Value,
 }
 
+/// Defines boolean types.
 #[derive(Debug)]
 pub enum Boolean {
     True,
     False,
 }
 
+/// The result of an evaluation.
 #[derive(Debug)]
 pub enum Value {
     Number(f32),
@@ -49,6 +54,7 @@ pub enum Value {
     Error(Error),
 }
 
+/// Defines each term in Expression Struct.
 #[derive(Debug)]
 pub enum Formula {
     Operation(Expression),
@@ -56,6 +62,7 @@ pub enum Formula {
     Reference(String),
 }
 
+/// Struct that holds a parsed string. Formula enum and Expression Struct are defined recursively.
 #[derive(Debug)]
 pub struct Expression {
     pub op: Operator,

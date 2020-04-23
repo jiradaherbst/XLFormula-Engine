@@ -204,6 +204,7 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
     }
 }
 
+/// Evaluates a string that was parsed and stored in Expression Struct.
 pub fn calculate_formula(
     formula: types::Formula,
     f: Option<fn(str1: String) -> types::Value>,
@@ -431,6 +432,7 @@ pub fn calculate_formula(
     }
 }
 
+/// Converts a result from Value Enum to a printable string.  
 pub fn result_to_string(_value: types::Value) -> String {
     match _value {
         types::Value::Number(number) => number.to_string(),

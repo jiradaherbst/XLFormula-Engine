@@ -1,3 +1,4 @@
 /target
 Formula.txt
 src/parse_function.txt
+Cargo.lock

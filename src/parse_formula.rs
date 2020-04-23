@@ -10,24 +10,20 @@ use pest::prec_climber::Assoc;
 use pest::prec_climber::Operator;
 use pest::prec_climber::PrecClimber;
 
-/////////////////////////// use this function to catch parse error ////////////////////////
+/// Use this function to catch a parse error.
 fn parse_string(s: &str) -> Option<pest::iterators::Pair<Rule>> {
     let parse_result = GrammarParser::parse(Rule::formula, s);
     match parse_result {
         Ok(mut result) => {
             let parse_result = result.next().unwrap();
-            //println!("{:?}", parse_result);
             Some(parse_result)
         }
-        Err(_) => {
-            //println!("{:?}", error);
-            None
-        }
+        Err(_) => None,
     }
 }
 
+/// Parses a string and stores it in Formula Enum.
 pub fn parse_string_to_formula(s: &str) -> types::Formula {
-    /////////////////////////////////// use this block to catch parse error ///////////////////////////
     let parse_result = parse_string(&s);
     match parse_result {
         Some(parse_result) => match parse_result.as_rule() {
@@ -48,9 +44,9 @@ pub fn parse_string_to_formula(s: &str) -> types::Formula {
             types::Formula::Value(value)
         }
     }
-    ///////////////////////////////// end of catch error block ////////////////////////////////////////////
 }
 
+/// Builds Formula Enum using a `pest-PrecClimber`.
 fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types::Formula {
     let climber = PrecClimber::new(vec![
         Operator::new(Rule::concat, Assoc::Left),
