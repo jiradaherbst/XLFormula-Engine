@@ -205,9 +205,10 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
 }
 
 /// Evaluates a string that was parsed and stored in Expression Struct.
+/// Takes an optional closure with the trait bound Fn(String) -> types::Value.
 pub fn calculate_formula(
     formula: types::Formula,
-    f: Option<fn(str1: String) -> types::Value>,
+    f: Option<&impl Fn(String) -> types::Value>,
 ) -> types::Value {
     match formula {
         types::Formula::Operation(mut exp) => match exp.op {

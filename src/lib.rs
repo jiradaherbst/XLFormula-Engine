@@ -17,7 +17,7 @@
 //!Add the corresponding entry to your Cargo.toml dependency list:
 //!```toml
 //![dependencies]
-//!xlformula_engine = "0.1.0"
+//!xlformula_engine = "0.1.2"
 //!```
 //!and add this to your crate root:
 //!```rust
@@ -31,18 +31,19 @@
 //!extern crate xlformula_engine;
 //!use xlformula_engine::calculate;
 //!use xlformula_engine::parse_formula;
+//!use xlformula_engine::NoFormula;
 //!
 //!fn main() {
 //!let formula = parse_formula::parse_string_to_formula(&"=1+2");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula = parse_formula::parse_string_to_formula(&"=(1*(2+3))*2");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula = parse_formula::parse_string_to_formula(&"=1+3/0"); // error (#DIV/0!)
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!}
 //!```
@@ -53,14 +54,15 @@
 //!extern crate xlformula_engine;
 //!use xlformula_engine::calculate;
 //!use xlformula_engine::parse_formula;
+//!use xlformula_engine::NoFormula;
 //!
 //!fn main() {
 //!let formula = parse_formula::parse_string_to_formula(&"=\"Hello \" & \" World!\"");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula = parse_formula::parse_string_to_formula(&"=1 + \"Hello\""); // error (#CAST!)
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!}
 //!```
@@ -71,14 +73,15 @@
 //!extern crate xlformula_engine;
 //!use xlformula_engine::calculate;
 //!use xlformula_engine::parse_formula;
+//!use xlformula_engine::NoFormula;
 //!
 //!fn main() {
 //!let formula = parse_formula::parse_string_to_formula(&"1.2");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula = parse_formula::parse_string_to_formula(&"Hello World");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!}
 //!```
@@ -88,18 +91,19 @@
 //!extern crate xlformula_engine;
 //!use xlformula_engine::calculate;
 //!use xlformula_engine::parse_formula;
+//!use xlformula_engine::NoFormula;
 //!
 //!fn main() {
 //!let formula = parse_formula::parse_string_to_formula(&"=ABS(-1)");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula = parse_formula::parse_string_to_formula(&"=SUM(1,2,\"3\")");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula = parse_formula::parse_string_to_formula(&"=PRODUCT(ABS(1),2*1, 3,4*1)");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!}
 //!```
@@ -109,18 +113,19 @@
 //!extern crate xlformula_engine;
 //!use xlformula_engine::calculate;
 //!use xlformula_engine::parse_formula;
+//!use xlformula_engine::NoFormula;
 //!
 //!fn main() {
 //!let formula = parse_formula::parse_string_to_formula(&"=2>=1");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula = parse_formula::parse_string_to_formula(&"=OR(1>1,1<>1)");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula = parse_formula::parse_string_to_formula(&"=AND(\"test\",\"True\", 1, true) ");
-//!let result = calculate::calculate_formula(formula, None);
+//!let result = calculate::calculate_formula(formula, None::<NoFormula>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!}
 //!```
@@ -139,7 +144,7 @@
 //!_ => types::Value::Error(types::Error::Value),
 //!};
 //!let formula = parse_formula::parse_string_to_formula(&"=A+B");
-//!let result = calculate::calculate_formula(formula, Some(data_function));
+//!let result = calculate::calculate_formula(formula, Some(&data_function));
 //!println!("Result is {}", calculate::result_to_string(result));
 //!}
 //!```
@@ -155,3 +160,5 @@ pub mod types;
 
 /// Parses a string using `pest` and `pest::prec_climber`.
 pub mod parse_formula;
+
+pub type NoFormula<'a> = &'a fn(String) -> types::Value;

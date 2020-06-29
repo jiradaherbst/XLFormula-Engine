@@ -2,24 +2,25 @@ extern crate xlformula_engine;
 use xlformula_engine::calculate;
 use xlformula_engine::parse_formula;
 use xlformula_engine::types;
+use xlformula_engine::NoFormula;
 
 use assert_approx_eq::assert_approx_eq;
 
 fn evaluate_formula_number(s: &str) -> f32 {
     let formula = parse_formula::parse_string_to_formula(s);
-    let result = calculate::calculate_formula(formula, None);
+    let result = calculate::calculate_formula(formula, None::<NoFormula>);
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
 fn evaluate_formula_string(s: &str) -> String {
     let formula = parse_formula::parse_string_to_formula(s);
-    let result = calculate::calculate_formula(formula, None);
+    let result = calculate::calculate_formula(formula, None::<NoFormula>);
     calculate::result_to_string(result)
 }
 
 fn evaluate_formula_number_with_reference(
     s: &str,
-    f: Option<fn(s: String) -> types::Value>,
+    f: Option<&impl Fn(String) -> types::Value>,
 ) -> f32 {
     let formula = parse_formula::parse_string_to_formula(s);
     let result = calculate::calculate_formula(formula, f);
@@ -409,27 +410,27 @@ fn it_evaluate_references() {
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
-        evaluate_formula_number_with_reference(&"=A+B", Some(data_function)),
+        evaluate_formula_number_with_reference(&"=A+B", Some(&data_function)),
         3.0,
     );
     assert_eq!(
-        evaluate_formula_number_with_reference(&"=(A*(B+C))*B", Some(data_function)),
+        evaluate_formula_number_with_reference(&"=(A*(B+C))*B", Some(&data_function)),
         10.0,
     );
     assert_eq!(
-        evaluate_formula_number_with_reference(&"=fix_rate*input.", Some(data_function)),
+        evaluate_formula_number_with_reference(&"=fix_rate*input.", Some(&data_function)),
         20.0,
     );
     assert_eq!(
-        evaluate_formula_number_with_reference(&"=D+F", Some(data_function)),
+        evaluate_formula_number_with_reference(&"=D+F", Some(&data_function)),
         3.0,
     );
     assert_eq!(
-        evaluate_formula_number_with_reference(&"=G+F", Some(data_function)),
+        evaluate_formula_number_with_reference(&"=G+F", Some(&data_function)),
         7.0,
     );
     assert_eq!(
-        evaluate_formula_number_with_reference(&"=SUM(A,B,C)", Some(data_function)),
+        evaluate_formula_number_with_reference(&"=SUM(A,B,C)", Some(&data_function)),
         6.0,
     );
 }
@@ -442,7 +443,7 @@ fn it_evaluate_references_other_formulas() {
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
-        evaluate_formula_number_with_reference(&"=A+B", Some(data_function)),
+        evaluate_formula_number_with_reference(&"=A+B", Some(&data_function)),
         7.0
     );
 }
