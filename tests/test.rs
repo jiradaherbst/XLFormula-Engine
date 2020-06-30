@@ -27,6 +27,15 @@ fn evaluate_formula_number_with_reference(
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
+fn evaluate_formula_boolean_with_reference(
+    s: &str,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> String {
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula(formula, f);
+    calculate::result_to_string(result) //.parse::<f32>().unwrap()
+}
+
 /////////////////// Simple math operators with floats and integer ///////////////////
 #[test]
 fn it_evaluate_add_operator_simple_addition() {
@@ -445,5 +454,18 @@ fn it_evaluate_references_other_formulas() {
     assert_eq!(
         evaluate_formula_number_with_reference(&"=A+B", Some(&data_function)),
         7.0
+    );
+}
+
+#[test]
+fn it_evaluate_references_boolean_formulas() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Boolean(types::Boolean::True),
+        "B" => types::Value::Boolean(types::Boolean::False),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND(A,B)", Some(&data_function)),
+        "FALSE"
     );
 }

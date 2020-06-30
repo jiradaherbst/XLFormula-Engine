@@ -426,6 +426,7 @@ pub fn calculate_formula(
                     let formula = parse_formula::parse_string_to_formula(&s);
                     calculate_formula(formula, Some(f))
                 }
+                types::Value::Boolean(x) => types::Value::Boolean(x),
                 _ => unreachable!(),
             },
             None => types::Value::Error(types::Error::Formula),

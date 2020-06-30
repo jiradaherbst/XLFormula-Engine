@@ -17,7 +17,7 @@
 //!Add the corresponding entry to your Cargo.toml dependency list:
 //!```toml
 //![dependencies]
-//!xlformula_engine = "0.1.2"
+//!xlformula_engine = "0.1.3"
 //!```
 //!and add this to your crate root:
 //!```rust
