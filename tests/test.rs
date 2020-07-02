@@ -469,3 +469,16 @@ fn it_evaluate_references_boolean_formulas() {
         "FALSE"
     );
 }
+
+#[test]
+fn it_evaluate_references_error_value_formulas() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Boolean(types::Boolean::True),
+        "B" => types::Value::Error(types::Error::Value), //types::Value::Boolean(types::Boolean::False),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND(A,B)", Some(&data_function)),
+        "TRUE"
+    );
+}

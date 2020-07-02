@@ -427,6 +427,9 @@ pub fn calculate_formula(
                     calculate_formula(formula, Some(f))
                 }
                 types::Value::Boolean(x) => types::Value::Boolean(x),
+                types::Value::Error(types::Error::Value) => {
+                    types::Value::Error(types::Error::Value)
+                }
                 _ => unreachable!(),
             },
             None => types::Value::Error(types::Error::Formula),
