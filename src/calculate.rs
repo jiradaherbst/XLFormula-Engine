@@ -103,6 +103,65 @@ fn calculate_numeric_operator(
     }
 }
 
+fn calculate_average_operator(
+    mut element_count: i32,
+    lhs: types::Value,
+    rhs: types::Value,
+    f: fn(num1: f32, num2: f32) -> f32,
+) -> (types::Value, i32) {
+    match lhs {
+        types::Value::Boolean(_) => (lhs, element_count),
+        types::Value::Error(_) => (lhs, element_count),
+        types::Value::Text(t) => match t.parse::<f32>() {
+            Ok(nl) => match rhs {
+                types::Value::Boolean(_) => (rhs, element_count),
+                types::Value::Error(_) => (rhs, element_count),
+                types::Value::Text(t) => match t.parse::<f32>() {
+                    Ok(nr) => (types::Value::Number(f(nl, nr)), element_count),
+                    Err(_) => (types::Value::Error(types::Error::Cast), element_count),
+                },
+                types::Value::Number(r) => (types::Value::Number(f(nl, r)), element_count),
+                types::Value::Iterator(_) => unreachable!(),
+            },
+            Err(_) => (types::Value::Error(types::Error::Cast), element_count),
+        },
+        types::Value::Number(l) => match rhs {
+            types::Value::Boolean(_) => (rhs, element_count),
+            types::Value::Error(_) => (rhs, element_count),
+            types::Value::Text(t) => match t.parse::<f32>() {
+                Ok(nr) => (types::Value::Number(f(l, nr)), element_count),
+                Err(_) => (types::Value::Error(types::Error::Cast), element_count),
+            },
+            types::Value::Number(r) => (types::Value::Number(f(l, r)), element_count),
+            types::Value::Iterator(mut value_vec) => {
+                if let Some(mut temp) = value_vec.pop() {
+                    while let Some(top) = value_vec.pop() {
+                        temp = calculate_numeric_operator(temp, top, f);
+                        element_count = element_count + 1;
+                    }
+                    (calculate_numeric_operator(lhs, temp, f), element_count)
+                } else {
+                    (types::Value::Error(types::Error::Formula), element_count)
+                }
+            }
+        },
+        types::Value::Iterator(mut value_vec) => match rhs {
+            types::Value::Number(_) => {
+                if let Some(mut temp) = value_vec.pop() {
+                    while let Some(top) = value_vec.pop() {
+                        temp = calculate_numeric_operator(temp, top, f);
+                        element_count = element_count + 1;
+                    }
+                    (calculate_numeric_operator(temp, rhs, f), element_count)
+                } else {
+                    (types::Value::Error(types::Error::Formula), element_count)
+                }
+            }
+            _ => unreachable!(),
+        },
+    }
+}
+
 fn calculate_comparison_operator(
     lhs: types::Value,
     rhs: types::Value,
@@ -404,6 +463,19 @@ pub fn calculate_formula(
                         product = calculate_numeric_operator(product, value, |n1, n2| n1 * n2);
                     }
                     product
+                }
+                types::Function::Average => {
+                    let mut product = types::Value::Number(1.00);
+                    let mut element_count = 0;
+                    while let Some(top) = exp.values.pop() {
+                        let value = calculate_formula(top, f);
+                        element_count = element_count + 1;
+                        product = calculate_numeric_operator(product, value, |n1, n2| n1 * n2);
+                    }
+                    let element_count = types::Value::Number(element_count as f32);
+                    let average =
+                        calculate_numeric_operator(product, element_count, |n1, n2| n1 / n2);
+                    average
                 }
                 types::Function::Or => {
                     let mut result = match exp.values.pop() {

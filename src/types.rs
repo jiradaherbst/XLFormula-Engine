@@ -4,6 +4,7 @@ pub enum Function {
     Abs,
     Sum,
     Product,
+    Average,
     Or,
     And,
     Xor,

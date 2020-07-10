@@ -293,6 +293,12 @@ fn it_evaluate_functions_sum() {
 }
 
 #[test]
+fn it_evaluate_functions_avg() {
+    assert_eq!(evaluate_formula_number(&"=AVERAGE(1,2,3)"), 2.0,);
+    assert_eq!(evaluate_formula_number(&"=AVERAGE({1,2,3})"), 2.0,);
+}
+
+#[test]
 fn it_evaluate_functions_product() {
     assert_eq!(
         evaluate_formula_number(&"=PRODUCT(ABS(1),2*1, 3,4*1)"),
@@ -535,3 +541,33 @@ fn it_evaluate_references_iterator() {
         3.0,
     );
 }
+
+// #[test]
+// fn it_evaluate_iterator_operators() {
+//     assert_eq!(evaluate_formula_string(&"={1,2,3}+{1,2,3}"), "{2,4,6}");
+//     assert_eq!(evaluate_formula_string(&"={3,2,1}-{1,2,3}"), "{2,0,-2}");
+//     assert_eq!(evaluate_formula_string(&"={1,2,3}*{1,2,3}"), "{1,4,9}");
+//     assert_eq!(evaluate_formula_string(&"={1,2,3}/{1,2,3}"), "{1,1,1}");
+//     assert_eq!(evaluate_formula_string(&"=-{1,2,3}"), "{-1,-2,-3}");
+// }
+
+// #[test]
+// fn it_evaluate_iterator_in_logic_functions() {
+//     assert_eq!(evaluate_formula_string(&"=AND({0,0,0})"), "FALSE");
+//     assert_eq!(evaluate_formula_string(&"=AND({1,0,0})"), "FALSE");
+//     assert_eq!(evaluate_formula_string(&"=AND({1,1,1})"), "TRUE");
+//     assert_eq!(evaluate_formula_string(&"=OR({0,0,0})"), "FALSE");
+//     assert_eq!(evaluate_formula_string(&"=OR({1,0,0})"), "TRUE");
+//     assert_eq!(evaluate_formula_string(&"=OR({0,1,1})"), "TRUE");
+//     assert_eq!(evaluate_formula_string(&"=OR({1,0,1})"), "TRUE");
+//     assert_eq!(evaluate_formula_string(&"=OR({1,1,1})"), "TRUE");
+//     assert_eq!(evaluate_formula_string(&"=XOR({1,0,1})"), "TRUE");
+//     assert_eq!(evaluate_formula_string(&"=XOR({0,1,0})"), "TRUE");
+//     assert_eq!(evaluate_formula_string(&"=XOR({0,0,0})"), "FALSE");
+// }
+
+// #[test]
+// fn it_evaluate_iterator_with_diffrent_number_of_entries() {
+//     assert_eq!(evaluate_formula_string(&"={0,0}+{1,2,3}"), "{1,2,#ARG!}");
+//     assert_eq!(evaluate_formula_string(&"={0,0}+{1,\"Hi\"}"), "{1,#CAST!}");
+// }
