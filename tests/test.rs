@@ -482,3 +482,36 @@ fn it_evaluate_references_error_value_formulas() {
         "TRUE"
     );
 }
+
+#[test]
+fn it_evaluate_references_with_dot() {
+    let data_function = |s: String| match s.as_str() {
+        "A.B" => types::Value::Number(1.0),
+        "B.C" => types::Value::Number(2.0),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=A.B+B.C", Some(&data_function)),
+        3.0,
+    );
+}
+
+#[test]
+fn it_evaluate_iterators() {
+    assert_eq!(evaluate_formula_number(&"=SUM({1,2,3})"), 6.0,);
+}
+
+#[test]
+fn it_evaluate_iterators_and_scalars() {
+    assert_eq!(evaluate_formula_number(&"=SUM({1,2,3}, 4)"), 10.0,);
+}
+
+#[test]
+fn it_evaluate_multiple_iterators_and_scalars() {
+    assert_eq!(evaluate_formula_number(&"=SUM({  1,2,3}, 4, {5, 6})"), 21.0,);
+    assert_eq!(evaluate_formula_number(&"=SUM({1,2,3},4,{5,6})"), 21.0,);
+    assert_eq!(
+        evaluate_formula_number(&"=SUM({1+1,2,3-3},4,{5,6*1})"),
+        19.0,
+    );
+}

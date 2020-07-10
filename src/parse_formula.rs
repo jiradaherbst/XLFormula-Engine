@@ -13,6 +13,7 @@ use pest::prec_climber::PrecClimber;
 /// Use this function to catch a parse error.
 fn parse_string(s: &str) -> Option<pest::iterators::Pair<Rule>> {
     let parse_result = GrammarParser::parse(Rule::formula, s);
+    println!("{:?}", parse_result);
     match parse_result {
         Ok(mut result) => {
             let parse_result = result.next().unwrap();
@@ -160,7 +161,18 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 let string = pair.as_str().parse::<String>().unwrap();
                 types::Formula::Reference(string)
             }
-
+            Rule::iterator => {
+                let mut vec = Vec::new();
+                for term in pair.into_inner() {
+                    vec.push(build_formula_with_climber(term.into_inner()));
+                }
+                // let operation = types::Expression {
+                //     op: types::Operator::Function(types::Function::Sum),
+                //     values: vec,
+                // };
+                //types::Formula::Iterator(types::Operator::Function(types::Function::Sum), vec)
+                types::Formula::Iterator(vec)
+            }
             Rule::expr => build_formula_with_climber(pair.into_inner()),
             _ => unreachable!(),
         },

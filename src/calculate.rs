@@ -434,6 +434,20 @@ pub fn calculate_formula(
             },
             None => types::Value::Error(types::Error::Formula),
         },
+        types::Formula::Iterator(mut vec) => {
+            let mut result = match vec.pop() {
+                Some(formula) => {
+                    //println!("{:?}", formula);
+                    calculate_formula(formula, f)
+                }
+                None => types::Value::Error(types::Error::Formula),
+            };
+            while let Some(top) = vec.pop() {
+                let value = calculate_formula(top, f);
+                result = calculate_numeric_operator(result, value, |n1, n2| n1 + n2);
+            }
+            result
+        }
     }
 }
 

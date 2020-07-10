@@ -56,9 +56,11 @@ boolean = _{ t | f }
 reference = ${ (ASCII_ALPHA | "_" | "\\") ~ char_reference* }  
 char_reference = { ASCII_ALPHANUMERIC | "." | "_" } 
 
+iterator = { "{" ~ expr ~ ("," ~ expr)*? ~ "}" }
+
 expr = { term ~ (operator ~ term)* }
 term = _{ number | "(" ~ expr ~ ")" | string_double_quote 
-        | string_single_quote | function | logical_function | boolean | reference }
+        | string_single_quote | function | logical_function | boolean | reference | iterator }
 term_constant = _{ string_constant }
 formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI }
 
