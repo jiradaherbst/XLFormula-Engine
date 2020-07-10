@@ -34,13 +34,16 @@ fn calculate_string_operator(
             types::Value::Error(_) => rhs,
             types::Value::Number(r) => types::Value::Text(f(&l.to_string(), &r.to_string())),
             types::Value::Text(r) => types::Value::Text(f(&l.to_string(), &r)),
+            types::Value::Iterator(_) => unreachable!(),
         },
         types::Value::Text(l) => match rhs {
             types::Value::Boolean(_) => rhs,
             types::Value::Error(_) => rhs,
             types::Value::Number(r) => types::Value::Text(f(&l, &r.to_string())),
             types::Value::Text(r) => types::Value::Text(f(&l, &r)),
+            types::Value::Iterator(_) => unreachable!(),
         },
+        types::Value::Iterator(_) => unreachable!(),
     }
 }
 
@@ -61,6 +64,7 @@ fn calculate_numeric_operator(
                     Err(_) => types::Value::Error(types::Error::Cast),
                 },
                 types::Value::Number(r) => types::Value::Number(f(nl, r)),
+                types::Value::Iterator(_) => unreachable!(),
             },
             Err(_) => types::Value::Error(types::Error::Cast),
         },
@@ -72,6 +76,29 @@ fn calculate_numeric_operator(
                 Err(_) => types::Value::Error(types::Error::Cast),
             },
             types::Value::Number(r) => types::Value::Number(f(l, r)),
+            types::Value::Iterator(mut value_vec) => {
+                if let Some(mut temp) = value_vec.pop() {
+                    while let Some(top) = value_vec.pop() {
+                        temp = calculate_numeric_operator(temp, top, f);
+                    }
+                    calculate_numeric_operator(lhs, temp, f)
+                } else {
+                    types::Value::Error(types::Error::Formula)
+                }
+            }
+        },
+        types::Value::Iterator(mut value_vec) => match rhs {
+            types::Value::Number(_) => {
+                if let Some(mut temp) = value_vec.pop() {
+                    while let Some(top) = value_vec.pop() {
+                        temp = calculate_numeric_operator(temp, top, f);
+                    }
+                    calculate_numeric_operator(temp, rhs, f)
+                } else {
+                    types::Value::Error(types::Error::Formula)
+                }
+            }
+            _ => unreachable!(),
         },
     }
 }
@@ -93,7 +120,9 @@ fn calculate_comparison_operator(
                 true => types::Value::Boolean(types::Boolean::True),
                 false => types::Value::Boolean(types::Boolean::False),
             },
+            types::Value::Iterator(_) => unreachable!(),
         },
+        types::Value::Iterator(_) => unreachable!(),
     }
 }
 
@@ -146,6 +175,7 @@ fn calculate_abs(value: types::Value) -> types::Value {
         types::Value::Error(_) => value,
         types::Value::Text(_) => value,
         types::Value::Number(l) => types::Value::Number(l.abs()),
+        types::Value::Iterator(_) => unreachable!(),
     }
 }
 
@@ -170,6 +200,7 @@ fn calculate_negation(value: types::Value) -> types::Value {
             true => types::Value::Boolean(types::Boolean::True),
             false => types::Value::Boolean(types::Boolean::False),
         },
+        types::Value::Iterator(_) => unreachable!(),
     }
 }
 
@@ -201,6 +232,7 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
             true => types::Value::Boolean(types::Boolean::True),
             false => types::Value::Boolean(types::Boolean::False),
         },
+        types::Value::Iterator(_) => unreachable!(),
     }
 }
 
@@ -435,18 +467,12 @@ pub fn calculate_formula(
             None => types::Value::Error(types::Error::Formula),
         },
         types::Formula::Iterator(mut vec) => {
-            let mut result = match vec.pop() {
-                Some(formula) => {
-                    //println!("{:?}", formula);
-                    calculate_formula(formula, f)
-                }
-                None => types::Value::Error(types::Error::Formula),
-            };
+            let mut value_vec = Vec::new();
             while let Some(top) = vec.pop() {
                 let value = calculate_formula(top, f);
-                result = calculate_numeric_operator(result, value, |n1, n2| n1 + n2);
+                value_vec.push(value);
             }
-            result
+            types::Value::Iterator(value_vec)
         }
     }
 }
@@ -467,5 +493,6 @@ pub fn result_to_string(_value: types::Value) -> String {
             types::Boolean::True => String::from("TRUE"),
             types::Boolean::False => String::from("FALSE"),
         },
+        types::Value::Iterator(_) => unreachable!(),
     }
 }

@@ -51,7 +51,7 @@ pub enum Value {
     Number(f32),
     Text(String),
     Boolean(Boolean),
-    //Iterator(Vec<Value>),
+    Iterator(Vec<Value>),
     Error(Error),
 }
 
