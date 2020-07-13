@@ -5,14 +5,15 @@ use xlformula_engine::types;
 use xlformula_engine::NoFormula;
 
 fn main() {
-    let formula = parse_formula::parse_string_to_formula(&"=AVERAGE(1,2,3)");
-    let result = calculate::calculate_formula(formula, None::<NoFormula>);
-    println!("Result is {}", calculate::result_to_string(result));
-
-    let formula = parse_formula::parse_string_to_formula(&"=AVERAGE({1,2,3})");
+    let formula = parse_formula::parse_string_to_formula(&"={1,2,3}+{1,2,3}");
     println!("{:?}", formula);
     let result = calculate::calculate_formula(formula, None::<NoFormula>);
     println!("Result is {}", calculate::result_to_string(result));
+
+    // let formula = parse_formula::parse_string_to_formula(&"=AND(0,{0,0,0})");
+    // println!("{:?}", formula);
+    // let result = calculate::calculate_formula(formula, None::<NoFormula>);
+    // println!("Result is {}", calculate::result_to_string(result));
 
     ///////////////////////////////// main that shows on github /////////////////
     // let formula = parse_formula::parse_string_to_formula(&"=1+2");

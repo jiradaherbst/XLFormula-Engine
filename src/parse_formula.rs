@@ -13,7 +13,7 @@ use pest::prec_climber::PrecClimber;
 /// Use this function to catch a parse error.
 fn parse_string(s: &str) -> Option<pest::iterators::Pair<Rule>> {
     let parse_result = GrammarParser::parse(Rule::formula, s);
-    //println!("{:?}", parse_result);
+    println!("{:?}", parse_result);
     match parse_result {
         Ok(mut result) => {
             let parse_result = result.next().unwrap();

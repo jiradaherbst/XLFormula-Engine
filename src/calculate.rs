@@ -210,6 +210,24 @@ fn calculate_boolean_operator(
                     types::Boolean::True => types::Value::Boolean(types::Boolean::True),
                     types::Boolean::False => types::Value::Boolean(types::Boolean::False),
                 },
+                types::Value::Iterator(mut value_vec) => {
+                    if let Some(mut temp) = value_vec.pop() {
+                        while let Some(top) = value_vec.pop() {
+                            temp = calculate_boolean_operator(temp, top, f);
+                        }
+                        let rhs = cast_value_to_boolean(temp);
+                        match rhs {
+                            types::Value::Boolean(r) => match f(to_bool(l), to_bool(r)) {
+                                true => types::Value::Boolean(types::Boolean::True),
+                                false => types::Value::Boolean(types::Boolean::False),
+                            },
+                            _ => unreachable!(),
+                        }
+                    //calculate_boolean_operator(l, temp, f)
+                    } else {
+                        types::Value::Error(types::Error::Formula)
+                    }
+                }
                 _ => unreachable!(),
             }
         }
@@ -221,6 +239,31 @@ fn calculate_boolean_operator(
                     false => types::Value::Boolean(types::Boolean::False),
                 },
                 types::Value::Error(_) => types::Value::Error(types::Error::Cast),
+                _ => unreachable!(),
+            }
+        }
+        types::Value::Iterator(mut value_vec) => {
+            let rh = cast_value_to_boolean(rhs);
+            match rh {
+                types::Value::Boolean(r) => {
+                    if let Some(mut temp) = value_vec.pop() {
+                        while let Some(top) = value_vec.pop() {
+                            temp = calculate_boolean_operator(temp, top, f);
+                        }
+                        let lhs = cast_value_to_boolean(temp);
+                        match lhs {
+                            types::Value::Boolean(l) => match f(to_bool(l), to_bool(r)) {
+                                true => types::Value::Boolean(types::Boolean::True),
+                                false => types::Value::Boolean(types::Boolean::False),
+                            },
+                            _ => types::Value::Error(types::Error::Formula),
+                        }
+                    //calculate_boolean_operator(l, temp, f)
+                    } else {
+                        types::Value::Error(types::Error::Formula)
+                    }
+                }
+
                 _ => unreachable!(),
             }
         }
@@ -291,7 +334,39 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
             true => types::Value::Boolean(types::Boolean::True),
             false => types::Value::Boolean(types::Boolean::False),
         },
-        types::Value::Iterator(_) => unreachable!(),
+        types::Value::Iterator(mut value_vec) => {
+            let mut boolean_vec = Vec::new();
+            while let Some(top) = value_vec.pop() {
+                let value = cast_value_to_boolean(top);
+                boolean_vec.push(value);
+            }
+            types::Value::Iterator(boolean_vec)
+        }
+    }
+}
+
+fn convert_iterator_to_result(
+    result: types::Value,
+    f: fn(bool1: bool, bool2: bool) -> bool,
+) -> types::Value {
+    match result {
+        types::Value::Iterator(mut value_vec) => {
+            if let Some(mut temp) = value_vec.pop() {
+                while let Some(top) = value_vec.pop() {
+                    temp = calculate_boolean_operator(temp, top, f); //|n1, n2| n1 && n2);
+                }
+                match cast_value_to_boolean(temp) {
+                    types::Value::Boolean(bool_result) => match to_bool(bool_result) {
+                        true => types::Value::Boolean(types::Boolean::True),
+                        false => types::Value::Boolean(types::Boolean::False),
+                    },
+                    _ => types::Value::Error(types::Error::Formula),
+                }
+            } else {
+                types::Value::Error(types::Error::Formula)
+            }
+        }
+        _ => result,
     }
 }
 
@@ -495,7 +570,8 @@ pub fn calculate_formula(
                         let value = calculate_formula(top, f);
                         result = calculate_boolean_operator(result, value, |n1, n2| n1 || n2);
                     }
-                    result
+                    convert_iterator_to_result(result, |n1, n2| n1 || n2)
+                    //result
                 }
                 types::Function::And => {
                     let mut result = match exp.values.pop() {
@@ -503,11 +579,13 @@ pub fn calculate_formula(
                         None => types::Value::Error(types::Error::Formula),
                     };
                     result = cast_value_to_boolean(result);
+                    println!("here");
                     while let Some(top) = exp.values.pop() {
                         let value = calculate_formula(top, f);
                         result = calculate_boolean_operator(result, value, |n1, n2| n1 && n2);
                     }
-                    result
+                    convert_iterator_to_result(result, |n1, n2| n1 && n2)
+                    //result
                 }
                 types::Function::Xor => {
                     let mut result = match exp.values.pop() {
@@ -519,7 +597,8 @@ pub fn calculate_formula(
                         let value = calculate_formula(top, f);
                         result = calculate_boolean_operator(result, value, |n1, n2| n1 ^ n2);
                     }
-                    result
+                    convert_iterator_to_result(result, |n1, n2| n1 ^ n2)
+                    //result
                 }
                 types::Function::Not => {
                     let value = match exp.values.pop() {
@@ -573,6 +652,12 @@ pub fn result_to_string(_value: types::Value) -> String {
             types::Boolean::True => String::from("TRUE"),
             types::Boolean::False => String::from("FALSE"),
         },
-        types::Value::Iterator(_) => unreachable!(),
+        types::Value::Iterator(mut value_vec) => {
+            let mut result = "".to_string();
+            while let Some(top) = value_vec.pop() {
+                result = result + &result_to_string(top);
+            }
+            result
+        }
     }
 }

@@ -552,20 +552,26 @@ fn it_evaluate_references_iterator() {
 //     assert_eq!(evaluate_formula_string(&"=-{1,2,3}"), "{-1,-2,-3}");
 // }
 
-// #[test]
-// fn it_evaluate_iterator_in_logic_functions() {
-//     assert_eq!(evaluate_formula_string(&"=AND({0,0,0})"), "FALSE");
-//     assert_eq!(evaluate_formula_string(&"=AND({1,0,0})"), "FALSE");
-//     assert_eq!(evaluate_formula_string(&"=AND({1,1,1})"), "TRUE");
-//     assert_eq!(evaluate_formula_string(&"=OR({0,0,0})"), "FALSE");
-//     assert_eq!(evaluate_formula_string(&"=OR({1,0,0})"), "TRUE");
-//     assert_eq!(evaluate_formula_string(&"=OR({0,1,1})"), "TRUE");
-//     assert_eq!(evaluate_formula_string(&"=OR({1,0,1})"), "TRUE");
-//     assert_eq!(evaluate_formula_string(&"=OR({1,1,1})"), "TRUE");
-//     assert_eq!(evaluate_formula_string(&"=XOR({1,0,1})"), "TRUE");
-//     assert_eq!(evaluate_formula_string(&"=XOR({0,1,0})"), "TRUE");
-//     assert_eq!(evaluate_formula_string(&"=XOR({0,0,0})"), "FALSE");
-// }
+#[test]
+fn it_evaluate_iterator_in_logic_functions() {
+    assert_eq!(evaluate_formula_string(&"=AND(0,{0,0,0},0)"), "FALSE");
+    assert_eq!(evaluate_formula_string(&"=AND(0,{0,0,0})"), "FALSE");
+    assert_eq!(evaluate_formula_string(&"=AND({0,0,0},0)"), "FALSE");
+    assert_eq!(evaluate_formula_string(&"=OR(1,{1,0,0},0,1)"), "TRUE");
+    assert_eq!(evaluate_formula_string(&"=OR(0,{0,1,0})"), "TRUE");
+    assert_eq!(evaluate_formula_string(&"=OR({0,0,0},1)"), "TRUE");
+    assert_eq!(evaluate_formula_string(&"=AND({0,0,0})"), "FALSE");
+    assert_eq!(evaluate_formula_string(&"=AND({1,0,0})"), "FALSE");
+    assert_eq!(evaluate_formula_string(&"=AND({1,1,1})"), "TRUE");
+    assert_eq!(evaluate_formula_string(&"=OR({0,0,0})"), "FALSE");
+    assert_eq!(evaluate_formula_string(&"=OR({1,0,0})"), "TRUE");
+    assert_eq!(evaluate_formula_string(&"=OR({0,1,1})"), "TRUE");
+    assert_eq!(evaluate_formula_string(&"=OR({1,0,1})"), "TRUE");
+    assert_eq!(evaluate_formula_string(&"=OR({1,1,1})"), "TRUE");
+    assert_eq!(evaluate_formula_string(&"=XOR({1,0,1})"), "FALSE");
+    assert_eq!(evaluate_formula_string(&"=XOR({0,1,0})"), "TRUE");
+    assert_eq!(evaluate_formula_string(&"=XOR({0,0,0})"), "FALSE");
+}
 
 // #[test]
 // fn it_evaluate_iterator_with_diffrent_number_of_entries() {
