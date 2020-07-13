@@ -87,16 +87,33 @@ fn calculate_numeric_operator(
                 }
             }
         },
-        types::Value::Iterator(mut value_vec) => match rhs {
+        types::Value::Iterator(mut lhs_vec) => match rhs {
             types::Value::Number(_) => {
-                if let Some(mut temp) = value_vec.pop() {
-                    while let Some(top) = value_vec.pop() {
+                if let Some(mut temp) = lhs_vec.pop() {
+                    while let Some(top) = lhs_vec.pop() {
                         temp = calculate_numeric_operator(temp, top, f);
                     }
                     calculate_numeric_operator(temp, rhs, f)
                 } else {
                     types::Value::Error(types::Error::Formula)
                 }
+            }
+            types::Value::Iterator(rhs_vec) => {
+                let mut result_vec = Vec::new();
+                let mut it_left = lhs_vec.iter();
+                let mut it_right = rhs_vec.iter();
+                loop {
+                    match (it_left.next(), it_right.next()) {
+                        (Some(x), Some(y)) => {
+                            result_vec.push(calculate_numeric_operator(x.clone(), y.clone(), f));
+                        } //println!("x={}, y={}", x, y),
+                        // (Some(x), None) => println!("x={}, no matching Y", x),
+                        // (None, Some(y)) => println!("y={}, no matching X", y),
+                        (None, None) => break,
+                        _ => unreachable!(),
+                    };
+                }
+                types::Value::Iterator(result_vec)
             }
             _ => unreachable!(),
         },
@@ -653,10 +670,12 @@ pub fn result_to_string(_value: types::Value) -> String {
             types::Boolean::False => String::from("FALSE"),
         },
         types::Value::Iterator(mut value_vec) => {
-            let mut result = "".to_string();
+            let mut result = "{".to_string();
             while let Some(top) = value_vec.pop() {
                 result = result + &result_to_string(top);
+                result = result + &",".to_string();
             }
+            result = result + &"}".to_string();
             result
         }
     }
