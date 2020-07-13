@@ -296,6 +296,7 @@ fn it_evaluate_functions_sum() {
 fn it_evaluate_functions_avg() {
     assert_eq!(evaluate_formula_number(&"=AVERAGE(1,2,3)"), 2.0,);
     assert_eq!(evaluate_formula_number(&"=AVERAGE({1,2,3})"), 2.0,);
+    //assert_eq!(evaluate_formula_number(&"=AVERAGE({1,2,3},1,2,3)"), 2.0,);
 }
 
 #[test]
