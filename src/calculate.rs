@@ -139,7 +139,6 @@ fn calculate_average_operator(
                         temp = calculate_numeric_operator(temp, top, f);
                         *element_count = *element_count + 1;
                     }
-                    *element_count = *element_count - 1;
                     calculate_numeric_operator(lhs, temp, f)
                 } else {
                     types::Value::Error(types::Error::Formula)
@@ -153,7 +152,6 @@ fn calculate_average_operator(
                         temp = calculate_numeric_operator(temp, top, f);
                         *element_count = *element_count + 1;
                     }
-                    *element_count = *element_count - 1;
                     calculate_numeric_operator(temp, rhs, f)
                 } else {
                     types::Value::Error(types::Error::Formula)
@@ -471,8 +469,7 @@ pub fn calculate_formula(
                     let mut element_count = 0;
                     while let Some(top) = exp.values.pop() {
                         let value = calculate_formula(top, f);
-                        //element_count = element_count + 1;
-                        //product = calculate_numeric_operator(product, value, |n1, n2| n1 * n2);
+                        element_count = element_count + 1;
                         product = calculate_average_operator(
                             &mut element_count,
                             product,
@@ -481,9 +478,11 @@ pub fn calculate_formula(
                         );
                     }
                     let element_count = types::Value::Number(element_count as f32);
-                    let average =
-                        //calculate_numeric_operator(product, element_count, |n1, n2| n1 / n2);
-                        calculate_numeric_operator(product, element_count, calculate_divide_operator);
+                    let average = calculate_numeric_operator(
+                        product,
+                        element_count,
+                        calculate_divide_operator,
+                    );
                     average
                 }
                 types::Function::Or => {
