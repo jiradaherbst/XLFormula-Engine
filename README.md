@@ -10,14 +10,15 @@ It supports:
 * Comparison operations =, >, >=, <, <=, <>;
 * String operation & (concatenation);
 * Build-in variables TRUE, FALSE;
-* Excel functions ABS(), SUM(), PRODUCT().
+* Excel functions ABS(), SUM(), PRODUCT(), AVERAGE();
+* Operations on lists of values (one dimensional range).
 
 ## Installation
 
 Add the corresponding entry to your Cargo.toml dependency list:
 ```toml
 [dependencies]
-xlformula_engine = "0.1.4"
+xlformula_engine = "0.1.5"
 ```
 and add this to your crate root:
 ```rust
@@ -145,6 +146,28 @@ _ => types::Value::Error(types::Error::Value),
 };
 let formula = parse_formula::parse_string_to_formula(&"=A+B");
 let result = calculate::calculate_formula(formula, Some(&data_function));
+println!("Result is {}", calculate::result_to_string(result));
+}
+```
+
+List:
+```rust
+extern crate xlformula_engine;
+use xlformula_engine::calculate;
+use xlformula_engine::parse_formula;
+use xlformula_engine::NoFormula;
+
+fn main() {
+let formula = parse_formula::parse_string_to_formula(&"={1,2,3}+{1,2,3}");
+let result = calculate::calculate_formula(formula, None::<NoFormula>);
+println!("Result is {}", calculate::result_to_string(result));    
+
+let formula = parse_formula::parse_string_to_formula(&"=XOR({0,0,0})");
+let result = calculate::calculate_formula(formula, None::<NoFormula>);
+println!("Result is {}", calculate::result_to_string(result));
+
+let formula = parse_formula::parse_string_to_formula(&"=AVERAGE({1,2,3},1,2,3)");
+let result = calculate::calculate_formula(formula, None::<NoFormula>);
 println!("Result is {}", calculate::result_to_string(result));
 }
 ```

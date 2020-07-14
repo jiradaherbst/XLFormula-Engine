@@ -100,25 +100,18 @@ fn calculate_numeric_operator(
             }
             types::Value::Iterator(mut rhs_vec) => {
                 let mut result_vec = Vec::new();
-                //let mut it_left = lhs_vec.iter();
-                //let mut it_right = rhs_vec.iter();
                 loop {
-                    //match (it_left.next(), it_right.next()) {
                     match (lhs_vec.pop(), rhs_vec.pop()) {
                         (Some(x), Some(y)) => {
-                            //println!("x={:?}, y={:?}", x, y);
                             result_vec.push(calculate_numeric_operator(x, y, f));
                         }
                         (Some(_), None) => {
-                            //println!("x={:?}", x);
                             result_vec.push(types::Value::Error(types::Error::Argument))
                         }
                         (None, Some(_)) => {
-                            //println!("y={:?}", y);
                             result_vec.push(types::Value::Error(types::Error::Argument))
                         }
                         (None, None) => break,
-                        //_ => unreachable!(),
                     };
                 }
                 types::Value::Iterator(result_vec)
@@ -248,7 +241,6 @@ fn calculate_boolean_operator(
                             },
                             _ => unreachable!(),
                         }
-                    //calculate_boolean_operator(l, temp, f)
                     } else {
                         types::Value::Error(types::Error::Formula)
                     }
@@ -283,7 +275,6 @@ fn calculate_boolean_operator(
                             },
                             _ => types::Value::Error(types::Error::Formula),
                         }
-                    //calculate_boolean_operator(l, temp, f)
                     } else {
                         types::Value::Error(types::Error::Formula)
                     }
@@ -392,7 +383,7 @@ fn convert_iterator_to_result(
         types::Value::Iterator(mut value_vec) => {
             if let Some(mut temp) = value_vec.pop() {
                 while let Some(top) = value_vec.pop() {
-                    temp = calculate_boolean_operator(temp, top, f); //|n1, n2| n1 && n2);
+                    temp = calculate_boolean_operator(temp, top, f);
                 }
                 match cast_value_to_boolean(temp) {
                     types::Value::Boolean(bool_result) => match to_bool(bool_result) {
@@ -610,7 +601,6 @@ pub fn calculate_formula(
                         result = calculate_boolean_operator(result, value, |n1, n2| n1 || n2);
                     }
                     convert_iterator_to_result(result, |n1, n2| n1 || n2)
-                    //result
                 }
                 types::Function::And => {
                     let mut result = match exp.values.pop() {
@@ -618,13 +608,11 @@ pub fn calculate_formula(
                         None => types::Value::Error(types::Error::Formula),
                     };
                     result = cast_value_to_boolean(result);
-                    println!("here");
                     while let Some(top) = exp.values.pop() {
                         let value = calculate_formula(top, f);
                         result = calculate_boolean_operator(result, value, |n1, n2| n1 && n2);
                     }
                     convert_iterator_to_result(result, |n1, n2| n1 && n2)
-                    //result
                 }
                 types::Function::Xor => {
                     let mut result = match exp.values.pop() {
@@ -637,7 +625,6 @@ pub fn calculate_formula(
                         result = calculate_boolean_operator(result, value, |n1, n2| n1 ^ n2);
                     }
                     convert_iterator_to_result(result, |n1, n2| n1 ^ n2)
-                    //result
                 }
                 types::Function::Not => {
                     let value = match exp.values.pop() {
