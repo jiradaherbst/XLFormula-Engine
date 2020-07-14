@@ -178,6 +178,13 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
                 }
                 types::Formula::Iterator(vec)
             }
+            Rule::negate => {
+                let operation = types::Expression {
+                    op: types::Operator::Function(types::Function::Negate),
+                    values: vec![build_formula_with_climber(pair.into_inner())],
+                };
+                types::Formula::Operation(operation)
+            }
             Rule::expr => build_formula_with_climber(pair.into_inner()),
             _ => unreachable!(),
         },

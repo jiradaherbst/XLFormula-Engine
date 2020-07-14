@@ -543,14 +543,19 @@ fn it_evaluate_references_iterator() {
     );
 }
 
-// #[test]
-// fn it_evaluate_iterator_operators() {
-//     assert_eq!(evaluate_formula_string(&"={1,2,3}+{1,2,3}"), "{2,4,6}");
-//     assert_eq!(evaluate_formula_string(&"={3,2,1}-{1,2,3}"), "{2,0,-2}");
-//     assert_eq!(evaluate_formula_string(&"={1,2,3}*{1,2,3}"), "{1,4,9}");
-//     assert_eq!(evaluate_formula_string(&"={1,2,3}/{1,2,3}"), "{1,1,1}");
-//     assert_eq!(evaluate_formula_string(&"=-{1,2,3}"), "{-1,-2,-3}");
-// }
+#[test]
+fn it_evaluate_iterator_operators() {
+    assert_eq!(evaluate_formula_string(&"={1,2,3}+{1,2,3}"), "{2,4,6}");
+    assert_eq!(evaluate_formula_string(&"={3,2,1}-{1,2,3}"), "{2,0,-2}");
+    assert_eq!(evaluate_formula_string(&"={1,2,3}*{1,2,3}"), "{1,4,9}");
+    assert_eq!(evaluate_formula_string(&"={1,2,3}/{1,2,3}"), "{1,1,1}");
+    assert_eq!(
+        evaluate_formula_string(&"={1,2,3}/{0,0,0}"),
+        "{#DIV/0!,#DIV/0!,#DIV/0!}"
+    );
+    assert_eq!(evaluate_formula_string(&"=-{1,2,3}"), "{-1,-2,-3}");
+    assert_eq!(evaluate_formula_string(&"=-({1,2,3})"), "{-1,-2,-3}");
+}
 
 #[test]
 fn it_evaluate_iterator_in_logic_functions() {
@@ -573,8 +578,13 @@ fn it_evaluate_iterator_in_logic_functions() {
     assert_eq!(evaluate_formula_string(&"=XOR({0,0,0})"), "FALSE");
 }
 
-// #[test]
-// fn it_evaluate_iterator_with_diffrent_number_of_entries() {
-//     assert_eq!(evaluate_formula_string(&"={0,0}+{1,2,3}"), "{1,2,#ARG!}");
-//     assert_eq!(evaluate_formula_string(&"={0,0}+{1,\"Hi\"}"), "{1,#CAST!}");
-// }
+#[test]
+fn it_evaluate_iterator_with_diffrent_number_of_entries() {
+    assert_eq!(evaluate_formula_string(&"={0,0}+{1,2,3}"), "{1,2,#ARG!}");
+    assert_eq!(evaluate_formula_string(&"={0,0}*{1,2,3}"), "{0,0,#ARG!}");
+    assert_eq!(
+        evaluate_formula_string(&"={1,2,3}/{0,0}"),
+        "{#DIV/0!,#DIV/0!,#ARG!}"
+    );
+    assert_eq!(evaluate_formula_string(&"={0,0}+{1,\"Hi\"}"), "{1,#CAST!}");
+}

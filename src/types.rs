@@ -9,6 +9,7 @@ pub enum Function {
     And,
     Xor,
     Not,
+    Negate,
 }
 
 /// Defines Excel Operators.
@@ -37,6 +38,7 @@ pub enum Error {
     Formula,
     Parse,
     Value,
+    Argument,
 }
 
 /// Defines boolean types.

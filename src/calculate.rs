@@ -98,19 +98,27 @@ fn calculate_numeric_operator(
                     types::Value::Error(types::Error::Formula)
                 }
             }
-            types::Value::Iterator(rhs_vec) => {
+            types::Value::Iterator(mut rhs_vec) => {
                 let mut result_vec = Vec::new();
-                let mut it_left = lhs_vec.iter();
-                let mut it_right = rhs_vec.iter();
+                //let mut it_left = lhs_vec.iter();
+                //let mut it_right = rhs_vec.iter();
                 loop {
-                    match (it_left.next(), it_right.next()) {
+                    //match (it_left.next(), it_right.next()) {
+                    match (lhs_vec.pop(), rhs_vec.pop()) {
                         (Some(x), Some(y)) => {
-                            result_vec.push(calculate_numeric_operator(x.clone(), y.clone(), f));
-                        } //println!("x={}, y={}", x, y),
-                        // (Some(x), None) => println!("x={}, no matching Y", x),
-                        // (None, Some(y)) => println!("y={}, no matching X", y),
+                            //println!("x={:?}, y={:?}", x, y);
+                            result_vec.push(calculate_numeric_operator(x, y, f));
+                        }
+                        (Some(_), None) => {
+                            //println!("x={:?}", x);
+                            result_vec.push(types::Value::Error(types::Error::Argument))
+                        }
+                        (None, Some(_)) => {
+                            //println!("y={:?}", y);
+                            result_vec.push(types::Value::Error(types::Error::Argument))
+                        }
                         (None, None) => break,
-                        _ => unreachable!(),
+                        //_ => unreachable!(),
                     };
                 }
                 types::Value::Iterator(result_vec)
@@ -320,6 +328,20 @@ fn calculate_negation(value: types::Value) -> types::Value {
             false => types::Value::Boolean(types::Boolean::False),
         },
         types::Value::Iterator(_) => unreachable!(),
+    }
+}
+
+fn calculate_negate(value: types::Value) -> types::Value {
+    match value {
+        types::Value::Number(l) => types::Value::Number(-l),
+        types::Value::Iterator(mut value_vec) => {
+            let mut result_vec = Vec::new();
+            while let Some(top) = value_vec.pop() {
+                result_vec.push(calculate_negate(top));
+            }
+            types::Value::Iterator(result_vec)
+        }
+        _ => unreachable!(),
     }
 }
 
@@ -624,6 +646,13 @@ pub fn calculate_formula(
                     };
                     calculate_negation(value)
                 }
+                types::Function::Negate => {
+                    let value = match exp.values.pop() {
+                        Some(formula) => calculate_formula(formula, f),
+                        None => types::Value::Error(types::Error::Formula),
+                    };
+                    calculate_negate(value)
+                }
             },
         },
         types::Formula::Value(val) => val,
@@ -656,7 +685,10 @@ pub fn calculate_formula(
 /// Converts a result from Value Enum to a printable string.  
 pub fn result_to_string(_value: types::Value) -> String {
     match _value {
-        types::Value::Number(number) => number.to_string(),
+        types::Value::Number(number) => match number.is_infinite() {
+            true => String::from("#DIV/0!"),
+            false => number.to_string(),
+        },
         types::Value::Text(text) => text,
         types::Value::Error(error) => match error {
             types::Error::Div0 => String::from("#DIV/0!"),
@@ -664,17 +696,20 @@ pub fn result_to_string(_value: types::Value) -> String {
             types::Error::Formula => String::from("Null Formula"),
             types::Error::Parse => String::from("#PARSE!"),
             types::Error::Value => String::from("#VALUE!"),
+            types::Error::Argument => String::from("#ARG!"),
         },
         types::Value::Boolean(boolean) => match boolean {
             types::Boolean::True => String::from("TRUE"),
             types::Boolean::False => String::from("FALSE"),
         },
         types::Value::Iterator(mut value_vec) => {
+            value_vec.reverse();
             let mut result = "{".to_string();
             while let Some(top) = value_vec.pop() {
                 result = result + &result_to_string(top);
                 result = result + &",".to_string();
             }
+            result = result.trim_end_matches(",").to_string();
             result = result + &"}".to_string();
             result
         }
