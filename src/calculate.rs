@@ -654,6 +654,7 @@ pub fn calculate_formula(
                 types::Value::Error(types::Error::Value) => {
                     types::Value::Error(types::Error::Value)
                 }
+                types::Value::Iterator(v) => types::Value::Iterator(v),
                 _ => unreachable!(),
             },
             None => types::Value::Error(types::Error::Formula),
