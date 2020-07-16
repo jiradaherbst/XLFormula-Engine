@@ -294,9 +294,21 @@ fn it_evaluate_functions_sum() {
 
 #[test]
 fn it_evaluate_functions_avg() {
-    assert_eq!(evaluate_formula_number(&"=AVERAGE(1,2,3)"), 2.0,);
+    assert_eq!(evaluate_formula_number(&"=AVERAGE(1,2)"), 1.5,);
     assert_eq!(evaluate_formula_number(&"=AVERAGE({1,2,3})"), 2.0,);
     assert_eq!(evaluate_formula_number(&"=AVERAGE({1,2,3},1,2,3)"), 2.0,);
+    assert_eq!(evaluate_formula_number(&"=AVERAGE(3,1,2,3)"), 2.25,);
+    assert_eq!(evaluate_formula_number(&"=AVERAGE(1,2,3,4,5,1,2,3)"), 2.625,);
+    assert_eq!(
+        evaluate_formula_number(&"=AVERAGE({1,2,3,4,5},1,2,3)"),
+        2.625,
+    );
+    assert_eq!(
+        evaluate_formula_number(&"=AVERAGE(AVERAGE({1,2,3,4,5}),1,2,3)"),
+        2.25,
+    );
+    assert_eq!(evaluate_formula_number(&"=AVERAGE({100,200})"), 150.0,);
+    //assert_eq!(evaluate_formula_number(&"=AVERAGE({{100,200}})"), 150.0);
 }
 
 #[test]
@@ -423,6 +435,14 @@ fn it_evaluate_references() {
         "D" => types::Value::Number(1.0),
         "F" => types::Value::Text("=D+1".to_string()),
         "G" => types::Value::Text("=F+1+D+1".to_string()),
+        "Test" => {
+            let mut vec = Vec::new();
+            vec.push(types::Value::Number(100.0));
+            vec.push(types::Value::Number(200.0));
+            vec.push(types::Value::Number(300.0));
+            types::Value::Iterator(vec)
+        }
+
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
@@ -448,6 +468,10 @@ fn it_evaluate_references() {
     assert_eq!(
         evaluate_formula_number_with_reference(&"=SUM(A,B,C)", Some(&data_function)),
         6.0,
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=AVERAGE(Test)", Some(&data_function)),
+        200.0,
     );
 }
 
@@ -518,6 +542,7 @@ fn it_evaluate_iterators_and_scalars() {
 
 #[test]
 fn it_evaluate_multiple_iterators_and_scalars() {
+    assert_eq!(evaluate_formula_number(&"=SUM({1,2,3})"), 6.0,);
     assert_eq!(evaluate_formula_number(&"=SUM({  1,2,3}, 4, {5, 6})"), 21.0,);
     assert_eq!(evaluate_formula_number(&"=SUM({1,2,3},4,{5,6})"), 21.0,);
     assert_eq!(
