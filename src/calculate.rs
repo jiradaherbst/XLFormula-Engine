@@ -400,6 +400,192 @@ fn convert_iterator_to_result(
     }
 }
 
+fn get_values(
+    mut exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> (types::Value, types::Value) {
+    let value2 = match exp.values.pop() {
+        Some(formula) => calculate_formula(formula, f),
+        None => types::Value::Error(types::Error::Formula),
+    };
+    let value1 = match exp.values.pop() {
+        Some(formula) => calculate_formula(formula, f),
+        None => types::Value::Error(types::Error::Formula),
+    };
+    (value2, value1)
+}
+
+fn get_value(
+    mut exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> types::Value {
+    match exp.values.pop() {
+        Some(formula) => calculate_formula(formula, f),
+        None => types::Value::Error(types::Error::Formula),
+    }
+}
+
+fn calculate_iterator(
+    mut vec: Vec<types::Formula>,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> types::Value {
+    let mut value_vec = Vec::new();
+    while let Some(top) = vec.pop() {
+        let value = calculate_formula(top, f);
+        value_vec.push(value);
+    }
+    types::Value::Iterator(value_vec)
+}
+
+fn calculate_reference(
+    string: String,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> types::Value {
+    match f {
+        Some(f) => match f(string) {
+            types::Value::Number(x) => types::Value::Number(x),
+            types::Value::Text(s) => {
+                let formula = parse_formula::parse_string_to_formula(&s);
+                calculate_formula(formula, Some(f))
+            }
+            types::Value::Boolean(x) => types::Value::Boolean(x),
+            types::Value::Error(types::Error::Value) => types::Value::Error(types::Error::Value),
+            types::Value::Iterator(v) => types::Value::Iterator(v),
+            _ => unreachable!(),
+        },
+        None => types::Value::Error(types::Error::Formula),
+    }
+}
+
+fn calculate_bool(
+    mut exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+    f_bool: fn(bool1: bool, bool2: bool) -> bool,
+) -> types::Value {
+    let mut result = match exp.values.pop() {
+        Some(formula) => calculate_formula(formula, f),
+        None => types::Value::Error(types::Error::Formula),
+    };
+    result = cast_value_to_boolean(result);
+    while let Some(top) = exp.values.pop() {
+        let value = calculate_formula(top, f);
+        result = calculate_boolean_operator(result, value, f_bool);
+    }
+    convert_iterator_to_result(result, f_bool)
+}
+
+fn calculate_collective_operator(
+    mut collective_value: types::Value,
+    mut exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+    f_collective: fn(num1: f32, num2: f32) -> f32,
+) -> types::Value {
+    while let Some(top) = exp.values.pop() {
+        let value = calculate_formula(top, f);
+        collective_value = calculate_numeric_operator(collective_value, value, f_collective);
+    }
+    collective_value
+}
+
+fn calculate_average(
+    mut exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> types::Value {
+    let mut sum = types::Value::Number(0.00);
+    let mut element_count = 0;
+    while let Some(top) = exp.values.pop() {
+        let value = calculate_formula(top, f);
+        element_count = element_count + 1;
+        sum = calculate_average_operator(&mut element_count, sum, value, |n1, n2| n1 + n2);
+    }
+    let element_count = types::Value::Number(element_count as f32);
+    let average = calculate_numeric_operator(sum, element_count, calculate_divide_operator);
+    average
+}
+
+fn calculate_function(
+    func: types::Function,
+    exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> types::Value {
+    match func {
+        types::Function::Abs => calculate_abs(get_value(exp, f)),
+        types::Function::Sum => {
+            calculate_collective_operator(types::Value::Number(0.00), exp, f, |n1, n2| n1 + n2)
+        }
+        types::Function::Product => {
+            calculate_collective_operator(types::Value::Number(1.00), exp, f, |n1, n2| n1 * n2)
+        }
+        types::Function::Average => calculate_average(exp, f),
+        types::Function::Or => calculate_bool(exp, f, |n1, n2| n1 || n2),
+        types::Function::And => calculate_bool(exp, f, |n1, n2| n1 && n2),
+        types::Function::Xor => calculate_bool(exp, f, |n1, n2| n1 ^ n2),
+        types::Function::Not => calculate_negation(get_value(exp, f)),
+        types::Function::Negate => calculate_negate(get_value(exp, f)),
+    }
+}
+
+fn calculate_operation(
+    exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> types::Value {
+    match exp.op {
+        types::Operator::Plus => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
+        }
+
+        types::Operator::Minus => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_numeric_operator(value1, value2, |n1, n2| n1 - n2)
+        }
+
+        types::Operator::Multiply => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_numeric_operator(value1, value2, |n1, n2| n1 * n2)
+        }
+        types::Operator::Divide => {
+            let (value2, value1) = get_values(exp, f);
+            match value2 {
+                types::Value::Number(x) if x == 0.0 => types::Value::Error(types::Error::Div0),
+                _ => calculate_numeric_operator(value1, value2, calculate_divide_operator),
+            }
+        }
+        types::Operator::Power => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_numeric_operator(value1, value2, calculate_power_operator)
+        }
+        types::Operator::Concat => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_string_operator(value1, value2, calculate_concat_operator)
+        }
+        types::Operator::Equal => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_comparison_operator(value1, value2, |n1, n2| n1 == n2)
+        }
+        types::Operator::NotEqual => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_comparison_operator(value1, value2, |n1, n2| n1 != n2)
+        }
+        types::Operator::Greater => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_comparison_operator(value1, value2, |n1, n2| n1 > n2)
+        }
+        types::Operator::Less => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_comparison_operator(value1, value2, |n1, n2| n1 < n2)
+        }
+        types::Operator::GreaterOrEqual => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_comparison_operator(value1, value2, |n1, n2| n1 >= n2)
+        }
+        types::Operator::LessOrEqual => {
+            let (value2, value1) = get_values(exp, f);
+            calculate_comparison_operator(value1, value2, |n1, n2| n1 <= n2)
+        }
+        types::Operator::Function(func) => calculate_function(func, exp, f),
+    }
+}
 /// Evaluates a string that was parsed and stored in Expression Struct.
 /// Takes an optional closure with the trait bound Fn(String) -> types::Value.
 pub fn calculate_formula(
@@ -407,299 +593,57 @@ pub fn calculate_formula(
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> types::Value {
     match formula {
-        types::Formula::Operation(mut exp) => match exp.op {
-            types::Operator::Plus => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
-            }
-
-            types::Operator::Minus => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_numeric_operator(value1, value2, |n1, n2| n1 - n2)
-            }
-
-            types::Operator::Multiply => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_numeric_operator(value1, value2, |n1, n2| n1 * n2)
-            }
-            types::Operator::Divide => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                match value2 {
-                    types::Value::Number(x) if x == 0.0 => types::Value::Error(types::Error::Div0),
-                    _ => calculate_numeric_operator(value1, value2, calculate_divide_operator),
-                }
-            }
-            types::Operator::Power => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_numeric_operator(value1, value2, calculate_power_operator)
-            }
-            types::Operator::Concat => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_string_operator(value1, value2, calculate_concat_operator)
-            }
-            types::Operator::Equal => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_comparison_operator(value1, value2, |n1, n2| n1 == n2)
-            }
-            types::Operator::NotEqual => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_comparison_operator(value1, value2, |n1, n2| n1 != n2)
-            }
-            types::Operator::Greater => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_comparison_operator(value1, value2, |n1, n2| n1 > n2)
-            }
-            types::Operator::Less => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_comparison_operator(value1, value2, |n1, n2| n1 < n2)
-            }
-            types::Operator::GreaterOrEqual => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_comparison_operator(value1, value2, |n1, n2| n1 >= n2)
-            }
-            types::Operator::LessOrEqual => {
-                let value2 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                let value1 = match exp.values.pop() {
-                    Some(formula) => calculate_formula(formula, f),
-                    None => types::Value::Error(types::Error::Formula),
-                };
-                calculate_comparison_operator(value1, value2, |n1, n2| n1 <= n2)
-            }
-            types::Operator::Function(func) => match func {
-                types::Function::Abs => {
-                    let value = match exp.values.pop() {
-                        Some(formula) => calculate_formula(formula, f),
-                        None => types::Value::Error(types::Error::Formula),
-                    };
-                    calculate_abs(value)
-                }
-                types::Function::Sum => {
-                    let mut sum = types::Value::Number(0.00);
-                    while let Some(top) = exp.values.pop() {
-                        let value = calculate_formula(top, f);
-                        sum = calculate_numeric_operator(sum, value, |n1, n2| n1 + n2);
-                    }
-                    sum
-                }
-                types::Function::Product => {
-                    let mut product = types::Value::Number(1.00);
-                    while let Some(top) = exp.values.pop() {
-                        let value = calculate_formula(top, f);
-                        product = calculate_numeric_operator(product, value, |n1, n2| n1 * n2);
-                    }
-                    product
-                }
-                types::Function::Average => {
-                    let mut product = types::Value::Number(0.00);
-                    let mut element_count = 0;
-                    while let Some(top) = exp.values.pop() {
-                        let value = calculate_formula(top, f);
-                        element_count = element_count + 1;
-                        product = calculate_average_operator(
-                            &mut element_count,
-                            product,
-                            value,
-                            |n1, n2| n1 + n2,
-                        );
-                    }
-                    let element_count = types::Value::Number(element_count as f32);
-                    let average = calculate_numeric_operator(
-                        product,
-                        element_count,
-                        calculate_divide_operator,
-                    );
-                    average
-                }
-                types::Function::Or => {
-                    let mut result = match exp.values.pop() {
-                        Some(formula) => calculate_formula(formula, f),
-                        None => types::Value::Error(types::Error::Formula),
-                    };
-                    result = cast_value_to_boolean(result);
-                    while let Some(top) = exp.values.pop() {
-                        let value = calculate_formula(top, f);
-                        result = calculate_boolean_operator(result, value, |n1, n2| n1 || n2);
-                    }
-                    convert_iterator_to_result(result, |n1, n2| n1 || n2)
-                }
-                types::Function::And => {
-                    let mut result = match exp.values.pop() {
-                        Some(formula) => calculate_formula(formula, f),
-                        None => types::Value::Error(types::Error::Formula),
-                    };
-                    result = cast_value_to_boolean(result);
-                    while let Some(top) = exp.values.pop() {
-                        let value = calculate_formula(top, f);
-                        result = calculate_boolean_operator(result, value, |n1, n2| n1 && n2);
-                    }
-                    convert_iterator_to_result(result, |n1, n2| n1 && n2)
-                }
-                types::Function::Xor => {
-                    let mut result = match exp.values.pop() {
-                        Some(formula) => calculate_formula(formula, f),
-                        None => types::Value::Error(types::Error::Formula),
-                    };
-                    result = cast_value_to_boolean(result);
-                    while let Some(top) = exp.values.pop() {
-                        let value = calculate_formula(top, f);
-                        result = calculate_boolean_operator(result, value, |n1, n2| n1 ^ n2);
-                    }
-                    convert_iterator_to_result(result, |n1, n2| n1 ^ n2)
-                }
-                types::Function::Not => {
-                    let value = match exp.values.pop() {
-                        Some(formula) => calculate_formula(formula, f),
-                        None => types::Value::Error(types::Error::Formula),
-                    };
-                    calculate_negation(value)
-                }
-                types::Function::Negate => {
-                    let value = match exp.values.pop() {
-                        Some(formula) => calculate_formula(formula, f),
-                        None => types::Value::Error(types::Error::Formula),
-                    };
-                    calculate_negate(value)
-                }
-            },
-        },
+        types::Formula::Operation(exp) => calculate_operation(exp, f),
         types::Formula::Value(val) => val,
-        types::Formula::Reference(string) => match f {
-            Some(f) => match f(string) {
-                types::Value::Number(x) => types::Value::Number(x),
-                types::Value::Text(s) => {
-                    let formula = parse_formula::parse_string_to_formula(&s);
-                    calculate_formula(formula, Some(f))
-                }
-                types::Value::Boolean(x) => types::Value::Boolean(x),
-                types::Value::Error(types::Error::Value) => {
-                    types::Value::Error(types::Error::Value)
-                }
-                types::Value::Iterator(v) => types::Value::Iterator(v),
-                _ => unreachable!(),
-            },
-            None => types::Value::Error(types::Error::Formula),
-        },
-        types::Formula::Iterator(mut vec) => {
-            let mut value_vec = Vec::new();
-            while let Some(top) = vec.pop() {
-                let value = calculate_formula(top, f);
-                value_vec.push(value);
-            }
-            types::Value::Iterator(value_vec)
-        }
+        types::Formula::Reference(string) => calculate_reference(string, f),
+        types::Formula::Iterator(vec) => calculate_iterator(vec, f),
     }
 }
 
 /// Converts a result from Value Enum to a printable string.  
 pub fn result_to_string(_value: types::Value) -> String {
     match _value {
-        types::Value::Number(number) => match number.is_infinite() {
-            true => String::from("#DIV/0!"),
-            false => number.to_string(),
-        },
+        types::Value::Number(number) => show_number(number),
         types::Value::Text(text) => text,
-        types::Value::Error(error) => match error {
-            types::Error::Div0 => String::from("#DIV/0!"),
-            types::Error::Cast => String::from("#CAST!"),
-            types::Error::Formula => String::from("Null Formula"),
-            types::Error::Parse => String::from("#PARSE!"),
-            types::Error::Value => String::from("#VALUE!"),
-            types::Error::Argument => String::from("#ARG!"),
-        },
-        types::Value::Boolean(boolean) => match boolean {
-            types::Boolean::True => String::from("TRUE"),
-            types::Boolean::False => String::from("FALSE"),
-        },
-        types::Value::Iterator(mut value_vec) => {
-            value_vec.reverse();
-            let mut result = "{".to_string();
-            while let Some(top) = value_vec.pop() {
-                result = result + &result_to_string(top);
-                result = result + &",".to_string();
-            }
-            result = result.trim_end_matches(",").to_string();
-            result = result + &"}".to_string();
-            result
-        }
+        types::Value::Error(error) => show_error(error),
+        types::Value::Boolean(boolean) => show_boolean(boolean),
+        types::Value::Iterator(value_vec) => show_iterator(value_vec),
     }
+}
+
+fn show_number(number: f32) -> String {
+    match number.is_infinite() {
+        true => String::from("#DIV/0!"),
+        false => number.to_string(),
+    }
+}
+
+fn show_error(error: types::Error) -> String {
+    match error {
+        types::Error::Div0 => String::from("#DIV/0!"),
+        types::Error::Cast => String::from("#CAST!"),
+        types::Error::Formula => String::from("Null Formula"),
+        types::Error::Parse => String::from("#PARSE!"),
+        types::Error::Value => String::from("#VALUE!"),
+        types::Error::Argument => String::from("#ARG!"),
+    }
+}
+
+fn show_boolean(boolean: types::Boolean) -> String {
+    match boolean {
+        types::Boolean::True => String::from("TRUE"),
+        types::Boolean::False => String::from("FALSE"),
+    }
+}
+
+fn show_iterator(mut value_vec: Vec<types::Value>) -> String {
+    value_vec.reverse();
+    let mut result = "{".to_string();
+    while let Some(top) = value_vec.pop() {
+        result = result + &result_to_string(top);
+        result = result + &",".to_string();
+    }
+    result = result.trim_end_matches(",").to_string();
+    result = result + &"}".to_string();
+    result
 }

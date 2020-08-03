@@ -1,5 +1,5 @@
 /// Defines Excel Functions.
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Function {
     Abs,
     Sum,
@@ -13,7 +13,7 @@ pub enum Function {
 }
 
 /// Defines Excel Operators.
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Operator {
     Plus,
     Minus,
@@ -31,7 +31,7 @@ pub enum Operator {
 }
 
 /// Defines error types.
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Error {
     Div0,
     Cast,
@@ -42,7 +42,7 @@ pub enum Error {
 }
 
 /// Defines boolean types.
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Boolean {
     True,
     False,
