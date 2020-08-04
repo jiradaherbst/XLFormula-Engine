@@ -244,6 +244,80 @@ fn to_bool(value: types::Boolean) -> bool {
     }
 }
 
+fn calculate_boolean_operator_rhs_boolean(
+    l: types::Boolean,
+    rh: types::Value,
+    f: fn(bool1: bool, bool2: bool) -> bool,
+) -> types::Value {
+    match rh {
+        types::Value::Boolean(r) => match f(to_bool(l), to_bool(r)) {
+            true => types::Value::Boolean(types::Boolean::True),
+            false => types::Value::Boolean(types::Boolean::False),
+        },
+        types::Value::Error(_) => match l {
+            types::Boolean::True => types::Value::Boolean(types::Boolean::True),
+            types::Boolean::False => types::Value::Boolean(types::Boolean::False),
+        },
+        types::Value::Iterator(mut value_vec) => {
+            if let Some(mut temp) = value_vec.pop() {
+                while let Some(top) = value_vec.pop() {
+                    temp = calculate_boolean_operator(temp, top, f);
+                }
+                let rhs = cast_value_to_boolean(temp);
+                match rhs {
+                    types::Value::Boolean(r) => match f(to_bool(l), to_bool(r)) {
+                        true => types::Value::Boolean(types::Boolean::True),
+                        false => types::Value::Boolean(types::Boolean::False),
+                    },
+                    _ => unreachable!(),
+                }
+            } else {
+                types::Value::Error(types::Error::Formula)
+            }
+        }
+        _ => unreachable!(),
+    }
+}
+
+fn calculate_boolean_operator_rhs_error(rh: types::Value) -> types::Value {
+    match rh {
+        types::Value::Boolean(r) => match to_bool(r) {
+            true => types::Value::Boolean(types::Boolean::True),
+            false => types::Value::Boolean(types::Boolean::False),
+        },
+        types::Value::Error(_) => types::Value::Error(types::Error::Cast),
+        _ => unreachable!(),
+    }
+}
+
+fn calculate_boolean_operator_rhs_iterator(
+    rh: types::Value,
+    mut lhs_vec: Vec<types::Value>,
+    f: fn(bool1: bool, bool2: bool) -> bool,
+) -> types::Value {
+    match rh {
+        types::Value::Boolean(r) => {
+            if let Some(mut temp) = lhs_vec.pop() {
+                while let Some(top) = lhs_vec.pop() {
+                    temp = calculate_boolean_operator(temp, top, f);
+                }
+                let lhs = cast_value_to_boolean(temp);
+                match lhs {
+                    types::Value::Boolean(l) => match f(to_bool(l), to_bool(r)) {
+                        true => types::Value::Boolean(types::Boolean::True),
+                        false => types::Value::Boolean(types::Boolean::False),
+                    },
+                    _ => types::Value::Error(types::Error::Formula),
+                }
+            } else {
+                types::Value::Error(types::Error::Formula)
+            }
+        }
+
+        _ => unreachable!(),
+    }
+}
+
 fn calculate_boolean_operator(
     lhs: types::Value,
     rhs: types::Value,
@@ -252,70 +326,11 @@ fn calculate_boolean_operator(
     let lh = cast_value_to_boolean(lhs);
     match lh {
         types::Value::Boolean(l) => {
-            let rh = cast_value_to_boolean(rhs);
-            match rh {
-                types::Value::Boolean(r) => match f(to_bool(l), to_bool(r)) {
-                    true => types::Value::Boolean(types::Boolean::True),
-                    false => types::Value::Boolean(types::Boolean::False),
-                },
-                types::Value::Error(_) => match l {
-                    types::Boolean::True => types::Value::Boolean(types::Boolean::True),
-                    types::Boolean::False => types::Value::Boolean(types::Boolean::False),
-                },
-                types::Value::Iterator(mut value_vec) => {
-                    if let Some(mut temp) = value_vec.pop() {
-                        while let Some(top) = value_vec.pop() {
-                            temp = calculate_boolean_operator(temp, top, f);
-                        }
-                        let rhs = cast_value_to_boolean(temp);
-                        match rhs {
-                            types::Value::Boolean(r) => match f(to_bool(l), to_bool(r)) {
-                                true => types::Value::Boolean(types::Boolean::True),
-                                false => types::Value::Boolean(types::Boolean::False),
-                            },
-                            _ => unreachable!(),
-                        }
-                    } else {
-                        types::Value::Error(types::Error::Formula)
-                    }
-                }
-                _ => unreachable!(),
-            }
+            calculate_boolean_operator_rhs_boolean(l, cast_value_to_boolean(rhs), f)
         }
-        types::Value::Error(_) => {
-            let rh = cast_value_to_boolean(rhs);
-            match rh {
-                types::Value::Boolean(r) => match to_bool(r) {
-                    true => types::Value::Boolean(types::Boolean::True),
-                    false => types::Value::Boolean(types::Boolean::False),
-                },
-                types::Value::Error(_) => types::Value::Error(types::Error::Cast),
-                _ => unreachable!(),
-            }
-        }
-        types::Value::Iterator(mut value_vec) => {
-            let rh = cast_value_to_boolean(rhs);
-            match rh {
-                types::Value::Boolean(r) => {
-                    if let Some(mut temp) = value_vec.pop() {
-                        while let Some(top) = value_vec.pop() {
-                            temp = calculate_boolean_operator(temp, top, f);
-                        }
-                        let lhs = cast_value_to_boolean(temp);
-                        match lhs {
-                            types::Value::Boolean(l) => match f(to_bool(l), to_bool(r)) {
-                                true => types::Value::Boolean(types::Boolean::True),
-                                false => types::Value::Boolean(types::Boolean::False),
-                            },
-                            _ => types::Value::Error(types::Error::Formula),
-                        }
-                    } else {
-                        types::Value::Error(types::Error::Formula)
-                    }
-                }
-
-                _ => unreachable!(),
-            }
+        types::Value::Error(_) => calculate_boolean_operator_rhs_error(cast_value_to_boolean(rhs)),
+        types::Value::Iterator(lhs_vec) => {
+            calculate_boolean_operator_rhs_iterator(cast_value_to_boolean(rhs), lhs_vec, f)
         }
         _ => unreachable!(),
     }
