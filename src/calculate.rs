@@ -21,6 +21,20 @@ fn calculate_concat_operator(str1: &String, str2: &String) -> String {
     str1.to_owned() + str2
 }
 
+fn calculate_string_operation_rhs(
+    l: &String,
+    rhs: types::Value,
+    f: fn(str1: &String, str2: &String) -> String,
+) -> types::Value {
+    match rhs {
+        types::Value::Boolean(_) => rhs,
+        types::Value::Error(_) => rhs,
+        types::Value::Number(r) => types::Value::Text(f(&l, &r.to_string())),
+        types::Value::Text(r) => types::Value::Text(f(&l, &r)),
+        types::Value::Iterator(_) => unreachable!(),
+    }
+}
+
 fn calculate_string_operator(
     lhs: types::Value,
     rhs: types::Value,
@@ -29,20 +43,8 @@ fn calculate_string_operator(
     match lhs {
         types::Value::Boolean(_) => lhs,
         types::Value::Error(_) => lhs,
-        types::Value::Number(l) => match rhs {
-            types::Value::Boolean(_) => rhs,
-            types::Value::Error(_) => rhs,
-            types::Value::Number(r) => types::Value::Text(f(&l.to_string(), &r.to_string())),
-            types::Value::Text(r) => types::Value::Text(f(&l.to_string(), &r)),
-            types::Value::Iterator(_) => unreachable!(),
-        },
-        types::Value::Text(l) => match rhs {
-            types::Value::Boolean(_) => rhs,
-            types::Value::Error(_) => rhs,
-            types::Value::Number(r) => types::Value::Text(f(&l, &r.to_string())),
-            types::Value::Text(r) => types::Value::Text(f(&l, &r)),
-            types::Value::Iterator(_) => unreachable!(),
-        },
+        types::Value::Number(l) => calculate_string_operation_rhs(&l.to_string(), rhs, f),
+        types::Value::Text(l) => calculate_string_operation_rhs(&l, rhs, f),
         types::Value::Iterator(_) => unreachable!(),
     }
 }
@@ -404,15 +406,16 @@ fn get_values(
     mut exp: types::Expression,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> (types::Value, types::Value) {
-    let value2 = match exp.values.pop() {
-        Some(formula) => calculate_formula(formula, f),
-        None => types::Value::Error(types::Error::Formula),
-    };
-    let value1 = match exp.values.pop() {
-        Some(formula) => calculate_formula(formula, f),
-        None => types::Value::Error(types::Error::Formula),
-    };
-    (value2, value1)
+    (
+        match exp.values.pop() {
+            Some(formula) => calculate_formula(formula, f),
+            None => types::Value::Error(types::Error::Formula),
+        },
+        match exp.values.pop() {
+            Some(formula) => calculate_formula(formula, f),
+            None => types::Value::Error(types::Error::Formula),
+        },
+    )
 }
 
 fn get_value(
@@ -431,8 +434,7 @@ fn calculate_iterator(
 ) -> types::Value {
     let mut value_vec = Vec::new();
     while let Some(top) = vec.pop() {
-        let value = calculate_formula(top, f);
-        value_vec.push(value);
+        value_vec.push(calculate_formula(top, f));
     }
     types::Value::Iterator(value_vec)
 }
@@ -445,8 +447,7 @@ fn calculate_reference(
         Some(f) => match f(string) {
             types::Value::Number(x) => types::Value::Number(x),
             types::Value::Text(s) => {
-                let formula = parse_formula::parse_string_to_formula(&s);
-                calculate_formula(formula, Some(f))
+                calculate_formula(parse_formula::parse_string_to_formula(&s), Some(f))
             }
             types::Value::Boolean(x) => types::Value::Boolean(x),
             types::Value::Error(types::Error::Value) => types::Value::Error(types::Error::Value),
@@ -468,8 +469,7 @@ fn calculate_bool(
     };
     result = cast_value_to_boolean(result);
     while let Some(top) = exp.values.pop() {
-        let value = calculate_formula(top, f);
-        result = calculate_boolean_operator(result, value, f_bool);
+        result = calculate_boolean_operator(result, calculate_formula(top, f), f_bool);
     }
     convert_iterator_to_result(result, f_bool)
 }
@@ -481,26 +481,33 @@ fn calculate_collective_operator(
     f_collective: fn(num1: f32, num2: f32) -> f32,
 ) -> types::Value {
     while let Some(top) = exp.values.pop() {
-        let value = calculate_formula(top, f);
-        collective_value = calculate_numeric_operator(collective_value, value, f_collective);
+        collective_value =
+            calculate_numeric_operator(collective_value, calculate_formula(top, f), f_collective);
     }
     collective_value
 }
 
 fn calculate_average(
+    mut collective_value: types::Value,
     mut exp: types::Expression,
     f: Option<&impl Fn(String) -> types::Value>,
+    f_collective: fn(num1: f32, num2: f32) -> f32,
 ) -> types::Value {
-    let mut sum = types::Value::Number(0.00);
     let mut element_count = 0;
     while let Some(top) = exp.values.pop() {
-        let value = calculate_formula(top, f);
         element_count = element_count + 1;
-        sum = calculate_average_operator(&mut element_count, sum, value, |n1, n2| n1 + n2);
+        collective_value = calculate_average_operator(
+            &mut element_count,
+            collective_value,
+            calculate_formula(top, f),
+            f_collective,
+        );
     }
-    let element_count = types::Value::Number(element_count as f32);
-    let average = calculate_numeric_operator(sum, element_count, calculate_divide_operator);
-    average
+    calculate_numeric_operator(
+        collective_value,
+        types::Value::Number(element_count as f32),
+        calculate_divide_operator,
+    )
 }
 
 fn calculate_function(
@@ -516,7 +523,9 @@ fn calculate_function(
         types::Function::Product => {
             calculate_collective_operator(types::Value::Number(1.00), exp, f, |n1, n2| n1 * n2)
         }
-        types::Function::Average => calculate_average(exp, f),
+        types::Function::Average => {
+            calculate_average(types::Value::Number(0.00), exp, f, |n1, n2| n1 + n2)
+        }
         types::Function::Or => calculate_bool(exp, f, |n1, n2| n1 || n2),
         types::Function::And => calculate_bool(exp, f, |n1, n2| n1 && n2),
         types::Function::Xor => calculate_bool(exp, f, |n1, n2| n1 ^ n2),
