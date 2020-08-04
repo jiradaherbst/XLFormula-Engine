@@ -49,6 +49,87 @@ fn calculate_string_operator(
     }
 }
 
+fn calcualte_numeric_operator_rhs_text(
+    t: String,
+    rhs: types::Value,
+    f: fn(num1: f32, num2: f32) -> f32,
+) -> types::Value {
+    match t.parse::<f32>() {
+        Ok(nl) => match rhs {
+            types::Value::Boolean(_) => rhs,
+            types::Value::Error(_) => rhs,
+            types::Value::Text(t) => match t.parse::<f32>() {
+                Ok(nr) => types::Value::Number(f(nl, nr)),
+                Err(_) => types::Value::Error(types::Error::Cast),
+            },
+            types::Value::Number(r) => types::Value::Number(f(nl, r)),
+            types::Value::Iterator(_) => unreachable!(),
+        },
+        Err(_) => types::Value::Error(types::Error::Cast),
+    }
+}
+
+fn calculate_numeric_operator_rhs_number(
+    l: f32,
+    lhs: types::Value,
+    rhs: types::Value,
+    f: fn(num1: f32, num2: f32) -> f32,
+) -> types::Value {
+    match rhs {
+        types::Value::Boolean(_) => rhs,
+        types::Value::Error(_) => rhs,
+        types::Value::Text(t) => match t.parse::<f32>() {
+            Ok(nr) => types::Value::Number(f(l, nr)),
+            Err(_) => types::Value::Error(types::Error::Cast),
+        },
+        types::Value::Number(r) => types::Value::Number(f(l, r)),
+        types::Value::Iterator(mut value_vec) => {
+            if let Some(mut temp) = value_vec.pop() {
+                while let Some(top) = value_vec.pop() {
+                    temp = calculate_numeric_operator(temp, top, f);
+                }
+                calculate_numeric_operator(lhs, temp, f)
+            } else {
+                types::Value::Error(types::Error::Formula)
+            }
+        }
+    }
+}
+
+fn calculate_numeric_operator_rhs_iterator(
+    mut lhs_vec: Vec<types::Value>,
+    rhs: types::Value,
+    f: fn(num1: f32, num2: f32) -> f32,
+) -> types::Value {
+    match rhs {
+        types::Value::Number(_) => {
+            if let Some(mut temp) = lhs_vec.pop() {
+                while let Some(top) = lhs_vec.pop() {
+                    temp = calculate_numeric_operator(temp, top, f);
+                }
+                calculate_numeric_operator(temp, rhs, f)
+            } else {
+                types::Value::Error(types::Error::Formula)
+            }
+        }
+        types::Value::Iterator(mut rhs_vec) => {
+            let mut result_vec = Vec::new();
+            loop {
+                match (lhs_vec.pop(), rhs_vec.pop()) {
+                    (Some(x), Some(y)) => {
+                        result_vec.push(calculate_numeric_operator(x, y, f));
+                    }
+                    (Some(_), None) => result_vec.push(types::Value::Error(types::Error::Argument)),
+                    (None, Some(_)) => result_vec.push(types::Value::Error(types::Error::Argument)),
+                    (None, None) => break,
+                };
+            }
+            types::Value::Iterator(result_vec)
+        }
+        _ => unreachable!(),
+    }
+}
+
 fn calculate_numeric_operator(
     lhs: types::Value,
     rhs: types::Value,
@@ -57,69 +138,60 @@ fn calculate_numeric_operator(
     match lhs {
         types::Value::Boolean(_) => lhs,
         types::Value::Error(_) => lhs,
+        types::Value::Text(t) => calcualte_numeric_operator_rhs_text(t, rhs, f),
+        types::Value::Number(l) => calculate_numeric_operator_rhs_number(l, lhs, rhs, f),
+        types::Value::Iterator(lhs_vec) => calculate_numeric_operator_rhs_iterator(lhs_vec, rhs, f),
+    }
+}
+
+fn calculate_average_operator_rhs_number(
+    element_count: &mut i32,
+    l: f32,
+    lhs: types::Value,
+    rhs: types::Value,
+    f: fn(num1: f32, num2: f32) -> f32,
+) -> types::Value {
+    match rhs {
+        types::Value::Boolean(_) => rhs,
+        types::Value::Error(_) => rhs,
         types::Value::Text(t) => match t.parse::<f32>() {
-            Ok(nl) => match rhs {
-                types::Value::Boolean(_) => rhs,
-                types::Value::Error(_) => rhs,
-                types::Value::Text(t) => match t.parse::<f32>() {
-                    Ok(nr) => types::Value::Number(f(nl, nr)),
-                    Err(_) => types::Value::Error(types::Error::Cast),
-                },
-                types::Value::Number(r) => types::Value::Number(f(nl, r)),
-                types::Value::Iterator(_) => unreachable!(),
-            },
+            Ok(nr) => types::Value::Number(f(l, nr)),
             Err(_) => types::Value::Error(types::Error::Cast),
         },
-        types::Value::Number(l) => match rhs {
-            types::Value::Boolean(_) => rhs,
-            types::Value::Error(_) => rhs,
-            types::Value::Text(t) => match t.parse::<f32>() {
-                Ok(nr) => types::Value::Number(f(l, nr)),
-                Err(_) => types::Value::Error(types::Error::Cast),
-            },
-            types::Value::Number(r) => types::Value::Number(f(l, r)),
-            types::Value::Iterator(mut value_vec) => {
-                if let Some(mut temp) = value_vec.pop() {
-                    while let Some(top) = value_vec.pop() {
-                        temp = calculate_numeric_operator(temp, top, f);
-                    }
-                    calculate_numeric_operator(lhs, temp, f)
-                } else {
-                    types::Value::Error(types::Error::Formula)
+        types::Value::Number(r) => types::Value::Number(f(l, r)),
+        types::Value::Iterator(mut value_vec) => {
+            if let Some(mut temp) = value_vec.pop() {
+                while let Some(top) = value_vec.pop() {
+                    temp = calculate_numeric_operator(temp, top, f);
+                    *element_count = *element_count + 1;
                 }
+                calculate_numeric_operator(lhs, temp, f)
+            } else {
+                types::Value::Error(types::Error::Formula)
             }
-        },
-        types::Value::Iterator(mut lhs_vec) => match rhs {
-            types::Value::Number(_) => {
-                if let Some(mut temp) = lhs_vec.pop() {
-                    while let Some(top) = lhs_vec.pop() {
-                        temp = calculate_numeric_operator(temp, top, f);
-                    }
-                    calculate_numeric_operator(temp, rhs, f)
-                } else {
-                    types::Value::Error(types::Error::Formula)
+        }
+    }
+}
+
+fn calculate_average_operator_rhs_iterator(
+    element_count: &mut i32,
+    mut lhs_vec: Vec<types::Value>,
+    rhs: types::Value,
+    f: fn(num1: f32, num2: f32) -> f32,
+) -> types::Value {
+    match rhs {
+        types::Value::Number(_) => {
+            if let Some(mut temp) = lhs_vec.pop() {
+                while let Some(top) = lhs_vec.pop() {
+                    temp = calculate_numeric_operator(temp, top, f);
+                    *element_count = *element_count + 1;
                 }
+                calculate_numeric_operator(temp, rhs, f)
+            } else {
+                types::Value::Error(types::Error::Formula)
             }
-            types::Value::Iterator(mut rhs_vec) => {
-                let mut result_vec = Vec::new();
-                loop {
-                    match (lhs_vec.pop(), rhs_vec.pop()) {
-                        (Some(x), Some(y)) => {
-                            result_vec.push(calculate_numeric_operator(x, y, f));
-                        }
-                        (Some(_), None) => {
-                            result_vec.push(types::Value::Error(types::Error::Argument))
-                        }
-                        (None, Some(_)) => {
-                            result_vec.push(types::Value::Error(types::Error::Argument))
-                        }
-                        (None, None) => break,
-                    };
-                }
-                types::Value::Iterator(result_vec)
-            }
-            _ => unreachable!(),
-        },
+        }
+        _ => unreachable!(),
     }
 }
 
@@ -132,53 +204,13 @@ fn calculate_average_operator(
     match lhs {
         types::Value::Boolean(_) => lhs,
         types::Value::Error(_) => lhs,
-        types::Value::Text(t) => match t.parse::<f32>() {
-            Ok(nl) => match rhs {
-                types::Value::Boolean(_) => rhs,
-                types::Value::Error(_) => rhs,
-                types::Value::Text(t) => match t.parse::<f32>() {
-                    Ok(nr) => types::Value::Number(f(nl, nr)),
-                    Err(_) => types::Value::Error(types::Error::Cast),
-                },
-                types::Value::Number(r) => types::Value::Number(f(nl, r)),
-                types::Value::Iterator(_) => unreachable!(),
-            },
-            Err(_) => types::Value::Error(types::Error::Cast),
-        },
-        types::Value::Number(l) => match rhs {
-            types::Value::Boolean(_) => rhs,
-            types::Value::Error(_) => rhs,
-            types::Value::Text(t) => match t.parse::<f32>() {
-                Ok(nr) => types::Value::Number(f(l, nr)),
-                Err(_) => types::Value::Error(types::Error::Cast),
-            },
-            types::Value::Number(r) => types::Value::Number(f(l, r)),
-            types::Value::Iterator(mut value_vec) => {
-                if let Some(mut temp) = value_vec.pop() {
-                    while let Some(top) = value_vec.pop() {
-                        temp = calculate_numeric_operator(temp, top, f);
-                        *element_count = *element_count + 1;
-                    }
-                    calculate_numeric_operator(lhs, temp, f)
-                } else {
-                    types::Value::Error(types::Error::Formula)
-                }
-            }
-        },
-        types::Value::Iterator(mut value_vec) => match rhs {
-            types::Value::Number(_) => {
-                if let Some(mut temp) = value_vec.pop() {
-                    while let Some(top) = value_vec.pop() {
-                        temp = calculate_numeric_operator(temp, top, f);
-                        *element_count = *element_count + 1;
-                    }
-                    calculate_numeric_operator(temp, rhs, f)
-                } else {
-                    types::Value::Error(types::Error::Formula)
-                }
-            }
-            _ => unreachable!(),
-        },
+        types::Value::Text(t) => calcualte_numeric_operator_rhs_text(t, rhs, f),
+        types::Value::Number(l) => {
+            calculate_average_operator_rhs_number(element_count, l, lhs, rhs, f)
+        }
+        types::Value::Iterator(lhs_vec) => {
+            calculate_average_operator_rhs_iterator(element_count, lhs_vec, rhs, f)
+        }
     }
 }
 
