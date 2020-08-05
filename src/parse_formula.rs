@@ -65,9 +65,10 @@ fn build_formula_string_single_quote(pair: pest::iterators::Pair<Rule>) -> types
 }
 
 fn build_formula_boolean(boolean_value: bool) -> types::Formula {
-    match boolean_value {
-        true => types::Formula::Value(types::Value::Boolean(types::Boolean::True)),
-        false => types::Formula::Value(types::Value::Boolean(types::Boolean::False)),
+    if boolean_value {
+        types::Formula::Value(types::Value::Boolean(types::Boolean::True))
+    } else {
+        types::Formula::Value(types::Value::Boolean(types::Boolean::False))
     }
 }
 
@@ -75,20 +76,15 @@ fn build_formula_unary_operator(
     unary_operation: Rule,
     pair: pest::iterators::Pair<Rule>,
 ) -> types::Formula {
-    let operation = match unary_operation {
-        Rule::abs => types::Expression {
-            op: types::Operator::Function(types::Function::Abs),
-            values: vec![build_formula_with_climber(pair.into_inner())],
-        },
-        Rule::not => types::Expression {
-            op: types::Operator::Function(types::Function::Not),
-            values: vec![build_formula_with_climber(pair.into_inner())],
-        },
-        Rule::negate => types::Expression {
-            op: types::Operator::Function(types::Function::Negate),
-            values: vec![build_formula_with_climber(pair.into_inner())],
-        },
+    let op_type = match unary_operation {
+        Rule::abs => types::Operator::Function(types::Function::Abs),
+        Rule::not => types::Operator::Function(types::Function::Not),
+        Rule::negate => types::Operator::Function(types::Function::Negate),
         _ => unreachable!(),
+    };
+    let operation = types::Expression {
+        op: op_type,
+        values: vec![build_formula_with_climber(pair.into_inner())],
     };
     types::Formula::Operation(operation)
 }
@@ -114,32 +110,18 @@ fn build_formula_collective_operator(
     for term in pair.into_inner() {
         vec.push(build_formula_with_climber(term.into_inner()));
     }
-    let operation = match collective_operation {
-        Rule::sum => types::Expression {
-            op: types::Operator::Function(types::Function::Sum),
-            values: vec,
-        },
-        Rule::product => types::Expression {
-            op: types::Operator::Function(types::Function::Product),
-            values: vec,
-        },
-        Rule::average => types::Expression {
-            op: types::Operator::Function(types::Function::Average),
-            values: vec,
-        },
-        Rule::or => types::Expression {
-            op: types::Operator::Function(types::Function::Or),
-            values: vec,
-        },
-        Rule::and => types::Expression {
-            op: types::Operator::Function(types::Function::And),
-            values: vec,
-        },
-        Rule::xor => types::Expression {
-            op: types::Operator::Function(types::Function::Xor),
-            values: vec,
-        },
+    let op_type = match collective_operation {
+        Rule::sum => types::Operator::Function(types::Function::Sum),
+        Rule::product => types::Operator::Function(types::Function::Product),
+        Rule::average => types::Operator::Function(types::Function::Average),
+        Rule::or => types::Operator::Function(types::Function::Or),
+        Rule::and => types::Operator::Function(types::Function::And),
+        Rule::xor => types::Operator::Function(types::Function::Xor),
         _ => unreachable!(),
+    };
+    let operation = types::Expression {
+        op: op_type,
+        values: vec,
     };
     types::Formula::Operation(operation)
 }
@@ -149,58 +131,25 @@ fn build_formula_binary_operator(
     lhs: types::Formula,
     rhs: types::Formula,
 ) -> types::Formula {
-    let operation = match binary_operator {
-        Rule::add => types::Expression {
-            op: types::Operator::Plus,
-            values: vec![lhs, rhs],
-        },
-        Rule::subtract => types::Expression {
-            op: types::Operator::Minus,
-            values: vec![lhs, rhs],
-        },
-        Rule::multiply => types::Expression {
-            op: types::Operator::Multiply,
-            values: vec![lhs, rhs],
-        },
-        Rule::divide => types::Expression {
-            op: types::Operator::Divide,
-            values: vec![lhs, rhs],
-        },
-        Rule::power => types::Expression {
-            op: types::Operator::Power,
-            values: vec![lhs, rhs],
-        },
-        Rule::concat => types::Expression {
-            op: types::Operator::Concat,
-            values: vec![lhs, rhs],
-        },
-        Rule::equal => types::Expression {
-            op: types::Operator::Equal,
-            values: vec![lhs, rhs],
-        },
-        Rule::not_equal => types::Expression {
-            op: types::Operator::NotEqual,
-            values: vec![lhs, rhs],
-        },
-        Rule::greater => types::Expression {
-            op: types::Operator::Greater,
-            values: vec![lhs, rhs],
-        },
-        Rule::less => types::Expression {
-            op: types::Operator::Less,
-            values: vec![lhs, rhs],
-        },
-        Rule::greater_or_equal => types::Expression {
-            op: types::Operator::GreaterOrEqual,
-            values: vec![lhs, rhs],
-        },
-        Rule::less_or_equal => types::Expression {
-            op: types::Operator::LessOrEqual,
-            values: vec![lhs, rhs],
-        },
+    let op_type = match binary_operator {
+        Rule::add => types::Operator::Plus,
+        Rule::subtract => types::Operator::Minus,
+        Rule::multiply => types::Operator::Multiply,
+        Rule::divide => types::Operator::Divide,
+        Rule::power => types::Operator::Power,
+        Rule::concat => types::Operator::Concat,
+        Rule::equal => types::Operator::Equal,
+        Rule::not_equal => types::Operator::NotEqual,
+        Rule::greater => types::Operator::Greater,
+        Rule::less => types::Operator::Less,
+        Rule::greater_or_equal => types::Operator::GreaterOrEqual,
+        Rule::less_or_equal => types::Operator::LessOrEqual,
         _ => unreachable!(0),
     };
-
+    let operation = types::Expression {
+        op: op_type,
+        values: vec![lhs, rhs],
+    };
     types::Formula::Operation(operation)
 }
 
