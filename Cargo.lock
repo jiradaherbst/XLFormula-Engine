@@ -179,7 +179,7 @@ checksum = "826e7639553986605ec5979c7dd957c7895e93eabed50ab2ffa7f6128a75097c"
 
 [[package]]
 name = "xlformula_engine"
-version = "0.1.6"
+version = "0.1.7"
 dependencies = [
  "assert_approx_eq",
  "pest",

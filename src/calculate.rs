@@ -533,7 +533,7 @@ fn calculate_reference(
             types::Value::Boolean(x) => types::Value::Boolean(x),
             types::Value::Error(types::Error::Value) => types::Value::Error(types::Error::Value),
             types::Value::Iterator(v) => types::Value::Iterator(v),
-            _ => unreachable!(),
+            _ => types::Value::Error(types::Error::Value), //unreachable!(),
         },
         None => types::Value::Error(types::Error::Formula),
     }
