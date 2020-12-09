@@ -117,6 +117,7 @@ fn build_formula_collective_operator(
         Rule::or => types::Operator::Function(types::Function::Or),
         Rule::and => types::Operator::Function(types::Function::And),
         Rule::xor => types::Operator::Function(types::Function::Xor),
+        Rule::days => types::Operator::Function(types::Function::Days),
         _ => unreachable!(),
     };
     let operation = types::Expression {
@@ -186,6 +187,7 @@ fn build_formula_with_climber(expression: pest::iterators::Pairs<Rule>) -> types
             Rule::iterator => build_formula_iterator(pair),
             Rule::negate => build_formula_unary_operator(Rule::negate, pair),
             Rule::expr => build_formula_with_climber(pair.into_inner()),
+            Rule::days => build_formula_collective_operator(Rule::days, pair),
             _ => unreachable!(),
         },
         |lhs: types::Formula, op: pest::iterators::Pair<Rule>, rhs: types::Formula| match op

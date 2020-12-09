@@ -1,3 +1,4 @@
+use chrono::{DateTime, FixedOffset};
 /// Defines Excel Functions.
 #[derive(Debug, Copy, Clone)]
 pub enum Function {
@@ -10,6 +11,7 @@ pub enum Function {
     Xor,
     Not,
     Negate,
+    Days,
 }
 
 /// Defines Excel Operators.
@@ -56,6 +58,7 @@ pub enum Value {
     Boolean(Boolean),
     Iterator(Vec<Value>),
     Error(Error),
+    Date(DateTime<FixedOffset>),
 }
 
 /// Defines each term in Expression Struct.

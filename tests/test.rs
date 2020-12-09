@@ -4,6 +4,9 @@ use xlformula_engine::parse_formula;
 use xlformula_engine::types;
 use xlformula_engine::NoFormula;
 
+use chrono::format::ParseError;
+use chrono::{DateTime, FixedOffset};
+
 use assert_approx_eq::assert_approx_eq;
 
 fn evaluate_formula_number(s: &str) -> f32 {
@@ -612,4 +615,20 @@ fn it_evaluate_iterator_with_diffrent_number_of_entries() {
         "{#DIV/0!,#DIV/0!,#ARG!}"
     );
     assert_eq!(evaluate_formula_string(&"={0,0}+{1,\"Hi\"}"), "{1,#CAST!}");
+}
+
+#[test]
+fn it_evaluate_date() -> Result<(), ParseError> {
+    let start: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-03-01T02:00:00.000Z")?;
+    let end: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-08-30T02:00:00.000Z")?;
+    let data_function = |s: String| match s.as_str() {
+        "start" => types::Value::Date(start),
+        "end" => types::Value::Date(end),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=DAYS(end, start)", Some(&data_function)),
+        182.00
+    );
+    Ok(())
 }

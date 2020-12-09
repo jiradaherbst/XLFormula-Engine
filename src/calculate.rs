@@ -33,6 +33,7 @@ fn calculate_string_operation_rhs(
         types::Value::Number(r) => types::Value::Text(f(&l, &r.to_string())),
         types::Value::Text(r) => types::Value::Text(f(&l, &r)),
         types::Value::Iterator(_) => unreachable!(),
+        types::Value::Date(_) => unreachable!(),
     }
 }
 
@@ -47,6 +48,7 @@ fn calculate_string_operator(
         types::Value::Number(l) => calculate_string_operation_rhs(&l.to_string(), rhs, f),
         types::Value::Text(l) => calculate_string_operation_rhs(&l, rhs, f),
         types::Value::Iterator(_) => unreachable!(),
+        types::Value::Date(_) => unreachable!(),
     }
 }
 
@@ -65,6 +67,7 @@ fn calcualte_numeric_operator_rhs_text(
             },
             types::Value::Number(r) => types::Value::Number(f(nl, r)),
             types::Value::Iterator(_) => unreachable!(),
+            types::Value::Date(_) => unreachable!(),
         },
         Err(_) => types::Value::Error(types::Error::Cast),
     }
@@ -94,6 +97,7 @@ fn calculate_numeric_operator_rhs_number(
                 types::Value::Error(types::Error::Formula)
             }
         }
+        types::Value::Date(_) => unreachable!(),
     }
 }
 
@@ -142,6 +146,7 @@ fn calculate_numeric_operator(
         types::Value::Text(t) => calcualte_numeric_operator_rhs_text(t, rhs, f),
         types::Value::Number(l) => calculate_numeric_operator_rhs_number(l, lhs, rhs, f),
         types::Value::Iterator(lhs_vec) => calculate_numeric_operator_rhs_iterator(lhs_vec, rhs, f),
+        types::Value::Date(_) => unreachable!(),
     }
 }
 
@@ -171,6 +176,7 @@ fn calculate_average_operator_rhs_number(
                 types::Value::Error(types::Error::Formula)
             }
         }
+        types::Value::Date(_) => unreachable!(),
     }
 }
 
@@ -212,6 +218,7 @@ fn calculate_average_operator(
         types::Value::Iterator(lhs_vec) => {
             calculate_average_operator_rhs_iterator(element_count, lhs_vec, rhs, f)
         }
+        types::Value::Date(_) => unreachable!(),
     }
 }
 
@@ -236,8 +243,10 @@ fn calculate_comparison_operator(
                 }
             }
             types::Value::Iterator(_) => unreachable!(),
+            types::Value::Date(_) => unreachable!(),
         },
         types::Value::Iterator(_) => unreachable!(),
+        types::Value::Date(_) => unreachable!(),
     }
 }
 
@@ -359,6 +368,7 @@ fn calculate_abs(value: types::Value) -> types::Value {
         types::Value::Text(_) => value,
         types::Value::Number(l) => types::Value::Number(l.abs()),
         types::Value::Iterator(_) => unreachable!(),
+        types::Value::Date(_) => unreachable!(),
     }
 }
 
@@ -393,6 +403,7 @@ fn calculate_negation(value: types::Value) -> types::Value {
             }
         }
         types::Value::Iterator(_) => unreachable!(),
+        types::Value::Date(_) => unreachable!(),
     }
 }
 
@@ -452,6 +463,7 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
             }
             types::Value::Iterator(boolean_vec)
         }
+        types::Value::Date(_) => unreachable!(),
     }
 }
 
@@ -509,6 +521,22 @@ fn get_value(
     }
 }
 
+fn get_date_value(
+    mut exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> (types::Value, types::Value) {
+    (
+        match exp.values.pop() {
+            Some(formula) => calculate_formula(formula, f),
+            None => types::Value::Error(types::Error::Formula),
+        },
+        match exp.values.pop() {
+            Some(formula) => calculate_formula(formula, f),
+            None => types::Value::Error(types::Error::Formula),
+        },
+    )
+}
+
 fn calculate_iterator(
     mut vec: Vec<types::Formula>,
     f: Option<&impl Fn(String) -> types::Value>,
@@ -533,6 +561,7 @@ fn calculate_reference(
             types::Value::Boolean(x) => types::Value::Boolean(x),
             types::Value::Error(types::Error::Value) => types::Value::Error(types::Error::Value),
             types::Value::Iterator(v) => types::Value::Iterator(v),
+            types::Value::Date(d) => types::Value::Date(d),
             _ => types::Value::Error(types::Error::Value), //unreachable!(),
         },
         None => types::Value::Error(types::Error::Formula),
@@ -591,6 +620,16 @@ fn calculate_average(
     )
 }
 
+fn calculate_date(date_pair: (types::Value, types::Value)) -> types::Value {
+    let (start, end) = date_pair;
+    match (start, end) {
+        (types::Value::Date(start), types::Value::Date(end)) => {
+            types::Value::Number((end - start).num_days() as f32)
+        }
+        _ => types::Value::Error(types::Error::Value),
+    }
+}
+
 fn calculate_function(
     func: types::Function,
     exp: types::Expression,
@@ -612,6 +651,7 @@ fn calculate_function(
         types::Function::Xor => calculate_bool(exp, f, |n1, n2| n1 ^ n2),
         types::Function::Not => calculate_negation(get_value(exp, f)),
         types::Function::Negate => calculate_negate(get_value(exp, f)),
+        types::Function::Days => calculate_date(get_date_value(exp, f)),
     }
 }
 
@@ -698,6 +738,7 @@ pub fn result_to_string(_value: types::Value) -> String {
         types::Value::Error(error) => show_error(error),
         types::Value::Boolean(boolean) => show_boolean(boolean),
         types::Value::Iterator(value_vec) => show_iterator(value_vec),
+        types::Value::Date(_) => "Do nothing".to_string(),
     }
 }
 
