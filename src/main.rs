@@ -20,7 +20,13 @@ fn main() -> Result<(), ParseError> {
     let result = calculate::calculate_formula(formula, Some(&data_function));
     println!("Result is {}", calculate::result_to_string(result));
 
-    //Ok(())
+    let formula = parse_formula::parse_string_to_formula(&"=start+1");
+    let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
+
+    let formula = parse_formula::parse_string_to_formula(&"=end-3");
+    let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
 
     // from here is for publishing
     let formula = parse_formula::parse_string_to_formula(&"=1+2");

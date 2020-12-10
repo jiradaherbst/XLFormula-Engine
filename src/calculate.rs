@@ -1,5 +1,6 @@
 use crate::parse_formula;
 use crate::types;
+use chrono::{DateTime, Duration, FixedOffset};
 
 fn calculate_divide_operator(num1: f32, num2: f32) -> f32 {
     num1 / num2
@@ -131,6 +132,20 @@ fn calculate_numeric_operator_rhs_iterator(
             }
             types::Value::Iterator(result_vec)
         }
+        _ => unreachable!(),
+    }
+}
+
+fn add_days_to_date(d: DateTime<FixedOffset>, rhs: types::Value) -> types::Value {
+    match rhs {
+        types::Value::Number(x) => types::Value::Date(d + Duration::days(x as i64)),
+        _ => unreachable!(),
+    }
+}
+
+fn subtract_days_from_date(d: DateTime<FixedOffset>, rhs: types::Value) -> types::Value {
+    match rhs {
+        types::Value::Number(x) => types::Value::Date(d - Duration::days(x as i64)),
         _ => unreachable!(),
     }
 }
@@ -521,7 +536,7 @@ fn get_value(
     }
 }
 
-fn get_date_value(
+fn get_date_values(
     mut exp: types::Expression,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> (types::Value, types::Value) {
@@ -620,7 +635,7 @@ fn calculate_average(
     )
 }
 
-fn calculate_date(date_pair: (types::Value, types::Value)) -> types::Value {
+fn calculate_days(date_pair: (types::Value, types::Value)) -> types::Value {
     let (start, end) = date_pair;
     match (start, end) {
         (types::Value::Date(start), types::Value::Date(end)) => {
@@ -651,7 +666,7 @@ fn calculate_function(
         types::Function::Xor => calculate_bool(exp, f, |n1, n2| n1 ^ n2),
         types::Function::Not => calculate_negation(get_value(exp, f)),
         types::Function::Negate => calculate_negate(get_value(exp, f)),
-        types::Function::Days => calculate_date(get_date_value(exp, f)),
+        types::Function::Days => calculate_days(get_date_values(exp, f)),
     }
 }
 
@@ -662,12 +677,18 @@ fn calculate_operation(
     match exp.op {
         types::Operator::Plus => {
             let (value2, value1) = get_values(exp, f);
-            calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2)
+            match value1 {
+                types::Value::Date(d) => add_days_to_date(d, value2),
+                _ => calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2),
+            }
         }
 
         types::Operator::Minus => {
             let (value2, value1) = get_values(exp, f);
-            calculate_numeric_operator(value1, value2, |n1, n2| n1 - n2)
+            match value1 {
+                types::Value::Date(d) => subtract_days_from_date(d, value2),
+                _ => calculate_numeric_operator(value1, value2, |n1, n2| n1 - n2),
+            }
         }
 
         types::Operator::Multiply => {
@@ -738,7 +759,7 @@ pub fn result_to_string(_value: types::Value) -> String {
         types::Value::Error(error) => show_error(error),
         types::Value::Boolean(boolean) => show_boolean(boolean),
         types::Value::Iterator(value_vec) => show_iterator(value_vec),
-        types::Value::Date(_) => "Do nothing".to_string(),
+        types::Value::Date(date) => date.to_string(),
     }
 }
 

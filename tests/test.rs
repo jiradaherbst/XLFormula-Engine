@@ -5,7 +5,7 @@ use xlformula_engine::types;
 use xlformula_engine::NoFormula;
 
 use chrono::format::ParseError;
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, Duration, FixedOffset};
 
 use assert_approx_eq::assert_approx_eq;
 
@@ -37,6 +37,15 @@ fn evaluate_formula_boolean_with_reference(
     let formula = parse_formula::parse_string_to_formula(s);
     let result = calculate::calculate_formula(formula, f);
     calculate::result_to_string(result) //.parse::<f32>().unwrap()
+}
+
+fn evaluate_formula_date_with_reference(
+    s: &str,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> String {
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula(formula, f);
+    calculate::result_to_string(result)
 }
 
 /////////////////// Simple math operators with floats and integer ///////////////////
@@ -629,6 +638,14 @@ fn it_evaluate_date() -> Result<(), ParseError> {
     assert_eq!(
         evaluate_formula_number_with_reference(&"=DAYS(end, start)", Some(&data_function)),
         182.00
+    );
+    assert_eq!(
+        evaluate_formula_date_with_reference(&"=start + 1", Some(&data_function)),
+        (start + Duration::days(1)).to_string()
+    );
+    assert_eq!(
+        evaluate_formula_date_with_reference(&"=end-3", Some(&data_function)),
+        (end - Duration::days(3)).to_string()
     );
     Ok(())
 }
