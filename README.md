@@ -11,14 +11,15 @@ It supports:
 * String operation & (concatenation);
 * Build-in variables TRUE, FALSE;
 * Excel functions ABS(), SUM(), PRODUCT(), AVERAGE();
-* Operations on lists of values (one dimensional range).
+* Operations on lists of values (one dimensional range);
+* Add or subtract dates and excel funtion DAYS().
 
 ## Installation
 
 Add the corresponding entry to your Cargo.toml dependency list:
 ```toml
 [dependencies]
-xlformula_engine = "0.1.7"
+xlformula_engine = "0.1.8"
 ```
 and add this to your crate root:
 ```rust
@@ -168,6 +169,36 @@ println!("Result is {}", calculate::result_to_string(result));
 
 let formula = parse_formula::parse_string_to_formula(&"=AVERAGE({1,2,3},1,2,3)");
 let result = calculate::calculate_formula(formula, None::<NoFormula>);
+println!("Result is {}", calculate::result_to_string(result));
+}
+```
+
+Date:
+```rust
+extern crate xlformula_engine;
+use xlformula_engine::calculate;
+use xlformula_engine::parse_formula;
+use xlformula_engine::types;
+
+fn main() {
+let start: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-03-01T02:00:00.000Z")?;
+let end: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-08-30T02:00:00.000Z")?;
+let data_function = |s: String| match s.as_str() {
+"start" => types::Value::Date(start),
+"end" => types::Value::Date(end),
+_ => types::Value::Error(types::Error::Value),
+};
+
+let formula = parse_formula::parse_string_to_formula(&"=DAYS(end, start)");
+let result = calculate::calculate_formula(formula, Some(&data_function));
+println!("Result is {}", calculate::result_to_string(result));
+
+let formula = parse_formula::parse_string_to_formula(&"=start+1");
+let result = calculate::calculate_formula(formula, Some(&data_function));
+println!("Result is {}", calculate::result_to_string(result));
+
+let formula = parse_formula::parse_string_to_formula(&"=end-3");
+let result = calculate::calculate_formula(formula, Some(&data_function));
 println!("Result is {}", calculate::result_to_string(result));
 }
 ```
