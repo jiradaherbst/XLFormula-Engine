@@ -168,7 +168,7 @@
 //!use chrono::format::ParseError;
 //!use chrono::{DateTime, FixedOffset};
 //!
-//!fn main() {
+//!fn main() -> Result<(), ParseError> {
 //!let start: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-03-01T02:00:00.000Z")?;
 //!let end: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-08-30T02:00:00.000Z")?;
 //!let data_function = |s: String| match s.as_str() {
@@ -188,6 +188,7 @@
 //!let formula = parse_formula::parse_string_to_formula(&"=end-3");
 //!let result = calculate::calculate_formula(formula, Some(&data_function));
 //!println!("Result is {}", calculate::result_to_string(result));
+//! Ok(())
 //!}
 //!```
 
