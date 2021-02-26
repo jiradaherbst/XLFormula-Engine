@@ -2,7 +2,8 @@ extern crate xlformula_engine;
 use xlformula_engine::calculate;
 use xlformula_engine::parse_formula;
 use xlformula_engine::types;
-use xlformula_engine::NoFormula;
+use xlformula_engine::NoCustomFunction;
+use xlformula_engine::NoReference;
 
 use chrono::format::ParseError;
 use chrono::{DateTime, Duration, FixedOffset};
@@ -10,14 +11,14 @@ use chrono::{DateTime, Duration, FixedOffset};
 use assert_approx_eq::assert_approx_eq;
 
 fn evaluate_formula_number(s: &str) -> f32 {
-    let formula = parse_formula::parse_string_to_formula(s);
-    let result = calculate::calculate_formula(formula, None::<NoFormula>);
+    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
 fn evaluate_formula_string(s: &str) -> String {
-    let formula = parse_formula::parse_string_to_formula(s);
-    let result = calculate::calculate_formula(formula, None::<NoFormula>);
+    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
     calculate::result_to_string(result)
 }
 
@@ -25,7 +26,7 @@ fn evaluate_formula_number_with_reference(
     s: &str,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> f32 {
-    let formula = parse_formula::parse_string_to_formula(s);
+    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
     let result = calculate::calculate_formula(formula, f);
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
@@ -34,7 +35,7 @@ fn evaluate_formula_boolean_with_reference(
     s: &str,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> String {
-    let formula = parse_formula::parse_string_to_formula(s);
+    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
     let result = calculate::calculate_formula(formula, f);
     calculate::result_to_string(result) //.parse::<f32>().unwrap()
 }
@@ -43,9 +44,29 @@ fn evaluate_formula_date_with_reference(
     s: &str,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> String {
-    let formula = parse_formula::parse_string_to_formula(s);
+    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
     let result = calculate::calculate_formula(formula, f);
     calculate::result_to_string(result)
+}
+
+fn evaluate_formula_number_with_custom_function(
+    s: &str,
+    custom_function: Option<&impl Fn(String, Vec<f32>) -> types::Value>,
+    //reference: Option<&impl Fn(String) -> types::Value>,
+) -> f32 {
+    let formula = parse_formula::parse_string_to_formula(s, custom_function);
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    calculate::result_to_string(result).parse::<f32>().unwrap()
+}
+
+fn _evaluate_formula_number_with_custom_function_and_reference(
+    s: &str,
+    custom_function: Option<&impl Fn(String, Vec<f32>) -> types::Value>,
+    reference: Option<&impl Fn(String) -> types::Value>,
+) -> f32 {
+    let formula = parse_formula::parse_string_to_formula(s, custom_function);
+    let result = calculate::calculate_formula(formula, reference);
+    calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
 /////////////////// Simple math operators with floats and integer ///////////////////
@@ -649,3 +670,62 @@ fn it_evaluate_date() -> Result<(), ParseError> {
     );
     Ok(())
 }
+
+#[test]
+fn it_evaluate_custom_functions_() {
+    let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
+        "Increase" => types::Value::Number(params[0] + 1.0),
+        "SimpleSum" => types::Value::Number(params[0] + params[1]),
+        "CustomSum" => types::Value::Number(params[0] + params[1] + params[2]),
+        "EqualFive" => types::Value::Number(5.0),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_custom_function(&"=_Increase(1)", Some(&custom_functions)),
+        2.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_custom_function(&"=_SimpleSum(1,2)", Some(&custom_functions)),
+        3.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_custom_function(
+            &"=_CustomSum(1,2,3)",
+            Some(&custom_functions)
+        ),
+        6.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_custom_function(&"=_EqualFive()+1", Some(&custom_functions)),
+        6.0
+    );
+}
+
+// #[test]
+// fn it_evaluate_custom_functions_with_reference() {
+//     let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
+//         "Increase" => types::Value::Number(params[0] + 1.0),
+//         _ => types::Value::Error(types::Error::Value),
+//     };
+//     let data_functions = |s: String| match s.as_str() {
+//         "A" => types::Value::Number(1.0),
+//         "B" => types::Value::Number(2.0),
+//         _ => types::Value::Error(types::Error::Value),
+//     };
+//     assert_eq!(
+//         evaluate_formula_number_with_custom_function_and_reference(
+//             &"=_Increase(A)",
+//             Some(&custom_functions),
+//             Some(&data_functions),
+//         ),
+//         2.0
+//     );
+//     assert_eq!(
+//         evaluate_formula_number_with_custom_function_and_reference(
+//             &"=_SimpleSum(A,B)",
+//             Some(&custom_functions),
+//             Some(&data_functions),
+//         ),
+//         3.0
+//     );
+// }

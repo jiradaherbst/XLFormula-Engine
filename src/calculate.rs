@@ -1,6 +1,7 @@
 use crate::parse_formula;
 use crate::types;
 use chrono::{DateTime, Duration, FixedOffset};
+type NoCustomFunction<'a> = &'a fn(String, Vec<f32>) -> types::Value;
 
 fn calculate_divide_operator(num1: f32, num2: f32) -> f32 {
     num1 / num2
@@ -570,9 +571,10 @@ fn calculate_reference(
     match f {
         Some(f) => match f(string) {
             types::Value::Number(x) => types::Value::Number(x),
-            types::Value::Text(s) => {
-                calculate_formula(parse_formula::parse_string_to_formula(&s), Some(f))
-            }
+            types::Value::Text(s) => calculate_formula(
+                parse_formula::parse_string_to_formula(&s, None::<NoCustomFunction>),
+                Some(f),
+            ),
             types::Value::Boolean(x) => types::Value::Boolean(x),
             types::Value::Error(types::Error::Value) => types::Value::Error(types::Error::Value),
             types::Value::Iterator(v) => types::Value::Iterator(v),
