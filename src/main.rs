@@ -161,5 +161,14 @@ fn main() -> Result<(), ParseError> {
     let result = calculate::calculate_formula(formula, None::<NoReference>);
     println!("Result is {}", calculate::result_to_string(result));
 
+    let custom_function = |s: String, _params: Vec<f32>| match s.as_str() {
+        "EqualFive" => types::Value::Number(5.0),
+        _ => types::Value::Error(types::Error::Value),
+    };
+
+    let formula = parse_formula::parse_string_to_formula(&"=_EqualFive()", Some(&custom_function));
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    println!("Result is {}", calculate::result_to_string(result));
+
     Ok(())
 }
