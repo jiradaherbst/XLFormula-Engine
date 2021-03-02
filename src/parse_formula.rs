@@ -156,9 +156,16 @@ fn build_formula_custom_function(
     match f {
         Some(f) => match f(ref_string, vec) {
             types::Value::Number(x) => types::Formula::Value(types::Value::Number(x)),
-            _ => unreachable!(),
+            types::Value::Text(s) => types::Formula::Value(types::Value::Text(s)),
+            types::Value::Boolean(x) => types::Formula::Value(types::Value::Boolean(x)),
+            types::Value::Error(types::Error::Value) => {
+                types::Formula::Value(types::Value::Error(types::Error::Value))
+            }
+            types::Value::Iterator(v) => types::Formula::Value(types::Value::Iterator(v)),
+            types::Value::Date(d) => types::Formula::Value(types::Value::Date(d)),
+            _ => types::Formula::Value(types::Value::Error(types::Error::Value)), //unreachable!(),
         },
-        None => unreachable!(),
+        None => types::Formula::Value(types::Value::Error(types::Error::Formula)),
     }
 }
 

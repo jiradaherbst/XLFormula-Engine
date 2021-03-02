@@ -34,19 +34,20 @@ Here are simple examples of parsing an Excel formula string and evaluating to a 
 extern crate xlformula_engine;
 use xlformula_engine::calculate;
 use xlformula_engine::parse_formula;
-use xlformula_engine::NoFormula;
+use xlformula_engine::NoReference;
+use xlformula_engine::NoCustomFunction;
 
 fn main() {
-let formula = parse_formula::parse_string_to_formula(&"=1+2");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=1+2", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"=(1*(2+3))*2");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=(1*(2+3))*2", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"=1+3/0"); // error (#DIV/0!)
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=1+3/0", None::<NoCustomFunction>); // error (#DIV/0!)
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 }
 ```
@@ -57,15 +58,16 @@ Concatenating strings:
 extern crate xlformula_engine;
 use xlformula_engine::calculate;
 use xlformula_engine::parse_formula;
-use xlformula_engine::NoFormula;
+use xlformula_engine::NoReference;
+use xlformula_engine::NoCustomFunction;
 
 fn main() {
-let formula = parse_formula::parse_string_to_formula(&"=\"Hello \" & \" World!\"");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=\"Hello \" & \" World!\"", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"=1 + \"Hello\""); // error (#CAST!)
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=1 + \"Hello\"", None::<NoCustomFunction>); // error (#CAST!)
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 }
 ```
@@ -76,15 +78,16 @@ Constants ( i.e. a string without '=' ):
 extern crate xlformula_engine;
 use xlformula_engine::calculate;
 use xlformula_engine::parse_formula;
-use xlformula_engine::NoFormula;
+use xlformula_engine::NoReference;
+use xlformula_engine::NoCustomFunction;
 
 fn main() {
-let formula = parse_formula::parse_string_to_formula(&"1.2");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"1.2", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"Hello World");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"Hello World", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 }
 ```
@@ -94,19 +97,20 @@ Excel functions:
 extern crate xlformula_engine;
 use xlformula_engine::calculate;
 use xlformula_engine::parse_formula;
-use xlformula_engine::NoFormula;
+use xlformula_engine::NoReference;
+use xlformula_engine::NoCustomFunction;
 
 fn main() {
-let formula = parse_formula::parse_string_to_formula(&"=ABS(-1)");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=ABS(-1)", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"=SUM(1,2,\"3\")");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=SUM(1,2,\"3\")", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"=PRODUCT(ABS(1),2*1, 3,4*1)");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=PRODUCT(ABS(1),2*1, 3,4*1)", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 }
 ```
@@ -116,19 +120,20 @@ Logical expressions:
 extern crate xlformula_engine;
 use xlformula_engine::calculate;
 use xlformula_engine::parse_formula;
-use xlformula_engine::NoFormula;
+use xlformula_engine::NoReference;
+use xlformula_engine::NoCustomFunction;
 
 fn main() {
-let formula = parse_formula::parse_string_to_formula(&"=2>=1");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=2>=1", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"=OR(1>1,1<>1)");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=OR(1>1,1<>1)", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"=AND(\"test\",\"True\", 1, true) ");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=AND(\"test\",\"True\", 1, true) ", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 }
 ```
@@ -139,6 +144,8 @@ extern crate xlformula_engine;
 use xlformula_engine::calculate;
 use xlformula_engine::parse_formula;
 use xlformula_engine::types;
+use xlformula_engine::NoReference;
+use xlformula_engine::NoCustomFunction;
 
 fn main() {
 let data_function = |s: String| match s.as_str() {
@@ -146,7 +153,7 @@ let data_function = |s: String| match s.as_str() {
 "B" => types::Value::Number(3.0),
 _ => types::Value::Error(types::Error::Value),
 };
-let formula = parse_formula::parse_string_to_formula(&"=A+B");
+let formula = parse_formula::parse_string_to_formula(&"=A+B", None::<NoCustomFunction>);
 let result = calculate::calculate_formula(formula, Some(&data_function));
 println!("Result is {}", calculate::result_to_string(result));
 }
@@ -157,19 +164,20 @@ List:
 extern crate xlformula_engine;
 use xlformula_engine::calculate;
 use xlformula_engine::parse_formula;
-use xlformula_engine::NoFormula;
+use xlformula_engine::NoReference;
+use xlformula_engine::NoCustomFunction;
 
 fn main() {
-let formula = parse_formula::parse_string_to_formula(&"={1,2,3}+{1,2,3}");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"={1,2,3}+{1,2,3}", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));    
 
-let formula = parse_formula::parse_string_to_formula(&"=XOR({0,0,0})");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=XOR({0,0,0})", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"=AVERAGE({1,2,3},1,2,3)");
-let result = calculate::calculate_formula(formula, None::<NoFormula>);
+let formula = parse_formula::parse_string_to_formula(&"=AVERAGE({1,2,3},1,2,3)", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 }
 ```
@@ -182,6 +190,9 @@ use xlformula_engine::parse_formula;
 use xlformula_engine::types;
 use chrono::format::ParseError;
 use chrono::{DateTime, FixedOffset};
+use xlformula_engine::NoReference;
+use xlformula_engine::NoCustomFunction;
+
 
 fn main() -> Result<(), ParseError> {
 let start: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-03-01T02:00:00.000Z")?;
@@ -192,15 +203,15 @@ let data_function = |s: String| match s.as_str() {
 _ => types::Value::Error(types::Error::Value),
 };
 
-let formula = parse_formula::parse_string_to_formula(&"=DAYS(end, start)");
+let formula = parse_formula::parse_string_to_formula(&"=DAYS(end, start)", None::<NoCustomFunction>);
 let result = calculate::calculate_formula(formula, Some(&data_function));
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"=start+1");
+let formula = parse_formula::parse_string_to_formula(&"=start+1", None::<NoCustomFunction>);
 let result = calculate::calculate_formula(formula, Some(&data_function));
 println!("Result is {}", calculate::result_to_string(result));
 
-let formula = parse_formula::parse_string_to_formula(&"=end-3");
+let formula = parse_formula::parse_string_to_formula(&"=end-3", None::<NoCustomFunction>);
 let result = calculate::calculate_formula(formula, Some(&data_function));
 println!("Result is {}", calculate::result_to_string(result));
 Ok(())

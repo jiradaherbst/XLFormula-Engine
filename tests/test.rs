@@ -59,6 +59,16 @@ fn evaluate_formula_number_with_custom_function(
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
+fn evaluate_formula_string_with_custom_function(
+    s: &str,
+    custom_function: Option<&impl Fn(String, Vec<f32>) -> types::Value>,
+    //reference: Option<&impl Fn(String) -> types::Value>,
+) -> String {
+    let formula = parse_formula::parse_string_to_formula(s, custom_function);
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    calculate::result_to_string(result)
+}
+
 fn _evaluate_formula_number_with_custom_function_and_reference(
     s: &str,
     custom_function: Option<&impl Fn(String, Vec<f32>) -> types::Value>,
@@ -678,6 +688,8 @@ fn it_evaluate_custom_functions_() {
         "SimpleSum" => types::Value::Number(params[0] + params[1]),
         "CustomSum" => types::Value::Number(params[0] + params[1] + params[2]),
         "EqualFive" => types::Value::Number(5.0),
+        "CountText" => types::Value::Text(10.0.to_string()),
+        "CountNumber" => types::Value::Number(20.0),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
@@ -698,6 +710,20 @@ fn it_evaluate_custom_functions_() {
     assert_eq!(
         evaluate_formula_number_with_custom_function(&"=_EqualFive()+1", Some(&custom_functions)),
         6.0
+    );
+    assert_eq!(
+        evaluate_formula_string_with_custom_function(
+            &"=\"P\"&_CountText()",
+            Some(&custom_functions)
+        ),
+        "P10"
+    );
+    assert_eq!(
+        evaluate_formula_string_with_custom_function(
+            &"=\"P\"&_CountNumber()",
+            Some(&custom_functions)
+        ),
+        "P20"
     );
 }
 
