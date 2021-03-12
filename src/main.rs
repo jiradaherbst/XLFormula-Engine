@@ -147,17 +147,17 @@ fn main() -> Result<(), ParseError> {
     };
 
     let formula =
-        parse_formula::parse_string_to_formula(&"=_Increase(1)+1", Some(&custom_functions));
+        parse_formula::parse_string_to_formula(&"=Increase(1)+1", Some(&custom_functions));
     let result = calculate::calculate_formula(formula, None::<NoReference>);
     println!("Result is {}", calculate::result_to_string(result));
 
     let formula =
-        parse_formula::parse_string_to_formula(&"=_EqualFive()+1", Some(&custom_functions));
+        parse_formula::parse_string_to_formula(&"=EqualFive()+1", Some(&custom_functions));
     let result = calculate::calculate_formula(formula, None::<NoReference>);
     println!("Result is {}", calculate::result_to_string(result));
 
     let formula =
-        parse_formula::parse_string_to_formula(&"=_SimpleSum(1,2)", Some(&custom_functions));
+        parse_formula::parse_string_to_formula(&"=SimpleSum(1,2)", Some(&custom_functions));
     let result = calculate::calculate_formula(formula, None::<NoReference>);
     println!("Result is {}", calculate::result_to_string(result));
 
@@ -166,7 +166,7 @@ fn main() -> Result<(), ParseError> {
         _ => types::Value::Error(types::Error::Value),
     };
 
-    let formula = parse_formula::parse_string_to_formula(&"=_EqualFive()", Some(&custom_function));
+    let formula = parse_formula::parse_string_to_formula(&"=EqualFive()", Some(&custom_function));
     let result = calculate::calculate_formula(formula, None::<NoReference>);
     println!("Result is {}", calculate::result_to_string(result));
 

@@ -20,7 +20,7 @@ It supports:
 Add the corresponding entry to your Cargo.toml dependency list:
 ```toml
 [dependencies]
-xlformula_engine = "0.1.10"
+xlformula_engine = "0.1.11"
 ```
 and add this to your crate root:
 ```rust
@@ -235,17 +235,17 @@ _ => types::Value::Error(types::Error::Value),
 };
 
 let formula =
-parse_formula::parse_string_to_formula(&"=_Increase(1)+1", Some(&custom_functions));
+parse_formula::parse_string_to_formula(&"=Increase(1)+1", Some(&custom_functions));
 let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
 let formula =
-parse_formula::parse_string_to_formula(&"=_EqualFive()+1", Some(&custom_functions));
+parse_formula::parse_string_to_formula(&"=EqualFive()+1", Some(&custom_functions));
 let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
 let formula =
-parse_formula::parse_string_to_formula(&"=_SimpleSum(1,2)", Some(&custom_functions));
+parse_formula::parse_string_to_formula(&"=SimpleSum(1,2)", Some(&custom_functions));
 let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 }

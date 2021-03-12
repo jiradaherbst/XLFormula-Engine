@@ -41,9 +41,9 @@ function = _{ abs | sum | product | average | negate | days | custom_function}
     sum     = { "SUM" ~ function_param }   
     product = { "PRODUCT" ~ function_param }
     average = { "AVERAGE" ~ function_param }
-    negate  = { "-" ~ (function_param | iterator)? }
+    negate  = { "-" ~ (function_param | iterator) }
     days    = { "DAYS" ~ function_param }
-    custom_function = { "_" ~ reference ~ ( function_param | empty_param)? } 
+    custom_function = { reference ~ (function_param | empty_param) } 
 
 logical_function = _{ or | and | xor | not } 
     or      =  { "OR" ~ function_param } 
@@ -67,7 +67,7 @@ iterator = { "{" ~ expr ~ ("," ~ expr)*? ~ "}" }
 
 expr = { term ~ (operator ~ term)* }
 term = _{ number | "(" ~ expr ~ ")" | string_double_quote 
-        | string_single_quote  | function | logical_function | boolean | reference | iterator } 
+        | string_single_quote | logical_function | function  | boolean | reference | iterator } 
 term_constant = _{ string_constant }
 
 formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI }

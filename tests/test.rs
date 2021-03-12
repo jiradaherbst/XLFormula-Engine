@@ -693,34 +693,31 @@ fn it_evaluate_custom_functions_() {
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
-        evaluate_formula_number_with_custom_function(&"=_Increase(1)", Some(&custom_functions)),
+        evaluate_formula_number_with_custom_function(&"=Increase(1)", Some(&custom_functions)),
         2.0
     );
     assert_eq!(
-        evaluate_formula_number_with_custom_function(&"=_SimpleSum(1,2)", Some(&custom_functions)),
+        evaluate_formula_number_with_custom_function(&"=SimpleSum(1,2)", Some(&custom_functions)),
         3.0
     );
     assert_eq!(
-        evaluate_formula_number_with_custom_function(
-            &"=_CustomSum(1,2,3)",
-            Some(&custom_functions)
-        ),
+        evaluate_formula_number_with_custom_function(&"=CustomSum(1,2,3)", Some(&custom_functions)),
         6.0
     );
     assert_eq!(
-        evaluate_formula_number_with_custom_function(&"=_EqualFive()+1", Some(&custom_functions)),
+        evaluate_formula_number_with_custom_function(&"=EqualFive()+1", Some(&custom_functions)),
         6.0
     );
     assert_eq!(
         evaluate_formula_string_with_custom_function(
-            &"=\"P\"&_CountText()",
+            &"=\"P\"&CountText()",
             Some(&custom_functions)
         ),
         "P10"
     );
     assert_eq!(
         evaluate_formula_string_with_custom_function(
-            &"=\"P\"&_CountNumber()",
+            &"=\"P\"&CountNumber()",
             Some(&custom_functions)
         ),
         "P20"
@@ -740,7 +737,7 @@ fn it_evaluate_custom_functions_() {
 //     };
 //     assert_eq!(
 //         evaluate_formula_number_with_custom_function_and_reference(
-//             &"=_Increase(A)",
+//             &"=Increase(A)",
 //             Some(&custom_functions),
 //             Some(&data_functions),
 //         ),
@@ -748,7 +745,7 @@ fn it_evaluate_custom_functions_() {
 //     );
 //     assert_eq!(
 //         evaluate_formula_number_with_custom_function_and_reference(
-//             &"=_SimpleSum(A,B)",
+//             &"=SimpleSum(A,B)",
 //             Some(&custom_functions),
 //             Some(&data_functions),
 //         ),
