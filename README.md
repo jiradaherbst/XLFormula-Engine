@@ -20,7 +20,7 @@ It supports:
 Add the corresponding entry to your Cargo.toml dependency list:
 ```toml
 [dependencies]
-xlformula_engine = "0.1.11"
+xlformula_engine = "0.1.12"
 ```
 and add this to your crate root:
 ```rust
@@ -110,6 +110,18 @@ let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
 let formula = parse_formula::parse_string_to_formula(&"=PRODUCT(ABS(1),2*1, 3,4*1)", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
+println!("Result is {}", calculate::result_to_string(result));
+
+let formula = parse_formula::parse_string_to_formula(&"=RIGHT(\"apple\", 3)", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
+println!("Result is {}", calculate::result_to_string(result));
+
+let formula = parse_formula::parse_string_to_formula(&"=LEFT(\"apple\", 3)", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
+println!("Result is {}", calculate::result_to_string(result));
+
+let formula = parse_formula::parse_string_to_formula(&"=LEFT(\"apple\")", None::<NoCustomFunction>);
 let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 }
