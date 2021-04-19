@@ -10,7 +10,7 @@ It supports:
 * Comparison operations =, >, >=, <, <=, <>;
 * String operation & (concatenation);
 * Build-in variables TRUE, FALSE;
-* Excel functions ABS(), SUM(), PRODUCT(), AVERAGE();
+* Excel functions ABS(), SUM(), PRODUCT(), AVERAGE(), RIGHT(), LEFT();
 * Operations on lists of values (one dimensional range);
 * Add or subtract dates and excel funtion DAYS();
 * Custom functions with number arguments.
