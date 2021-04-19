@@ -170,5 +170,33 @@ fn main() -> Result<(), ParseError> {
     let result = calculate::calculate_formula(formula, None::<NoReference>);
     println!("Result is {}", calculate::result_to_string(result));
 
+    ///////////// RIGHT function
+    let formula =
+        parse_formula::parse_string_to_formula(&"=RIGHT(\"apple\", 3)", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    println!("Result is {}", calculate::result_to_string(result));
+
+    let formula =
+        parse_formula::parse_string_to_formula(&"=RIGHT(\"apple\")", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    println!("Result is {}", calculate::result_to_string(result));
+
+    let formula = parse_formula::parse_string_to_formula(
+        &"=\"P\"&RIGHT(\"000\"&1,3)",
+        None::<NoCustomFunction>,
+    );
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    println!("Result is {}", calculate::result_to_string(result));
+    ///////////// LEFT function
+    let formula =
+        parse_formula::parse_string_to_formula(&"=LEFT(\"apple\", 3)", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    println!("Result is {}", calculate::result_to_string(result));
+
+    let formula =
+        parse_formula::parse_string_to_formula(&"=LEFT(\"apple\")", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    println!("Result is {}", calculate::result_to_string(result));
+
     Ok(())
 }

@@ -553,6 +553,32 @@ fn get_date_values(
     )
 }
 
+fn get_number_and_string_values(
+    mut exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> (types::Value, types::Value) {
+    if exp.values.len() == 1 {
+        (
+            types::Value::Number(1.0),
+            match exp.values.pop() {
+                Some(formula) => calculate_formula(formula, f),
+                None => types::Value::Error(types::Error::Formula),
+            },
+        )
+    } else {
+        (
+            match exp.values.pop() {
+                Some(formula) => calculate_formula(formula, f),
+                None => types::Value::Error(types::Error::Formula),
+            },
+            match exp.values.pop() {
+                Some(formula) => calculate_formula(formula, f),
+                None => types::Value::Error(types::Error::Formula),
+            },
+        )
+    }
+}
+
 fn calculate_iterator(
     mut vec: Vec<types::Formula>,
     f: Option<&impl Fn(String) -> types::Value>,
@@ -647,6 +673,40 @@ fn calculate_days(date_pair: (types::Value, types::Value)) -> types::Value {
     }
 }
 
+fn calculate_right(number_string: (types::Value, types::Value)) -> types::Value {
+    let (number, string) = number_string;
+    let trim_length = match number {
+        types::Value::Number(x) => x as usize,
+        _ => 0,
+    };
+
+    let trimmed_string = match string {
+        types::Value::Text(s) => {
+            let temp: &'static str = Box::leak(s.into_boxed_str());
+            &temp[(temp.len() - trim_length)..]
+        }
+        _ => "",
+    };
+    types::Value::Text(trimmed_string.to_string())
+}
+
+fn calculate_left(number_string: (types::Value, types::Value)) -> types::Value {
+    let (number, string) = number_string;
+    let trim_length = match number {
+        types::Value::Number(x) => x as usize,
+        _ => 0,
+    };
+
+    let trimmed_string = match string {
+        types::Value::Text(s) => {
+            let temp: &'static str = Box::leak(s.into_boxed_str());
+            &temp[..trim_length]
+        }
+        _ => "",
+    };
+    types::Value::Text(trimmed_string.to_string())
+}
+
 fn calculate_function(
     func: types::Function,
     exp: types::Expression,
@@ -669,6 +729,8 @@ fn calculate_function(
         types::Function::Not => calculate_negation(get_value(exp, f)),
         types::Function::Negate => calculate_negate(get_value(exp, f)),
         types::Function::Days => calculate_days(get_date_values(exp, f)),
+        types::Function::Right => calculate_right(get_number_and_string_values(exp, f)),
+        types::Function::Left => calculate_left(get_number_and_string_values(exp, f)),
     }
 }
 

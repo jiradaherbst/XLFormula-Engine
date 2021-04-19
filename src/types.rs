@@ -12,6 +12,8 @@ pub enum Function {
     Not,
     Negate,
     Days,
+    Right,
+    Left,
 }
 
 /// Defines Excel Operators.

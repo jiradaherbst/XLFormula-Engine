@@ -21,6 +21,9 @@ fn parse_string(s: &str) -> Option<pest::iterators::Pair<Rule>> {
         }
         Err(_) => None,
     }
+    // GrammarParser::parse(Rule::formula, s)
+    //     .expect("unsuccessful parse")
+    //     .next()
 }
 
 fn parse_string_constant(parse_result: pest::iterators::Pair<Rule>) -> types::Formula {
@@ -126,6 +129,8 @@ fn build_formula_collective_operator(
         Rule::and => types::Operator::Function(types::Function::And),
         Rule::xor => types::Operator::Function(types::Function::Xor),
         Rule::days => types::Operator::Function(types::Function::Days),
+        Rule::right => types::Operator::Function(types::Function::Right),
+        Rule::left => types::Operator::Function(types::Function::Left),
         _ => unreachable!(),
     };
     let operation = types::Expression {
@@ -142,7 +147,17 @@ fn build_formula_custom_function(
     let mut vec = Vec::new();
     for field in pair.clone().into_inner() {
         match field.as_rule() {
-            Rule::expr => vec.push(field.into_inner().as_str().parse::<f32>().unwrap()),
+            Rule::expr =>
+            // vec.push(field.into_inner().as_str().parse::<f32>().unwrap()),
+            // if custom formula is undefined, then don't have anything to push into vec
+            {
+                let x = field.into_inner().as_str();
+                let y = x.parse::<f32>();
+                match y {
+                    Ok(_) => vec.push(y.unwrap()),
+                    Err(_) => (),
+                }
+            }
             _ => (),
         }
     }
@@ -233,6 +248,8 @@ fn build_formula_with_climber(
             Rule::negate => build_formula_unary_operator(Rule::negate, pair, f),
             Rule::expr => build_formula_with_climber(pair.into_inner(), f),
             Rule::days => build_formula_collective_operator(Rule::days, pair, f),
+            Rule::right => build_formula_collective_operator(Rule::right, pair, f),
+            Rule::left => build_formula_collective_operator(Rule::left, pair, f),
             Rule::custom_function => build_formula_custom_function(pair, f),
             _ => unreachable!(),
         },

@@ -724,6 +724,21 @@ fn it_evaluate_custom_functions_() {
     );
 }
 
+#[test]
+fn it_evaluate_left_and_right_functions() {
+    assert_eq!(evaluate_formula_string(&"=RIGHT(\"apple\", 3)"), "ple",);
+    assert_eq!(evaluate_formula_string(&"=RIGHT(\"apple\")"), "e",);
+
+    assert_eq!(
+        evaluate_formula_string(&"=\"P\"&RIGHT(\"000\"&1,3)"),
+        "P001",
+    );
+    assert_eq!(evaluate_formula_string(&"=LEFT(\"apple\", 3)"), "app",);
+    assert_eq!(evaluate_formula_string(&"=LEFT(\"apple\")"), "a",);
+
+    assert_eq!(evaluate_formula_string(&"=\"P\"&LEFT(\"000\"&1,3)"), "P000",);
+}
+
 // #[test]
 // fn it_evaluate_custom_functions_with_reference() {
 //     let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
