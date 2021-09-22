@@ -35,7 +35,7 @@ pub enum Operator {
 }
 
 /// Defines error types.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Error {
     Div0,
     Cast,
@@ -46,14 +46,14 @@ pub enum Error {
 }
 
 /// Defines boolean types.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Boolean {
     True,
     False,
 }
 
 /// The result of an evaluation.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Number(f32),
     Text(String),
@@ -61,6 +61,7 @@ pub enum Value {
     Iterator(Vec<Value>),
     Error(Error),
     Date(DateTime<FixedOffset>),
+    Blank,
 }
 
 /// Defines each term in Expression Struct.

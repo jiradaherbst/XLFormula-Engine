@@ -31,6 +31,16 @@ fn evaluate_formula_number_with_reference(
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
+fn evaluate_formula_number_with_reference_no_conversion(
+    s: &str,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> types::Value {
+    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, f);
+    result
+    //calculate::result_to_string(result).parse::<f32>().unwrap()
+}
+
 fn evaluate_formula_boolean_with_reference(
     s: &str,
     f: Option<&impl Fn(String) -> types::Value>,
@@ -738,6 +748,50 @@ fn it_evaluate_left_and_right_functions() {
 
     assert_eq!(evaluate_formula_string(&"=\"P\"&LEFT(\"000\"&1,3)"), "P000",);
 }
+
+#[test]
+fn it_evaluates_blanks() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Number(1.0),
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=SUM(A,B)", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=A+B", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference_no_conversion(&"=SUM(A,C)", Some(&data_function)),
+        types::Value::Error(types::Error::Value)
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=AVERAGE(A,B)", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=SUM(A,B,2,3,B)", Some(&data_function)),
+        6.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=AVERAGE(A,B,2,3,B)", Some(&data_function)),
+        2.0
+    );
+}
+
+// #[test]
+// fn it_evaluates_blank_constructors() {
+//     assert_eq!(evaluate_formula_number(&"=SUM()"), 0.0,);
+//     assert_eq!(evaluate_formula_number(&"=SUM(BLANK())"), 0.0,);
+//     assert_eq!(evaluate_formula_number(&"=SUM(BLANK(), 1)"), 1.0,);
+//     // Nice to haves:
+//     assert_eq!(evaluate_formula_number(&"=SUM(BLANK)"), 0.0,);
+//     assert_eq!(evaluate_formula_number(&"=SUM(BLANK, 1)"), 1.0,);
+//     assert_eq!(evaluate_formula_number(&"=SUM(BLANK(),BLANK,,,1)"), 1.0,);
+// }
 
 // #[test]
 // fn it_evaluate_custom_functions_with_reference() {

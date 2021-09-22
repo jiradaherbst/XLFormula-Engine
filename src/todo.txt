@@ -1,0 +1,13 @@
+// TODO: fix division operation so that 300/1.2 = 250 instead of 249.99998
+
+fn calculate_divide_operator(num1: f32, num2: f32) -> f32 {
+    num1 / num2
+}
+
+using the following example
+
+ let y = (x * 100.0).round() / 100.0;
+
+or 
+
+look into using rust lib for decimal/floating point calculation to solve precision problem.
