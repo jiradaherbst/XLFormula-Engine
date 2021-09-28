@@ -22,6 +22,15 @@ fn evaluate_formula_string(s: &str) -> String {
     calculate::result_to_string(result)
 }
 
+fn evaluate_formula_string_with_reference(
+    s: &str,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> String {
+    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, f);
+    calculate::result_to_string(result)
+}
+
 fn evaluate_formula_number_with_reference(
     s: &str,
     f: Option<&impl Fn(String) -> types::Value>,
@@ -783,6 +792,125 @@ fn it_evaluates_blanks() {
     assert_eq!(
         evaluate_formula_number_with_reference(&"=PRODUCT(A,B)", Some(&data_function)),
         1.0
+    );
+}
+
+#[test]
+fn it_evaluates_blanks_only() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Number(1.0),
+        "B" => types::Value::Blank,
+        "D" => types::Value::Number(2.0),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=SUM(B)", Some(&data_function)),
+        0.0
+    );
+    ///// TODO
+    // assert_eq!(
+    //     evaluate_formula_number_with_reference(&"=B", Some(&data_function)),
+    //     0.0
+    // );
+    // assert_eq!(
+    //     evaluate_formula_number_with_reference(&"=AVERAGE(B)", Some(&data_function)),
+    //     DIV/0
+    // );
+    // assert_eq!(
+    //     evaluate_formula_number_with_reference(&"=PRODUCT(B)", Some(&data_function)),
+    //     0.0
+    // );
+    // assert_eq!(
+    //     evaluate_formula_number_with_reference(&"=-B", Some(&data_function)),
+    //     0.0
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=XOR(A,C)", Some(&data_function)),
+    //     "TRUE"
+    // );
+}
+
+#[test]
+fn it_evaluates_blanks_when_blank_in_first_position() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Number(1.0),
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=SUM(B,A)", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B+A", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=AVERAGE(B,A)", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=SUM(B,2,3,B)", Some(&data_function)),
+        5.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=AVERAGE(B,2,3,B)", Some(&data_function)),
+        2.5
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT(B,A)", Some(&data_function)),
+        1.0
+    );
+}
+
+#[test]
+fn it_evaluates_blanks_in_other_functions() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Number(1.0),
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=ABS(B)", Some(&data_function)),
+        0.0
+    );
+}
+
+#[test]
+fn it_evaluate_boolean_formulas_with_blank() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Boolean(types::Boolean::True),
+        "B" => types::Value::Boolean(types::Boolean::False),
+        "C" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND(A,C)", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=OR(A,C)", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=NOT(C)", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=RIGHT(C)", Some(&data_function)),
+        "",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=LEFT(C)", Some(&data_function)),
+        "",
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND(B,C)", Some(&data_function)),
+        "FALSE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=OR(B,C)", Some(&data_function)),
+        "FALSE"
     );
 }
 

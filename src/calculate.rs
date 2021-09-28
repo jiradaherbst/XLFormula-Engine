@@ -372,6 +372,13 @@ fn calculate_boolean_operator_rhs_boolean(
                 types::Value::Error(types::Error::Formula)
             }
         }
+        types::Value::Blank => {
+            if to_bool(l) {
+                types::Value::Boolean(types::Boolean::True)
+            } else {
+                types::Value::Boolean(types::Boolean::False)
+            }
+        }
         _ => unreachable!(),
     }
 }
@@ -435,6 +442,11 @@ fn calculate_boolean_operator(
         types::Value::Iterator(lhs_vec) => {
             calculate_boolean_operator_rhs_iterator(cast_value_to_boolean(rhs), lhs_vec, f)
         }
+        types::Value::Blank => calculate_boolean_operator_rhs_boolean(
+            types::Boolean::True,
+            cast_value_to_boolean(rhs),
+            f,
+        ),
         _ => unreachable!(),
     }
 }
@@ -447,7 +459,7 @@ fn calculate_abs(value: types::Value) -> types::Value {
         types::Value::Number(l) => types::Value::Number(l.abs()),
         types::Value::Iterator(_) => unreachable!(),
         types::Value::Date(_) => unreachable!(),
-        types::Value::Blank => unreachable!(),
+        types::Value::Blank => types::Value::Number(0.0),
     }
 }
 
@@ -483,7 +495,7 @@ fn calculate_negation(value: types::Value) -> types::Value {
         }
         types::Value::Iterator(_) => unreachable!(),
         types::Value::Date(_) => unreachable!(),
-        types::Value::Blank => unreachable!(),
+        types::Value::Blank => types::Value::Boolean(types::Boolean::True),
     }
 }
 
@@ -544,7 +556,7 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
             types::Value::Iterator(boolean_vec)
         }
         types::Value::Date(_) => unreachable!(),
-        types::Value::Blank => unreachable!(),
+        types::Value::Blank => types::Value::Boolean(types::Boolean::True),
     }
 }
 
