@@ -780,6 +780,10 @@ fn it_evaluates_blanks() {
         evaluate_formula_number_with_reference(&"=AVERAGE(A,B,2,3,B)", Some(&data_function)),
         2.0
     );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT(A,B)", Some(&data_function)),
+        1.0
+    );
 }
 
 // #[test]

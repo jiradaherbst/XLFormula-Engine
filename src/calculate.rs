@@ -107,6 +107,35 @@ fn calculate_numeric_operator_rhs_number(
     }
 }
 
+fn calculate_numeric_operator_product_rhs_number(
+    l: f32,
+    lhs: types::Value,
+    rhs: types::Value,
+    f: fn(num1: f32, num2: f32) -> f32,
+) -> types::Value {
+    match rhs {
+        types::Value::Boolean(_) => rhs,
+        types::Value::Error(_) => rhs,
+        types::Value::Text(t) => match t.parse::<f32>() {
+            Ok(nr) => types::Value::Number(f(l, nr)),
+            Err(_) => types::Value::Error(types::Error::Cast),
+        },
+        types::Value::Number(r) => types::Value::Number(f(l, r)),
+        types::Value::Iterator(mut value_vec) => {
+            if let Some(mut temp) = value_vec.pop() {
+                while let Some(top) = value_vec.pop() {
+                    temp = calculate_numeric_operator(temp, top, f);
+                }
+                calculate_numeric_operator(lhs, temp, f)
+            } else {
+                types::Value::Error(types::Error::Formula)
+            }
+        }
+        types::Value::Date(_) => unreachable!(),
+        types::Value::Blank => types::Value::Number(f(l, 1.0)),
+    }
+}
+
 fn calculate_numeric_operator_rhs_iterator(
     mut lhs_vec: Vec<types::Value>,
     rhs: types::Value,
@@ -169,6 +198,23 @@ fn calculate_numeric_operator(
         types::Value::Iterator(lhs_vec) => calculate_numeric_operator_rhs_iterator(lhs_vec, rhs, f),
         types::Value::Date(_) => unreachable!(),
         types::Value::Blank => calculate_numeric_operator_rhs_number(0.0, lhs, rhs, f),
+    }
+}
+
+fn calculate_numeric_product_operator(
+    lhs: types::Value,
+    rhs: types::Value,
+    f: fn(num1: f32, num2: f32) -> f32,
+) -> types::Value {
+    //println!("{:?}::{:?}", lhs, rhs);
+    match lhs {
+        types::Value::Boolean(_) => lhs,
+        types::Value::Error(_) => lhs,
+        types::Value::Text(t) => calcualte_numeric_operator_rhs_text(t, rhs, f),
+        types::Value::Number(l) => calculate_numeric_operator_product_rhs_number(l, lhs, rhs, f),
+        types::Value::Iterator(lhs_vec) => calculate_numeric_operator_rhs_iterator(lhs_vec, rhs, f),
+        types::Value::Date(_) => unreachable!(),
+        types::Value::Blank => calculate_numeric_operator_product_rhs_number(1.0, lhs, rhs, f),
     }
 }
 
@@ -660,6 +706,22 @@ fn calculate_collective_operator(
     collective_value
 }
 
+fn calculate_collective_product_operator(
+    mut collective_value: types::Value,
+    mut exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+    f_collective: fn(num1: f32, num2: f32) -> f32,
+) -> types::Value {
+    while let Some(top) = exp.values.pop() {
+        collective_value = calculate_numeric_product_operator(
+            collective_value,
+            calculate_formula(top, f),
+            f_collective,
+        );
+    }
+    collective_value
+}
+
 fn calculate_average(
     mut collective_value: types::Value,
     mut exp: types::Expression,
@@ -738,7 +800,9 @@ fn calculate_function(
             calculate_collective_operator(types::Value::Number(0.00), exp, f, |n1, n2| n1 + n2)
         }
         types::Function::Product => {
-            calculate_collective_operator(types::Value::Number(1.00), exp, f, |n1, n2| n1 * n2)
+            calculate_collective_product_operator(types::Value::Number(1.00), exp, f, |n1, n2| {
+                n1 * n2
+            })
         }
         types::Function::Average => {
             calculate_average(types::Value::Number(0.00), exp, f, |n1, n2| n1 + n2)
