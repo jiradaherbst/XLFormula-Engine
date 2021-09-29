@@ -320,11 +320,38 @@ fn calculate_comparison_operator(
             }
             types::Value::Iterator(_) => unreachable!(),
             types::Value::Date(_) => unreachable!(),
-            types::Value::Blank => unreachable!(),
+            types::Value::Blank => {
+                if f(l, 0.0) {
+                    types::Value::Boolean(types::Boolean::True)
+                } else {
+                    types::Value::Boolean(types::Boolean::False)
+                }
+            }
         },
         types::Value::Iterator(_) => unreachable!(),
         types::Value::Date(_) => unreachable!(),
-        types::Value::Blank => unreachable!(),
+        types::Value::Blank => match rhs {
+            types::Value::Boolean(_) => rhs,
+            types::Value::Error(_) => rhs,
+            types::Value::Text(_) => rhs,
+            types::Value::Number(r) => {
+                if f(0.0, r) {
+                    types::Value::Boolean(types::Boolean::True)
+                } else {
+                    types::Value::Boolean(types::Boolean::False)
+                }
+            }
+            types::Value::Iterator(_) => unreachable!(),
+            types::Value::Date(_) => unreachable!(),
+            types::Value::Blank => types::Value::Boolean(types::Boolean::True),
+            // {
+            //     if f(0.0, 0.0) {
+            //         types::Value::Boolean(types::Boolean::True)
+            //     } else {
+            //         types::Value::Boolean(types::Boolean::False)
+            //     }
+            // }
+        },
     }
 }
 
@@ -758,11 +785,22 @@ fn calculate_average(
 }
 
 fn calculate_days(date_pair: (types::Value, types::Value)) -> types::Value {
+    let begin_of_date: DateTime<FixedOffset> =
+        DateTime::parse_from_rfc3339("1900-01-01T02:00:00.000Z")
+            .ok()
+            .unwrap();
     let (start, end) = date_pair;
     match (start, end) {
         (types::Value::Date(start), types::Value::Date(end)) => {
             types::Value::Number((end - start).num_days() as f32)
         }
+        (types::Value::Blank, types::Value::Date(end)) => {
+            types::Value::Number((end - begin_of_date).num_days() as f32)
+        }
+        (types::Value::Date(start), types::Value::Blank) => {
+            types::Value::Number((begin_of_date - start).num_days() as f32)
+        }
+        (types::Value::Blank, types::Value::Blank) => types::Value::Number(0.0),
         _ => types::Value::Error(types::Error::Value),
     }
 }
@@ -911,7 +949,7 @@ pub fn calculate_formula(
     }
 }
 
-/// Converts a result from Value Enum to a printable string.  
+/// Converts a result from Value Enum to a printable string.
 pub fn result_to_string(_value: types::Value) -> String {
     match _value {
         types::Value::Number(number) => show_number(number),

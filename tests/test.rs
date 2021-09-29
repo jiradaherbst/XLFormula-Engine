@@ -821,12 +821,27 @@ fn it_evaluates_blanks_only() {
     //     0.0
     // );
     // assert_eq!(
-    //     evaluate_formula_number_with_reference(&"=-B", Some(&data_function)),
+    //     evaluate_formula_number_with_reference(&"=-B", Some(&data_function)), =>> ParseError
     //     0.0
     // );
+    // for boolean operations
+    // let data_function = |s: String| match s.as_str() {
+    //     "A" => types::Value::Boolean(types::Boolean::True),
+    //     "B" => types::Value::Boolean(types::Boolean::False),
+    //     "C" => types::Value::Blank,
+    //     _ => types::Value::Error(types::Error::Value),
+    // };
     // assert_eq!(
     //     evaluate_formula_boolean_with_reference(&"=XOR(A,C)", Some(&data_function)),
     //     "TRUE"
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=OR(B,C)", Some(&data_function)),
+    //     "FALSE"
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=XOR(B,C)", Some(&data_function)),
+    //     "FALSE"
     // );
 }
 
@@ -864,7 +879,7 @@ fn it_evaluates_blanks_when_blank_in_first_position() {
 }
 
 #[test]
-fn it_evaluates_blanks_in_other_functions() {
+fn it_evaluates_blanks_in_abs_function() {
     let data_function = |s: String| match s.as_str() {
         "A" => types::Value::Number(1.0),
         "B" => types::Value::Blank,
@@ -877,7 +892,133 @@ fn it_evaluates_blanks_in_other_functions() {
 }
 
 #[test]
-fn it_evaluate_boolean_formulas_with_blank() {
+fn it_evaluates_blanks_in_days_function() {
+    let start: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-02-01T02:00:00.000Z")
+        .ok()
+        .unwrap();
+    let end: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-03-15T02:00:00.000Z")
+        .ok()
+        .unwrap();
+    let data_function = |s: String| match s.as_str() {
+        "start" => types::Value::Date(start),
+        "end" => types::Value::Date(end),
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=DAYS(B, B)", Some(&data_function)),
+        0.00
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=DAYS(start, B)", Some(&data_function)),
+        43495.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=DAYS(B, start)", Some(&data_function)),
+        -43495.0
+    );
+}
+
+#[test]
+fn it_evaluates_blanks_in_simple_operations() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Number(1.0),
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=1-B", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B-1", Some(&data_function)),
+        -1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=1+B", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B+1", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=1/B", Some(&data_function)),
+        "#DIV/0!"
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B/1", Some(&data_function)),
+        0.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=1*B", Some(&data_function)),
+        0.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B*1", Some(&data_function)),
+        0.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=1^B", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B^1", Some(&data_function)),
+        0.0
+    );
+}
+
+#[test]
+fn it_evaluates_blanks_in_simple_operations_with_reference() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Number(1.0),
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=A-B", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B-A", Some(&data_function)),
+        -1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=A+B", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B+A", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=A/B", Some(&data_function)),
+        "#DIV/0!"
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B/A", Some(&data_function)),
+        0.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=A*B", Some(&data_function)),
+        0.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B*A", Some(&data_function)),
+        0.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=A^B", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B^A", Some(&data_function)),
+        0.0
+    );
+}
+
+#[test]
+fn it_evaluates_blanks_in_boolean_operations() {
     let data_function = |s: String| match s.as_str() {
         "A" => types::Value::Boolean(types::Boolean::True),
         "B" => types::Value::Boolean(types::Boolean::False),
@@ -908,9 +1049,83 @@ fn it_evaluate_boolean_formulas_with_blank() {
         evaluate_formula_boolean_with_reference(&"=AND(B,C)", Some(&data_function)),
         "FALSE"
     );
+}
+
+#[test]
+fn it_evaluates_blanks_in_comparison_operators() {
+    let data_function = |s: String| match s.as_str() {
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=OR(B,C)", Some(&data_function)),
-        "FALSE"
+        evaluate_formula_string_with_reference(&"=B=B", Some(&data_function)),
+        "TRUE",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=1=B", Some(&data_function)),
+        "FALSE",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=B=1", Some(&data_function)),
+        "FALSE",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=1>B", Some(&data_function)),
+        "TRUE",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=B>1", Some(&data_function)),
+        "FALSE",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=0=B", Some(&data_function)),
+        "TRUE",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=B=0", Some(&data_function)),
+        "TRUE",
+    );
+}
+
+#[test]
+fn it_evaluates_blanks_in_comparison_operators_with_references() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Number(-2.0),
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=A>=B", Some(&data_function)),
+        "FALSE",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=B>=A", Some(&data_function)),
+        "TRUE",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=A<B", Some(&data_function)),
+        "TRUE",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=B<A", Some(&data_function)),
+        "FALSE",
+    );
+}
+
+#[test]
+fn it_evaluates_blanks_string_concat() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Number(-2.0),
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=\"Hello\"&B", Some(&data_function)),
+        "Hello",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=B&\"Hello\"", Some(&data_function)),
+        "Hello",
     );
 }
 
