@@ -539,6 +539,7 @@ fn calculate_negate(value: types::Value) -> types::Value {
             }
             types::Value::Iterator(result_vec)
         }
+        types::Value::Blank => types::Value::Blank,
         _ => unreachable!(),
     }
 }
@@ -1009,5 +1010,6 @@ fn show_iterator(mut value_vec: Vec<types::Value>) -> String {
 }
 
 fn show_blank() -> String {
-    String::from("BLANK")
+    show_number(0.0)
+    //String::from("BLANK")
 }

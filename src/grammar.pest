@@ -41,7 +41,7 @@ function = _{ abs | sum | product | average | negate | days | right | left |cust
     sum     = { "SUM" ~ function_param }   
     product = { "PRODUCT" ~ function_param }
     average = { "AVERAGE" ~ function_param }
-    negate  = { "-" ~ (function_param | iterator) }
+    negate  = { "-" ~ (function_param | iterator | reference) }
     days    = { "DAYS" ~ function_param }
     right   = { "RIGHT" ~ function_param }
     left    = { "LEFT" ~ function_param }
@@ -72,6 +72,6 @@ term = _{ number | "(" ~ expr ~ ")" | string_double_quote
         | string_single_quote | logical_function | function  | boolean | reference | iterator } 
 term_constant = _{ string_constant }
 
-formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI }
+formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI } 
 
 WHITESPACE = _{ " "  }

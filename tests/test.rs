@@ -797,6 +797,10 @@ fn it_evaluates_blanks() {
         evaluate_formula_number_with_reference(&"=PRODUCT(1,B,B,B,A,2)", Some(&data_function)),
         2.0
     );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=1+B+B+B", Some(&data_function)),
+        1.0
+    );
 }
 
 #[test]
@@ -819,15 +823,15 @@ fn it_evaluates_blanks_only() {
         evaluate_formula_number_with_reference(&"=PRODUCT(B)", Some(&data_function)),
         0.0
     );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B", Some(&data_function)),
+        0.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=-B", Some(&data_function)),
+        0.0
+    );
     ///// TODO
-    // assert_eq!(
-    //     evaluate_formula_number_with_reference(&"=B", Some(&data_function)),
-    //     0.0
-    // );
-    // assert_eq!(
-    //     evaluate_formula_number_with_reference(&"=-B", Some(&data_function)), =>> ParseError
-    //     0.0
-    // );
     // for boolean operations
     // let data_function = |s: String| match s.as_str() {
     //     "A" => types::Value::Boolean(types::Boolean::True),
@@ -891,6 +895,10 @@ fn it_evaluates_blanks_when_blank_in_first_position() {
     assert_eq!(
         evaluate_formula_number_with_reference(&"=PRODUCT(B,B,B,A,2)", Some(&data_function)),
         2.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=B+B+B", Some(&data_function)),
+        0.0
     );
 }
 
