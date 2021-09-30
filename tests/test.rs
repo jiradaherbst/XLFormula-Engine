@@ -793,6 +793,10 @@ fn it_evaluates_blanks() {
         evaluate_formula_number_with_reference(&"=PRODUCT(A,B)", Some(&data_function)),
         1.0
     );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT(1,B,B,B,A,2)", Some(&data_function)),
+        2.0
+    );
 }
 
 #[test]
@@ -807,17 +811,17 @@ fn it_evaluates_blanks_only() {
         evaluate_formula_number_with_reference(&"=SUM(B)", Some(&data_function)),
         0.0
     );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=AVERAGE(B)", Some(&data_function)),
+        "#DIV/0!"
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT(B)", Some(&data_function)),
+        0.0
+    );
     ///// TODO
     // assert_eq!(
     //     evaluate_formula_number_with_reference(&"=B", Some(&data_function)),
-    //     0.0
-    // );
-    // assert_eq!(
-    //     evaluate_formula_number_with_reference(&"=AVERAGE(B)", Some(&data_function)),
-    //     DIV/0
-    // );
-    // assert_eq!(
-    //     evaluate_formula_number_with_reference(&"=PRODUCT(B)", Some(&data_function)),
     //     0.0
     // );
     // assert_eq!(
@@ -875,6 +879,18 @@ fn it_evaluates_blanks_when_blank_in_first_position() {
     assert_eq!(
         evaluate_formula_number_with_reference(&"=PRODUCT(B,A)", Some(&data_function)),
         1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT(B,A,B)", Some(&data_function)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT(B,B,B)", Some(&data_function)),
+        0.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT(B,B,B,A,2)", Some(&data_function)),
+        2.0
     );
 }
 
@@ -1126,6 +1142,10 @@ fn it_evaluates_blanks_string_concat() {
     assert_eq!(
         evaluate_formula_string_with_reference(&"=B&\"Hello\"", Some(&data_function)),
         "Hello",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=B&B", Some(&data_function)),
+        "",
     );
 }
 

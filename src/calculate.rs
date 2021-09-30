@@ -124,15 +124,18 @@ fn calculate_numeric_operator_product_rhs_number(
         types::Value::Iterator(mut value_vec) => {
             if let Some(mut temp) = value_vec.pop() {
                 while let Some(top) = value_vec.pop() {
-                    temp = calculate_numeric_operator(temp, top, f);
+                    temp = calculate_numeric_product_operator(temp, top, f);
                 }
-                calculate_numeric_operator(lhs, temp, f)
+                calculate_numeric_product_operator(lhs, temp, f)
             } else {
                 types::Value::Error(types::Error::Formula)
             }
         }
         types::Value::Date(_) => unreachable!(),
-        types::Value::Blank => types::Value::Number(f(l, 1.0)),
+        types::Value::Blank => match lhs {
+            types::Value::Blank => types::Value::Blank,
+            _ => types::Value::Number(l),
+        },
     }
 }
 
@@ -758,7 +761,10 @@ fn calculate_collective_product_operator(
             f_collective,
         );
     }
-    collective_value
+    match collective_value {
+        types::Value::Blank => types::Value::Number(0.0),
+        _ => collective_value,
+    }
 }
 
 fn calculate_average(
@@ -777,11 +783,15 @@ fn calculate_average(
             f_collective,
         );
     }
-    calculate_numeric_operator(
-        collective_value,
-        types::Value::Number(element_count as f32),
-        calculate_divide_operator,
-    )
+    if element_count == 0 {
+        types::Value::Error(types::Error::Div0)
+    } else {
+        calculate_numeric_operator(
+            collective_value,
+            types::Value::Number(element_count as f32),
+            calculate_divide_operator,
+        )
+    }
 }
 
 fn calculate_days(date_pair: (types::Value, types::Value)) -> types::Value {
@@ -850,9 +860,7 @@ fn calculate_function(
             calculate_collective_operator(types::Value::Number(0.00), exp, f, |n1, n2| n1 + n2)
         }
         types::Function::Product => {
-            calculate_collective_product_operator(types::Value::Number(1.00), exp, f, |n1, n2| {
-                n1 * n2
-            })
+            calculate_collective_product_operator(types::Value::Blank, exp, f, |n1, n2| n1 * n2)
         }
         types::Function::Average => {
             calculate_average(types::Value::Number(0.00), exp, f, |n1, n2| n1 + n2)
