@@ -806,9 +806,7 @@ fn it_evaluates_blanks() {
 #[test]
 fn it_evaluates_blanks_only() {
     let data_function = |s: String| match s.as_str() {
-        "A" => types::Value::Number(1.0),
         "B" => types::Value::Blank,
-        "D" => types::Value::Number(2.0),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
@@ -885,7 +883,6 @@ fn it_evaluates_blanks_when_blank_in_first_position() {
 #[test]
 fn it_evaluates_blanks_in_abs_function() {
     let data_function = |s: String| match s.as_str() {
-        "A" => types::Value::Number(1.0),
         "B" => types::Value::Blank,
         _ => types::Value::Error(types::Error::Value),
     };
@@ -904,12 +901,8 @@ fn it_evaluates_blanks_in_days_function() {
     let start: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-02-01T02:00:00.000Z")
         .ok()
         .unwrap();
-    let end: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-03-15T02:00:00.000Z")
-        .ok()
-        .unwrap();
     let data_function = |s: String| match s.as_str() {
         "start" => types::Value::Date(start),
-        "end" => types::Value::Date(end),
         "B" => types::Value::Blank,
         _ => types::Value::Error(types::Error::Value),
     };
@@ -928,9 +921,8 @@ fn it_evaluates_blanks_in_days_function() {
 }
 
 #[test]
-fn it_evaluates_blanks_in_simple_operations() {
+fn it_evaluates_blanks_with_operators() {
     let data_function = |s: String| match s.as_str() {
-        "A" => types::Value::Number(1.0),
         "B" => types::Value::Blank,
         _ => types::Value::Error(types::Error::Value),
     };
@@ -977,7 +969,7 @@ fn it_evaluates_blanks_in_simple_operations() {
 }
 
 #[test]
-fn it_evaluates_blanks_in_simple_operations_with_reference() {
+fn it_evaluates_blanks_with_operators_and_reference() {
     let data_function = |s: String| match s.as_str() {
         "A" => types::Value::Number(1.0),
         "B" => types::Value::Blank,
@@ -1028,69 +1020,69 @@ fn it_evaluates_blanks_in_simple_operations_with_reference() {
 #[test]
 fn it_evaluates_blanks_in_boolean_operations() {
     let data_function = |s: String| match s.as_str() {
-        "A" => types::Value::Boolean(types::Boolean::True),
-        "B" => types::Value::Boolean(types::Boolean::False),
-        "C" => types::Value::Blank,
+        "T" => types::Value::Boolean(types::Boolean::True),
+        "B" => types::Value::Blank,
+        "F" => types::Value::Boolean(types::Boolean::False),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=AND(A,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=AND(T,B)", Some(&data_function)),
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=OR(A,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=OR(T,B)", Some(&data_function)),
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=NOT(C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=NOT(B)", Some(&data_function)),
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=AND(B,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=AND(F,B)", Some(&data_function)),
         "FALSE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=OR(B,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=OR(F,B)", Some(&data_function)),
         "FALSE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=OR(A,C,B,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=OR(T,B,F,B)", Some(&data_function)),
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=OR(B,C,A,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=OR(F,B,T,B)", Some(&data_function)),
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=AND(A,C,B,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=AND(T,B,F,B)", Some(&data_function)),
         "FALSE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=AND(B,C,A,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=AND(F,B,T,B)", Some(&data_function)),
         "FALSE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=XOR(A,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=XOR(T,B)", Some(&data_function)),
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=XOR(B,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=XOR(F,B)", Some(&data_function)),
         "FALSE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=XOR(A,C,B,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=XOR(T,B,F,B)", Some(&data_function)),
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=XOR(B,C,A,C)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=XOR(F,B,T,B)", Some(&data_function)),
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=XOR(A,C,B,C,A)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=XOR(T,B,F,B,T)", Some(&data_function)),
         "FALSE"
     );
     assert_eq!(
-        evaluate_formula_boolean_with_reference(&"=XOR(B,C,A,C,B)", Some(&data_function)),
+        evaluate_formula_boolean_with_reference(&"=XOR(F,B,T,B,F)", Some(&data_function)),
         "TRUE"
     );
 }
@@ -1194,7 +1186,6 @@ fn it_evaluates_blanks_string_operations() {
 //     // Nice to haves:
 //     assert_eq!(evaluate_formula_number(&"=SUM(BLANK)"), 0.0,);
 //     assert_eq!(evaluate_formula_number(&"=SUM(BLANK, 1)"), 1.0,);
-//     assert_eq!(evaluate_formula_number(&"=SUM(BLANK(),BLANK,,,1)"), 1.0,);
 // }
 //TODO??
 // #[test]
