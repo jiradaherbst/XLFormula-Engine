@@ -831,26 +831,6 @@ fn it_evaluates_blanks_only() {
         evaluate_formula_number_with_reference(&"=-B", Some(&data_function)),
         0.0
     );
-    ///// TODO
-    // for boolean operations
-    // let data_function = |s: String| match s.as_str() {
-    //     "A" => types::Value::Boolean(types::Boolean::True),
-    //     "B" => types::Value::Boolean(types::Boolean::False),
-    //     "C" => types::Value::Blank,
-    //     _ => types::Value::Error(types::Error::Value),
-    // };
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=XOR(A,C)", Some(&data_function)),
-    //     "TRUE"
-    // );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=OR(B,C)", Some(&data_function)),
-    //     "FALSE"
-    // );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=XOR(B,C)", Some(&data_function)),
-    //     "FALSE"
-    // );
 }
 
 #[test]
@@ -911,6 +891,10 @@ fn it_evaluates_blanks_in_abs_function() {
     };
     assert_eq!(
         evaluate_formula_number_with_reference(&"=ABS(B)", Some(&data_function)),
+        0.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=ABS(-B)", Some(&data_function)),
         0.0
     );
 }
@@ -1062,17 +1046,38 @@ fn it_evaluates_blanks_in_boolean_operations() {
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_string_with_reference(&"=RIGHT(C)", Some(&data_function)),
-        "",
-    );
-    assert_eq!(
-        evaluate_formula_string_with_reference(&"=LEFT(C)", Some(&data_function)),
-        "",
-    );
-    assert_eq!(
         evaluate_formula_boolean_with_reference(&"=AND(B,C)", Some(&data_function)),
         "FALSE"
     );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=OR(B,C)", Some(&data_function)),
+        "FALSE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=OR(A,C,B,C)", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=OR(B,C,A,C)", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND(A,C,B,C)", Some(&data_function)),
+        "FALSE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND(B,C,A,C)", Some(&data_function)),
+        "FALSE"
+    );
+    ///// TODO
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=XOR(A,C)", Some(&data_function)),
+    //     "TRUE"
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=XOR(B,C)", Some(&data_function)),
+    //     "FALSE"
+    // );
 }
 
 #[test]
@@ -1137,7 +1142,7 @@ fn it_evaluates_blanks_in_comparison_operators_with_references() {
 }
 
 #[test]
-fn it_evaluates_blanks_string_concat() {
+fn it_evaluates_blanks_string_operations() {
     let data_function = |s: String| match s.as_str() {
         "A" => types::Value::Number(-2.0),
         "B" => types::Value::Blank,
@@ -1155,8 +1160,17 @@ fn it_evaluates_blanks_string_concat() {
         evaluate_formula_string_with_reference(&"=B&B", Some(&data_function)),
         "",
     );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=RIGHT(B)", Some(&data_function)),
+        "",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=LEFT(B)", Some(&data_function)),
+        "",
+    );
 }
 
+//TODO??
 // #[test]
 // fn it_evaluates_blank_constructors() {
 //     assert_eq!(evaluate_formula_number(&"=SUM()"), 0.0,);
@@ -1167,7 +1181,7 @@ fn it_evaluates_blanks_string_concat() {
 //     assert_eq!(evaluate_formula_number(&"=SUM(BLANK, 1)"), 1.0,);
 //     assert_eq!(evaluate_formula_number(&"=SUM(BLANK(),BLANK,,,1)"), 1.0,);
 // }
-
+//TODO??
 // #[test]
 // fn it_evaluate_custom_functions_with_reference() {
 //     let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
