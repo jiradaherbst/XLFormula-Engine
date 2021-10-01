@@ -1177,16 +1177,45 @@ fn it_evaluates_blanks_string_operations() {
     );
 }
 
-//TODO??
-// #[test]
-// fn it_evaluates_blank_constructors() {
-//     assert_eq!(evaluate_formula_number(&"=SUM()"), 0.0,);
-//     assert_eq!(evaluate_formula_number(&"=SUM(BLANK())"), 0.0,);
-//     assert_eq!(evaluate_formula_number(&"=SUM(BLANK(), 1)"), 1.0,);
-//     // Nice to haves:
-//     assert_eq!(evaluate_formula_number(&"=SUM(BLANK)"), 0.0,);
-//     assert_eq!(evaluate_formula_number(&"=SUM(BLANK, 1)"), 1.0,);
-// }
+#[test]
+fn it_evaluates_blank_constructors() {
+    let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
+        "Increase" => types::Value::Number(params[0] + 1.0),
+        "BLANK" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_custom_function(&"=SUM(BLANK())", Some(&custom_functions)),
+        0.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_custom_function(&"=SUM(BLANK(), 1)", Some(&custom_functions)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_custom_function(
+            &"=PRODUCT(BLANK(), 1)",
+            Some(&custom_functions)
+        ),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_custom_function(
+            &"=AVERAGE(BLANK(), 1)",
+            Some(&custom_functions)
+        ),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_custom_function(&"=BLANK()+1", Some(&custom_functions)),
+        1.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_custom_function(&"=BLANK()*1", Some(&custom_functions)),
+        0.0
+    );
+}
+
 //TODO??
 // #[test]
 // fn it_evaluate_custom_functions_with_reference() {

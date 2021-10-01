@@ -178,6 +178,7 @@ fn build_formula_custom_function(
             }
             types::Value::Iterator(v) => types::Formula::Value(types::Value::Iterator(v)),
             types::Value::Date(d) => types::Formula::Value(types::Value::Date(d)),
+            types::Value::Blank => types::Formula::Value(types::Value::Blank),
             _ => types::Formula::Value(types::Value::Error(types::Error::Value)), //unreachable!(),
         },
         None => types::Formula::Value(types::Value::Error(types::Error::Formula)),
