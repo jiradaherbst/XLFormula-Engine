@@ -1069,15 +1069,30 @@ fn it_evaluates_blanks_in_boolean_operations() {
         evaluate_formula_boolean_with_reference(&"=AND(B,C,A,C)", Some(&data_function)),
         "FALSE"
     );
-    ///// TODO
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=XOR(A,C)", Some(&data_function)),
-    //     "TRUE"
-    // );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=XOR(B,C)", Some(&data_function)),
-    //     "FALSE"
-    // );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR(A,C)", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR(B,C)", Some(&data_function)),
+        "FALSE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR(A,C,B,C)", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR(B,C,A,C)", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR(A,C,B,C,A)", Some(&data_function)),
+        "FALSE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR(B,C,A,C,B)", Some(&data_function)),
+        "TRUE"
+    );
 }
 
 #[test]

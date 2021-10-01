@@ -504,6 +504,29 @@ fn calculate_boolean_operator_or(
     }
 }
 
+fn calculate_boolean_operator_xor(
+    lhs: types::Value,
+    rhs: types::Value,
+    f: fn(bool1: bool, bool2: bool) -> bool,
+) -> types::Value {
+    let lh = cast_value_to_boolean(lhs);
+    match lh {
+        types::Value::Boolean(l) => {
+            calculate_boolean_operator_rhs_boolean(l, cast_value_to_boolean(rhs), f)
+        }
+        types::Value::Error(_) => calculate_boolean_operator_rhs_error(cast_value_to_boolean(rhs)),
+        types::Value::Iterator(lhs_vec) => {
+            calculate_boolean_operator_rhs_iterator(cast_value_to_boolean(rhs), lhs_vec, f)
+        }
+        types::Value::Blank => calculate_boolean_operator_rhs_boolean(
+            types::Boolean::False,
+            cast_value_to_boolean(rhs),
+            f,
+        ),
+        _ => unreachable!(),
+    }
+}
+
 fn calculate_abs(value: types::Value) -> types::Value {
     match value {
         types::Value::Boolean(_) => value,
@@ -775,6 +798,22 @@ fn calculate_or(
     convert_iterator_to_result(result, f_bool)
 }
 
+fn calculate_xor(
+    mut exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+    f_bool: fn(bool1: bool, bool2: bool) -> bool,
+) -> types::Value {
+    let mut result = match exp.values.pop() {
+        Some(formula) => calculate_formula(formula, f),
+        None => types::Value::Error(types::Error::Formula),
+    };
+    result = cast_value_to_boolean(result);
+    while let Some(top) = exp.values.pop() {
+        result = calculate_boolean_operator_xor(result, calculate_formula(top, f), f_bool);
+    }
+    convert_iterator_to_result(result, f_bool)
+}
+
 fn calculate_collective_operator(
     mut collective_value: types::Value,
     mut exp: types::Expression,
@@ -907,7 +946,7 @@ fn calculate_function(
         }
         types::Function::Or => calculate_or(exp, f, |n1, n2| n1 || n2),
         types::Function::And => calculate_bool(exp, f, |n1, n2| n1 && n2),
-        types::Function::Xor => calculate_bool(exp, f, |n1, n2| n1 ^ n2),
+        types::Function::Xor => calculate_xor(exp, f, |n1, n2| n1 ^ n2),
         types::Function::Not => calculate_negation(get_value(exp, f)),
         types::Function::Negate => calculate_negate(get_value(exp, f)),
         types::Function::Days => calculate_days(get_date_values(exp, f)),
