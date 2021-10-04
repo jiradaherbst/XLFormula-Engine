@@ -282,7 +282,6 @@ fn main() -> {
     };
 
     let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
-        "Increase" => types::Value::Number(params[0] + 1.0),
         "BLANK" => types::Value::Blank,
         _ => types::Value::Error(types::Error::Value),
     };
