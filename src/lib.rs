@@ -4,16 +4,17 @@
 //!## Features
 //!It supports:
 //!
-//!* Any numbers, negative and positive, as float or integer;
-//!* Arithmetic operations +, -, /, *, ^;
-//!* Logical operations AND(), OR(), NOT(), XOR();
-//!* Comparison operations =, >, >=, <, <=, <>;
-//!* String operation & (concatenation);
-//!* Build-in variables TRUE, FALSE;
-//!* Excel functions ABS(), SUM(), PRODUCT(), AVERAGE(), RIGHT(), LEFT();
-//!* Operations on lists of values (one dimensional range);
-//!* Add or subtract dates and excel funtion DAYS();
-//!* Custom functions with number arguments.
+//!* Any numbers, negative and positive, as float or integer
+//!* Arithmetic operations +, -, /, *, ^
+//!* Logical operations AND(), OR(), NOT(), XOR()
+//!* Comparison operations =, >, >=, <, <=, <>
+//!* String operation & (concatenation)
+//!* Build-in variables TRUE, FALSE
+//!* Excel functions ABS(), SUM(), PRODUCT(), AVERAGE(), RIGHT(), LEFT()
+//!* Operations on lists of values (one dimensional range)
+//!* Add or subtract dates and excel funtion DAYS()
+//!* Custom functions with number arguments
+//!* Handle blank/null values in calculation
 //!
 //!## Installation
 //!
@@ -242,6 +243,39 @@
 //!parse_formula::parse_string_to_formula(&"=SimpleSum(1,2)", Some(&custom_functions));
 //!let result = calculate::calculate_formula(formula, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
+//!```
+//!
+//!Handle blank in calculation:
+//!```rust
+//!extern crate xlformula_engine;
+//!use xlformula_engine::calculate;
+//!use xlformula_engine::parse_formula;
+//!use xlformula_engine::types;
+//!use chrono::format::ParseError;
+//!use chrono::{DateTime, FixedOffset};
+//!use xlformula_engine::NoReference;
+//!use xlformula_engine::NoCustomFunction;
+//!
+//!let data_function = |s: String| match s.as_str() {
+//!"B" => types::Value::Blank,
+//!_ => types::Value::Error(types::Error::Value),
+//!};
+//!
+//!let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
+//!"Increase" => types::Value::Number(params[0] + 1.0),
+//!"BLANK" => types::Value::Blank,
+//!_ => types::Value::Error(types::Error::Value),
+//!};
+//!
+//!let formula = parse_formula::parse_string_to_formula(&"=SUM(B, 1)", None::<NoCustomFunction>);
+//!let result = calculate::calculate_formula(formula, Some(&data_function));
+//!println!("Result is {}", calculate::result_to_string(result));
+//!
+//!let formula =
+//!parse_formula::parse_string_to_formula(&"=SUM(BLANK(), 1)", Some(&custom_functions));
+//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!println!("Result is {}", calculate::result_to_string(result));
+//!
 //!```
 
 #[macro_use]

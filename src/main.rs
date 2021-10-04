@@ -198,5 +198,25 @@ fn main() -> Result<(), ParseError> {
     let result = calculate::calculate_formula(formula, None::<NoReference>);
     println!("Result is {}", calculate::result_to_string(result));
 
+    ///////////// Handle blank in calculation
+    let data_function = |s: String| match s.as_str() {
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+
+    let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
+        "Increase" => types::Value::Number(params[0] + 1.0),
+        "BLANK" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+
+    let formula = parse_formula::parse_string_to_formula(&"=SUM(B, 1)", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
+
+    let formula =
+        parse_formula::parse_string_to_formula(&"=SUM(BLANK(), 1)", Some(&custom_functions));
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    println!("Result is {}", calculate::result_to_string(result));
     Ok(())
 }
