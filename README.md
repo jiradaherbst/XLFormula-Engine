@@ -21,7 +21,7 @@ It supports:
 Add the corresponding entry to your Cargo.toml dependency list:
 ```toml
 [dependencies]
-xlformula_engine = "0.1.13"
+xlformula_engine = "0.1.14"
 ```
 and add this to your crate root:
 ```rust
@@ -293,6 +293,14 @@ fn main() -> {
     let formula =
         parse_formula::parse_string_to_formula(&"=SUM(BLANK(), 1)", Some(&custom_functions));
     let result = calculate::calculate_formula(formula, None::<NoReference>);
+    println!("Result is {}", calculate::result_to_string(result));
+
+    //takes list as input
+    let formula = parse_formula::parse_string_to_formula(&"=SUM({B, 1})", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
+    let formula = parse_formula::parse_string_to_formula(&"=XOR({F,B,T,B,F,{F,B,T,B,F}})", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, Some(&data_function));
     println!("Result is {}", calculate::result_to_string(result));
 }
 ```

@@ -218,5 +218,16 @@ fn main() -> Result<(), ParseError> {
         parse_formula::parse_string_to_formula(&"=SUM(BLANK(), 1)", Some(&custom_functions));
     let result = calculate::calculate_formula(formula, None::<NoReference>);
     println!("Result is {}", calculate::result_to_string(result));
+
+    let data_function = |s: String| match s.as_str() {
+        "T" => types::Value::Boolean(types::Boolean::True),
+        "B" => types::Value::Blank,
+        "F" => types::Value::Boolean(types::Boolean::False),
+        _ => types::Value::Error(types::Error::Value),
+    };
+
+    let formula = parse_formula::parse_string_to_formula(&"=OR({F,B})", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
     Ok(())
 }
