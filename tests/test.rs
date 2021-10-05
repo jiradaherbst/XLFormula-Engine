@@ -1216,6 +1216,134 @@ fn it_evaluates_blank_constructors() {
     );
 }
 
+#[test]
+fn it_evaluates_blank_in_iterators() {
+    let data_function = |s: String| match s.as_str() {
+        "A" => types::Value::Number(100.0),
+        "Array" => types::Value::Iterator(vec![
+            types::Value::Number(100.0),
+            types::Value::Blank,
+            types::Value::Blank,
+        ]),
+        "B" => types::Value::Blank,
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=AVERAGE({A, B, B})", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=AVERAGE({A, B})", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=AVERAGE({B, A, B})", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=AVERAGE(Array)", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=SUM({A, B, B})", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=SUM({A, B})", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=SUM({B, A, B})", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=SUM(Array)", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT({A, B, B})", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT({A, B})", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT({B, A, B})", Some(&data_function)),
+        100.0
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=PRODUCT(Array)", Some(&data_function)),
+        100.0
+    );
+}
+
+#[test]
+fn it_evaluates_blank_with_iterators_in_boolean_operations() {
+    let data_function = |s: String| match s.as_str() {
+        "T" => types::Value::Boolean(types::Boolean::True),
+        "B" => types::Value::Blank,
+        "F" => types::Value::Boolean(types::Boolean::False),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND({T,B})", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=OR({T,B})", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND({F,B})", Some(&data_function)),
+        "FALSE"
+    );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=OR({F,B})", Some(&data_function)),
+    //     "FALSE"
+    // );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=OR({T,B,F,B})", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=OR({F,B,T,B})", Some(&data_function)),
+        "TRUE"
+    );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=AND(T,B,F,B)", Some(&data_function)),
+    //     "FALSE"
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=AND(F,B,T,B)", Some(&data_function)),
+    //     "FALSE"
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=XOR(T,B)", Some(&data_function)),
+    //     "TRUE"
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=XOR(F,B)", Some(&data_function)),
+    //     "FALSE"
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=XOR(T,B,F,B)", Some(&data_function)),
+    //     "TRUE"
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=XOR(F,B,T,B)", Some(&data_function)),
+    //     "TRUE"
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=XOR(T,B,F,B,T)", Some(&data_function)),
+    //     "FALSE"
+    // );
+    // assert_eq!(
+    //     evaluate_formula_boolean_with_reference(&"=XOR(F,B,T,B,F)", Some(&data_function)),
+    //     "TRUE"
+    // );
+}
+
 //TODO??
 // #[test]
 // fn it_evaluate_custom_functions_with_reference() {

@@ -238,9 +238,16 @@ fn calculate_average_operator_rhs_number(
         types::Value::Number(r) => types::Value::Number(f(l, r)),
         types::Value::Iterator(mut value_vec) => {
             if let Some(mut temp) = value_vec.pop() {
+                match temp {
+                    types::Value::Blank => *element_count -= 1,
+                    _ => (),
+                };
                 while let Some(top) = value_vec.pop() {
-                    temp = calculate_numeric_operator(temp, top, f);
-                    *element_count += 1;
+                    temp = calculate_numeric_operator(temp, top.clone(), f);
+                    match top {
+                        types::Value::Blank => (),
+                        _ => *element_count += 1,
+                    };
                 }
                 calculate_numeric_operator(lhs, temp, f)
             } else {
