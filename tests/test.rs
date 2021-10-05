@@ -1298,10 +1298,10 @@ fn it_evaluates_blank_with_iterators_in_boolean_operations() {
         evaluate_formula_boolean_with_reference(&"=AND({F,B})", Some(&data_function)),
         "FALSE"
     );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=OR({F,B})", Some(&data_function)),
-    //     "FALSE"
-    // );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=OR({F,B})", Some(&data_function)),
+        "FALSE"
+    );
     assert_eq!(
         evaluate_formula_boolean_with_reference(&"=OR({T,B,F,B})", Some(&data_function)),
         "TRUE"
@@ -1310,38 +1310,45 @@ fn it_evaluates_blank_with_iterators_in_boolean_operations() {
         evaluate_formula_boolean_with_reference(&"=OR({F,B,T,B})", Some(&data_function)),
         "TRUE"
     );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=AND(T,B,F,B)", Some(&data_function)),
-    //     "FALSE"
-    // );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=AND(F,B,T,B)", Some(&data_function)),
-    //     "FALSE"
-    // );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=XOR(T,B)", Some(&data_function)),
-    //     "TRUE"
-    // );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=XOR(F,B)", Some(&data_function)),
-    //     "FALSE"
-    // );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=XOR(T,B,F,B)", Some(&data_function)),
-    //     "TRUE"
-    // );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=XOR(F,B,T,B)", Some(&data_function)),
-    //     "TRUE"
-    // );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=XOR(T,B,F,B,T)", Some(&data_function)),
-    //     "FALSE"
-    // );
-    // assert_eq!(
-    //     evaluate_formula_boolean_with_reference(&"=XOR(F,B,T,B,F)", Some(&data_function)),
-    //     "TRUE"
-    // );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND({T,B,F,B})", Some(&data_function)),
+        "FALSE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND({F,B,T,B})", Some(&data_function)),
+        "FALSE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR({T,B})", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR({F,B})", Some(&data_function)),
+        "FALSE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR({T,B,F,B})", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR({F,B,T,B})", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR({T,B,F,B,T})", Some(&data_function)),
+        "FALSE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=XOR({F,B,T,B,F})", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(
+            &"=XOR({F,B,T,B,F,{F,B,T,B,F}})",
+            Some(&data_function)
+        ),
+        "FALSE"
+    );
 }
 
 //TODO??

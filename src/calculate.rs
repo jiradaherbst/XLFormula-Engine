@@ -672,6 +672,62 @@ fn convert_iterator_to_result(
     }
 }
 
+fn convert_iterator_to_result_or(
+    result: types::Value,
+    f: fn(bool1: bool, bool2: bool) -> bool,
+) -> types::Value {
+    match result {
+        types::Value::Iterator(mut value_vec) => {
+            if let Some(mut temp) = value_vec.pop() {
+                while let Some(top) = value_vec.pop() {
+                    temp = calculate_boolean_operator_or(temp, top, f);
+                }
+                match cast_value_to_boolean(temp) {
+                    types::Value::Boolean(bool_result) => {
+                        if to_bool(bool_result) {
+                            types::Value::Boolean(types::Boolean::True)
+                        } else {
+                            types::Value::Boolean(types::Boolean::False)
+                        }
+                    }
+                    _ => types::Value::Error(types::Error::Formula),
+                }
+            } else {
+                types::Value::Error(types::Error::Formula)
+            }
+        }
+        _ => result,
+    }
+}
+
+fn convert_iterator_to_result_xor(
+    result: types::Value,
+    f: fn(bool1: bool, bool2: bool) -> bool,
+) -> types::Value {
+    match result {
+        types::Value::Iterator(mut value_vec) => {
+            if let Some(mut temp) = value_vec.pop() {
+                while let Some(top) = value_vec.pop() {
+                    temp = calculate_boolean_operator_xor(temp, top, f);
+                }
+                match cast_value_to_boolean(temp) {
+                    types::Value::Boolean(bool_result) => {
+                        if to_bool(bool_result) {
+                            types::Value::Boolean(types::Boolean::True)
+                        } else {
+                            types::Value::Boolean(types::Boolean::False)
+                        }
+                    }
+                    _ => types::Value::Error(types::Error::Formula),
+                }
+            } else {
+                types::Value::Error(types::Error::Formula)
+            }
+        }
+        _ => result,
+    }
+}
+
 fn get_values(
     mut exp: types::Expression,
     f: Option<&impl Fn(String) -> types::Value>,
@@ -802,7 +858,7 @@ fn calculate_or(
     while let Some(top) = exp.values.pop() {
         result = calculate_boolean_operator_or(result, calculate_formula(top, f), f_bool);
     }
-    convert_iterator_to_result(result, f_bool)
+    convert_iterator_to_result_or(result, f_bool)
 }
 
 fn calculate_xor(
@@ -818,7 +874,7 @@ fn calculate_xor(
     while let Some(top) = exp.values.pop() {
         result = calculate_boolean_operator_xor(result, calculate_formula(top, f), f_bool);
     }
-    convert_iterator_to_result(result, f_bool)
+    convert_iterator_to_result_xor(result, f_bool)
 }
 
 fn calculate_collective_operator(
