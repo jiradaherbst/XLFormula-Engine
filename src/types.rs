@@ -14,6 +14,7 @@ pub enum Function {
     Days,
     Right,
     Left,
+    Iff,
 }
 
 /// Defines Excel Operators.

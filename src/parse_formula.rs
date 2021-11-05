@@ -131,6 +131,7 @@ fn build_formula_collective_operator(
         Rule::days => types::Operator::Function(types::Function::Days),
         Rule::right => types::Operator::Function(types::Function::Right),
         Rule::left => types::Operator::Function(types::Function::Left),
+        Rule::iff => types::Operator::Function(types::Function::Iff),
         _ => unreachable!(),
     };
     let operation = types::Expression {
@@ -252,6 +253,7 @@ fn build_formula_with_climber(
             Rule::right => build_formula_collective_operator(Rule::right, pair, f),
             Rule::left => build_formula_collective_operator(Rule::left, pair, f),
             Rule::custom_function => build_formula_custom_function(pair, f),
+            Rule::iff => build_formula_collective_operator(Rule::iff, pair, f),
             _ => unreachable!(),
         },
         |lhs: types::Formula, op: pest::iterators::Pair<Rule>, rhs: types::Formula| match op

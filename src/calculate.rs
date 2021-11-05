@@ -796,6 +796,26 @@ fn get_number_and_string_values(
     }
 }
 
+fn get_iff_values(
+    mut exp: types::Expression,
+    f: Option<&impl Fn(String) -> types::Value>,
+) -> (types::Value, types::Value, types::Value) {
+    (
+        match exp.values.pop() {
+            Some(formula) => calculate_formula(formula, f),
+            None => types::Value::Error(types::Error::Formula),
+        },
+        match exp.values.pop() {
+            Some(formula) => calculate_formula(formula, f),
+            None => types::Value::Error(types::Error::Formula),
+        },
+        match exp.values.pop() {
+            Some(formula) => calculate_formula(formula, f),
+            None => types::Value::Error(types::Error::Formula),
+        },
+    )
+}
+
 fn calculate_iterator(
     mut vec: Vec<types::Formula>,
     f: Option<&impl Fn(String) -> types::Value>,
@@ -991,6 +1011,20 @@ fn calculate_left(number_string: (types::Value, types::Value)) -> types::Value {
     types::Value::Text(trimmed_string.to_string())
 }
 
+fn calculate_iff(iff_arguments: (types::Value, types::Value, types::Value)) -> types::Value {
+    let (false_value, true_value, bool_expression) = iff_arguments;
+    match bool_expression {
+        types::Value::Boolean(bool_value) => {
+            if to_bool(bool_value) {
+                true_value
+            } else {
+                false_value
+            }
+        }
+        _ => unreachable!(),
+    }
+}
+
 fn calculate_function(
     func: types::Function,
     exp: types::Expression,
@@ -999,7 +1033,7 @@ fn calculate_function(
     match func {
         types::Function::Abs => calculate_abs(get_value(exp, f)),
         types::Function::Sum => {
-            calculate_collective_operator(types::Value::Number(0.00), exp, f, |n1, n2| n1 + n2)
+            calculate_collective_operator(types::Value::Number(0.0), exp, f, |n1, n2| n1 + n2)
         }
         types::Function::Product => {
             calculate_collective_product_operator(types::Value::Blank, exp, f, |n1, n2| n1 * n2)
@@ -1015,6 +1049,7 @@ fn calculate_function(
         types::Function::Days => calculate_days(get_date_values(exp, f)),
         types::Function::Right => calculate_right(get_number_and_string_values(exp, f)),
         types::Function::Left => calculate_left(get_number_and_string_values(exp, f)),
+        types::Function::Iff => calculate_iff(get_iff_values(exp, f)),
     }
 }
 

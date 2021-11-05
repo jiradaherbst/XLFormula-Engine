@@ -279,9 +279,6 @@
 //!let formula = parse_formula::parse_string_to_formula(&"=SUM({B, 1})", None::<NoCustomFunction>);
 //!let result = calculate::calculate_formula(formula, Some(&data_function));
 //!println!("Result is {}", calculate::result_to_string(result));
-//!let formula = parse_formula::parse_string_to_formula(&"=XOR({F,B,T,B,F,{F,B,T,B,F}})", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, Some(&data_function));
-//!println!("Result is {}", calculate::result_to_string(result));
 //!```
 
 #[macro_use]

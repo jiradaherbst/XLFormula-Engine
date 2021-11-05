@@ -1351,6 +1351,39 @@ fn it_evaluates_blank_with_iterators_in_boolean_operations() {
     );
 }
 
+#[test]
+fn it_evaluates_if_formulas() {
+    assert_eq!(evaluate_formula_number(&"=IF(TRUE,1,0)"), 1.0);
+    assert_eq!(evaluate_formula_number(&"=IF(FALSE,1,0)"), 0.0);
+    assert_eq!(evaluate_formula_string(&"=IF(TRUE,\"a\",0)"), "a");
+    assert_eq!(evaluate_formula_number(&"=IF(FALSE,\"a\",0)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(1=1,1,0)"), 1.0);
+    assert_eq!(evaluate_formula_number(&"=IF(1=2,1,0)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(AND(TRUE,FALSE),1,0)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(TRUE,IF(FALSE,1,2),0)"), 2.0);
+    // assert_eq!(evaluate_formula_number(&"=IF(FALSE,1)"), 0.0);
+    // assert_eq!(evaluate_formula_number(&"=IF(2,1,0)"), 1.0);
+    // assert_eq!(evaluate_formula_number(&"=IF(-1,1,0)"), 1.0);
+    // assert_eq!(
+    //     evaluate_formula_string(&"=IF(1/0,IF(FALSE,1,2),0)"),
+    //     "#DIV/0!",
+    // );
+    // assert_eq!(evaluate_formula_string(&"=IF(\"text\",1,0)"), "#VALUE!",);
+    // let date1: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-03-01T02:00:00.000Z")?;
+    // let date2: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-08-30T02:00:00.000Z")?;
+    // let data_function = |s: String| match s.as_str() {
+    //     "date1" => types::Value::Date(date1),
+    //     "date2" => types::Value::Date(date2),
+    //     _ => types::Value::Error(types::Error::Value),
+    // };
+    // assert_eq!(
+    //     evaluate_formula_number_with_reference(&"=DAYS(end, date1)", Some(&data_function)),
+    //     182.00
+    // );
+    //data1=date2 -| true
+    //date1!+date3 -> false
+}
+
 //TODO??
 // #[test]
 // fn it_evaluate_custom_functions_with_reference() {
