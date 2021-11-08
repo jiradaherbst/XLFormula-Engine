@@ -807,11 +807,11 @@ fn get_iff_values(
         },
         match exp.values.pop() {
             Some(formula) => calculate_formula(formula, f),
-            None => types::Value::Error(types::Error::Formula),
+            None => types::Value::Blank,
         },
         match exp.values.pop() {
             Some(formula) => calculate_formula(formula, f),
-            None => types::Value::Error(types::Error::Formula),
+            None => types::Value::Blank,
         },
     )
 }
@@ -1019,6 +1019,13 @@ fn calculate_iff(iff_arguments: (types::Value, types::Value, types::Value)) -> t
                 true_value
             } else {
                 false_value
+            }
+        }
+        types::Value::Number(number_value) => {
+            if number_value == 0.0 {
+                false_value
+            } else {
+                true_value
             }
         }
         _ => unreachable!(),

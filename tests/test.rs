@@ -1179,8 +1179,7 @@ fn it_evaluates_blanks_string_operations() {
 
 #[test]
 fn it_evaluates_blank_constructors() {
-    let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
-        "Increase" => types::Value::Number(params[0] + 1.0),
+    let custom_functions = |s: String, _params: Vec<f32>| match s.as_str() {
         "BLANK" => types::Value::Blank,
         _ => types::Value::Error(types::Error::Value),
     };
@@ -1361,9 +1360,13 @@ fn it_evaluates_if_formulas() {
     assert_eq!(evaluate_formula_number(&"=IF(1=2,1,0)"), 0.0);
     assert_eq!(evaluate_formula_number(&"=IF(AND(TRUE,FALSE),1,0)"), 0.0);
     assert_eq!(evaluate_formula_number(&"=IF(TRUE,IF(FALSE,1,2),0)"), 2.0);
+    assert_eq!(evaluate_formula_number(&"=IF(2,1,0)"), 1.0);
+    assert_eq!(evaluate_formula_number(&"=IF(-1,1,0)"), 1.0);
+    assert_eq!(evaluate_formula_number(&"=IF(0,1,0)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(TRUE,1+2+3,0)"), 6.0);
     // assert_eq!(evaluate_formula_number(&"=IF(FALSE,1)"), 0.0);
-    // assert_eq!(evaluate_formula_number(&"=IF(2,1,0)"), 1.0);
-    // assert_eq!(evaluate_formula_number(&"=IF(-1,1,0)"), 1.0);
+    // assert_eq!(evaluate_formula_number(&"=IF(FALSE,1,)"), 0.0);
+    // assert_eq!(evaluate_formula_number(&"=IF(TRUE,,1)"), 0.0);
     // assert_eq!(
     //     evaluate_formula_string(&"=IF(1/0,IF(FALSE,1,2),0)"),
     //     "#DIV/0!",
