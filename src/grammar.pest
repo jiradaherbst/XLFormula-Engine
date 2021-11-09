@@ -15,6 +15,8 @@ str_inner_constant  = @{ char_constant* }
 char_constant       = { "\'" ~  ("=")
                         |!("=") ~ ANY } 
 
+blank        = { "," ~ "," }
+
 operator = _{ arithmetic_operator | string_operator | logical_operator }
     
 arithmetic_operator = _{ add | subtract | multiply | divide | power }     
@@ -56,7 +58,15 @@ logical_function = _{ or | and | xor | not }
 
 function_param      = _{ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
 empty_param         = { "(" ~ ")" }
-iff_function_param  = _{ "(" ~ expr ~ "," ~ expr ~  "," ~ expr ~ ")" }
+iff_function_param  = _{ "(" ~ expr ~ "," ~ expr ~  "," ~ expr ~ ")" | 
+                        "(" ~ expr ~ "," ~ expr ~  ")" |
+                        "(" ~ expr ~ "," ~ expr ~  "," ~ ")" |
+                        "(" ~ expr ~ expr ~ expr ~ ")" }
+// iff2_function_param  = _{ "(" ~ params3 ~ ")" }
+
+// params3 = {param~param?~param?}  
+// param = {expr ~ (",")?}
+//_{ "(" ~ expr ~ (",," ~ expr)*? ~ ("," ~ expr)*? ~ ")" }
 
 boolean = _{ t | f }
     t    = { ( "T" | "t") ~ ( "R" | "r") ~ ( "U" | "u") ~ ( "E" | "e") }
@@ -70,7 +80,7 @@ iterator = { "{" ~ expr ~ ("," ~ expr)*? ~ "}" }
 
 
 expr = { term ~ (operator ~ term)* }
-term = _{ number | "(" ~ expr ~ ")" | string_double_quote 
+term = _{ number | blank | "(" ~ expr ~ ")" | string_double_quote 
         | string_single_quote | logical_function | function  | boolean | reference | iterator } 
 term_constant = _{ string_constant }
 

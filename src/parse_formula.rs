@@ -70,6 +70,10 @@ fn build_formula_string_single_quote(pair: pest::iterators::Pair<Rule>) -> types
     types::Formula::Value(value)
 }
 
+fn build_formula_blank() -> types::Formula {
+    types::Formula::Value(types::Value::Blank)
+}
+
 fn build_formula_boolean(boolean_value: bool) -> types::Formula {
     if boolean_value {
         types::Formula::Value(types::Value::Boolean(types::Boolean::True))
@@ -254,6 +258,7 @@ fn build_formula_with_climber(
             Rule::left => build_formula_collective_operator(Rule::left, pair, f),
             Rule::custom_function => build_formula_custom_function(pair, f),
             Rule::iff => build_formula_collective_operator(Rule::iff, pair, f),
+            Rule::blank => build_formula_blank(),
             _ => unreachable!(),
         },
         |lhs: types::Formula, op: pest::iterators::Pair<Rule>, rhs: types::Formula| match op

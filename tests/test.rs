@@ -352,6 +352,8 @@ fn it_evaluate_functions_sum() {
         evaluate_formula_number(&"=SUM(1*1, ABS(2), ABS(2+1), 4)"),
         10.0,
     );
+    //TODO
+    //assert_eq!(evaluate_formula_number(&"=SUM(1, 2, , 3)"), 6.0,);
 }
 
 #[test]
@@ -1364,9 +1366,10 @@ fn it_evaluates_if_formulas() {
     assert_eq!(evaluate_formula_number(&"=IF(-1,1,0)"), 1.0);
     assert_eq!(evaluate_formula_number(&"=IF(0,1,0)"), 0.0);
     assert_eq!(evaluate_formula_number(&"=IF(TRUE,1+2+3,0)"), 6.0);
-    // assert_eq!(evaluate_formula_number(&"=IF(FALSE,1)"), 0.0);
-    // assert_eq!(evaluate_formula_number(&"=IF(FALSE,1,)"), 0.0);
-    // assert_eq!(evaluate_formula_number(&"=IF(TRUE,,1)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(FALSE,1)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(FALSE,1,)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(TRUE,,1)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(TRUE, ,1)"), 0.0);
     // assert_eq!(
     //     evaluate_formula_string(&"=IF(1/0,IF(FALSE,1,2),0)"),
     //     "#DIV/0!",
