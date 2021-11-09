@@ -259,6 +259,8 @@ fn build_formula_with_climber(
             Rule::custom_function => build_formula_custom_function(pair, f),
             Rule::iff => build_formula_collective_operator(Rule::iff, pair, f),
             Rule::blank => build_formula_blank(),
+            Rule::params3 => build_formula_with_climber(pair.into_inner(), f),
+            //Rule::param => build_formula_with_climber(pair.into_inner(), f),
             _ => unreachable!(),
         },
         |lhs: types::Formula, op: pest::iterators::Pair<Rule>, rhs: types::Formula| match op
