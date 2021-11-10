@@ -47,7 +47,7 @@ function = _{ abs | sum | product | average | negate | days | right | left | iff
     days    = { "DAYS" ~ function_param }
     right   = { "RIGHT" ~ function_param }
     left    = { "LEFT" ~ function_param }
-    iff     = { "IF" ~ iff2_function_param }
+    iff     = { "IF" ~ iff3_function_param }
     custom_function = { reference ~ (function_param | empty_param) } 
     
 logical_function = _{ or | and | xor | not } 
@@ -62,10 +62,14 @@ iff_function_param  = _{ "(" ~ expr ~ "," ~ expr ~  "," ~ expr ~ ")" |
                         "(" ~ expr ~ "," ~ expr ~  ")" |
                         "(" ~ expr ~ "," ~ expr ~  "," ~ ")" |
                         "(" ~ expr ~ expr ~ expr ~ ")" }
-                        
+
 iff2_function_param  = _{ "(" ~ params3 ~ ")" | "(" ~ expr ~ expr ~ expr ~ ")" }
 params3 = _{ param ~ param? ~ param? }
 param = {expr ~ (",")? }
+
+iff3_function_param  = _{ "(" ~ params3_1 ~ ")" }
+params3_1 = _{ param_1? ~ param_1? ~ param_1? }
+param_1 = _{expr ~ ( expr | (",")?) }
 
 boolean = _{ t | f }
     t    = { ( "T" | "t") ~ ( "R" | "r") ~ ( "U" | "u") ~ ( "E" | "e") }
