@@ -800,22 +800,20 @@ fn get_iff_values(
     mut exp: types::Expression,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> (types::Value, types::Value, types::Value) {
-    let first_argument = match exp.values.pop() {
-        Some(formula) => calculate_formula(formula, f),
-        None => types::Value::Blank,
-    };
-    let second_argument = match exp.values.pop() {
-        Some(formula) => calculate_formula(formula, f),
-        None => types::Value::Blank,
-    };
-    let third_argument = match exp.values.pop() {
-        Some(formula) => calculate_formula(formula, f),
-        None => types::Value::Blank,
-    };
-    match third_argument {
-        types::Value::Blank => (types::Value::Blank, first_argument, second_argument),
-        _ => (first_argument, second_argument, third_argument),
-    }
+    (
+        match exp.values.pop() {
+            Some(formula) => calculate_formula(formula, f),
+            None => types::Value::Blank,
+        },
+        match exp.values.pop() {
+            Some(formula) => calculate_formula(formula, f),
+            None => types::Value::Blank,
+        },
+        match exp.values.pop() {
+            Some(formula) => calculate_formula(formula, f),
+            None => types::Value::Blank,
+        },
+    )
 }
 
 fn calculate_iterator(
@@ -1030,6 +1028,7 @@ fn calculate_iff(iff_arguments: (types::Value, types::Value, types::Value)) -> t
                 true_value
             }
         }
+        types::Value::Blank => false_value,
         _ => unreachable!(),
     }
 }

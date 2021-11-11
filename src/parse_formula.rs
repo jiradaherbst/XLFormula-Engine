@@ -70,10 +70,6 @@ fn build_formula_string_single_quote(pair: pest::iterators::Pair<Rule>) -> types
     types::Formula::Value(value)
 }
 
-fn build_formula_blank() -> types::Formula {
-    types::Formula::Value(types::Value::Blank)
-}
-
 fn build_formula_boolean(boolean_value: bool) -> types::Formula {
     if boolean_value {
         types::Formula::Value(types::Value::Boolean(types::Boolean::True))
@@ -140,6 +136,27 @@ fn build_formula_collective_operator(
     };
     let operation = types::Expression {
         op: op_type,
+        values: vec,
+    };
+    types::Formula::Operation(operation)
+}
+
+fn build_formula_iff(
+    pair: pest::iterators::Pair<Rule>,
+    f: Option<&impl Fn(String, Vec<f32>) -> types::Value>,
+) -> types::Formula {
+    let mut vec = Vec::new();
+    for term in pair.into_inner() {
+        if (term.as_str().parse::<String>().unwrap() == "")
+            | (term.as_str().parse::<String>().unwrap() == ",")
+        {
+            vec.push(types::Formula::Value(types::Value::Blank))
+        } else {
+            vec.push(build_formula_with_climber(term.into_inner(), f))
+        }
+    }
+    let operation = types::Expression {
+        op: types::Operator::Function(types::Function::Iff),
         values: vec,
     };
     types::Formula::Operation(operation)
@@ -257,10 +274,7 @@ fn build_formula_with_climber(
             Rule::right => build_formula_collective_operator(Rule::right, pair, f),
             Rule::left => build_formula_collective_operator(Rule::left, pair, f),
             Rule::custom_function => build_formula_custom_function(pair, f),
-            Rule::iff => build_formula_collective_operator(Rule::iff, pair, f),
-            Rule::blank => build_formula_blank(),
-            Rule::params3 => build_formula_with_climber(pair.into_inner(), f),
-            //Rule::param => build_formula_with_climber(pair.into_inner(), f),
+            Rule::iff => build_formula_iff(pair, f),
             _ => unreachable!(),
         },
         |lhs: types::Formula, op: pest::iterators::Pair<Rule>, rhs: types::Formula| match op

@@ -15,8 +15,6 @@ str_inner_constant  = @{ char_constant* }
 char_constant       = { "\'" ~  ("=")
                         |!("=") ~ ANY } 
 
-blank        = { "," ~ "," }
-
 operator = _{ arithmetic_operator | string_operator | logical_operator }
     
 arithmetic_operator = _{ add | subtract | multiply | divide | power }     
@@ -47,7 +45,7 @@ function = _{ abs | sum | product | average | negate | days | right | left | iff
     days    = { "DAYS" ~ function_param }
     right   = { "RIGHT" ~ function_param }
     left    = { "LEFT" ~ function_param }
-    iff     = { "IF" ~ iff3_function_param }
+    iff     = { "IF" ~ three_params }
     custom_function = { reference ~ (function_param | empty_param) } 
     
 logical_function = _{ or | and | xor | not } 
@@ -63,13 +61,12 @@ iff_function_param  = _{ "(" ~ expr ~ "," ~ expr ~  "," ~ expr ~ ")" |
                         "(" ~ expr ~ "," ~ expr ~  "," ~ ")" |
                         "(" ~ expr ~ expr ~ expr ~ ")" }
 
-iff2_function_param  = _{ "(" ~ params3 ~ ")" | "(" ~ expr ~ expr ~ expr ~ ")" }
-params3 = _{ param ~ param? ~ param? }
-param = {expr ~ (",")? }
+three_params  = _{ 
+    "(" ~ ")" |
+    "(" ~ first_param ~ param ~ param ~ ")" }
 
-iff3_function_param  = _{ "(" ~ params3_1 ~ ")" }
-params3_1 = _{ param_1? ~ param_1? ~ param_1? }
-param_1 = _{expr ~ ( expr | (",")?) }
+first_param = ${ expr? }
+param = ${ (","? ~ expr ?) }
 
 boolean = _{ t | f }
     t    = { ( "T" | "t") ~ ( "R" | "r") ~ ( "U" | "u") ~ ( "E" | "e") }
@@ -83,7 +80,7 @@ iterator = { "{" ~ expr ~ ("," ~ expr)*? ~ "}" }
 
 
 expr = { term ~ (operator ~ term)* }
-term = _{ number | blank | "(" ~ expr ~ ")" | string_double_quote 
+term = _{ number | "(" ~ expr ~ ")" | string_double_quote 
         | string_single_quote | logical_function | function  | boolean | reference | iterator } 
 term_constant = _{ string_constant }
 

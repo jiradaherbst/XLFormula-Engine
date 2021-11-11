@@ -1353,6 +1353,32 @@ fn it_evaluates_blank_with_iterators_in_boolean_operations() {
 }
 
 #[test]
+fn it_evaluates_formulas_with_3_params() {
+    assert_eq!(evaluate_formula_number(&"=IF()"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF( )"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(,)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF( ,)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(, )"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF( , )"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(,,)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(, ,)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(,,)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(,, )"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(1,,)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(1,2,)"), 2.0);
+    assert_eq!(evaluate_formula_number(&"=IF(1,2)"), 2.0);
+    assert_eq!(evaluate_formula_number(&"=IF(0,2,)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(0,2)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(0,,3)"), 3.0);
+    assert_eq!(evaluate_formula_number(&"=IF(1,,3)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(0,2,3)"), 3.0);
+    assert_eq!(evaluate_formula_number(&"=IF(,2,)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(,2)"), 0.0);
+    assert_eq!(evaluate_formula_number(&"=IF(,2,3)"), 3.0);
+    assert_eq!(evaluate_formula_number(&"=IF(,,3)"), 3.0);
+}
+
+#[test]
 fn it_evaluates_if_formulas() {
     assert_eq!(evaluate_formula_number(&"=IF(TRUE,1,0)"), 1.0);
     assert_eq!(evaluate_formula_number(&"=IF(FALSE,1,0)"), 0.0);
