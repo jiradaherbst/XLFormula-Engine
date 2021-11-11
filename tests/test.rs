@@ -1407,11 +1407,11 @@ fn it_evaluates_if_formulas() {
         evaluate_formula_number(&"=IF(1=0,IF(FALSE,1,2),IF(TRUE,1,2))"),
         1.0
     );
-    // assert_eq!(
-    //     evaluate_formula_string(&"=IF(1/0,IF(FALSE,1,2),0)"),
-    //     "#DIV/0!",
-    // );
-    // assert_eq!(evaluate_formula_string(&"=IF(\"text\",1,0)"), "#VALUE!",);
+    assert_eq!(
+        evaluate_formula_string(&"=IF(1/0,IF(FALSE,1,2),0)"),
+        "#DIV/0!",
+    );
+    assert_eq!(evaluate_formula_string(&"=IF(\"text\",1,0)"), "#VALUE!",);
     // let date1: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-03-01T02:00:00.000Z")?;
     // let date2: DateTime<FixedOffset> = DateTime::parse_from_rfc3339("2019-08-30T02:00:00.000Z")?;
     // let data_function = |s: String| match s.as_str() {

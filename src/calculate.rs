@@ -1029,6 +1029,8 @@ fn calculate_iff(iff_arguments: (types::Value, types::Value, types::Value)) -> t
             }
         }
         types::Value::Blank => false_value,
+        types::Value::Error(_) => bool_expression,
+        types::Value::Text(_) => types::Value::Error(types::Error::Value),
         _ => unreachable!(),
     }
 }
