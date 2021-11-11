@@ -149,6 +149,8 @@ fn build_formula_iff(
     for term in pair.into_inner() {
         if (term.as_str().parse::<String>().unwrap() == "")
             | (term.as_str().parse::<String>().unwrap() == ",")
+            | (term.as_str().parse::<String>().unwrap() == ", ")
+            | (term.as_str().parse::<String>().unwrap() == " ,")
         {
             vec.push(types::Formula::Value(types::Value::Blank))
         } else {
@@ -275,6 +277,7 @@ fn build_formula_with_climber(
             Rule::left => build_formula_collective_operator(Rule::left, pair, f),
             Rule::custom_function => build_formula_custom_function(pair, f),
             Rule::iff => build_formula_iff(pair, f),
+            Rule::atomic_expr => build_formula_with_climber(pair.into_inner(), f),
             _ => unreachable!(),
         },
         |lhs: types::Formula, op: pest::iterators::Pair<Rule>, rhs: types::Formula| match op

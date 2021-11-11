@@ -65,8 +65,10 @@ three_params  = _{
     "(" ~ ")" |
     "(" ~ first_param ~ param ~ param ~ ")" }
 
-first_param = ${ expr? }
-param = ${ (","? ~ expr ?) }
+atomic_expr = ${ expr }
+param_inner = _{ atomic_expr | expr}
+first_param = { param_inner? }
+param       = { ","? ~ param_inner? }
 
 boolean = _{ t | f }
     t    = { ( "T" | "t") ~ ( "R" | "r") ~ ( "U" | "u") ~ ( "E" | "e") }
@@ -76,8 +78,6 @@ reference = @{ (ASCII_ALPHA | "_" | "\\") ~ char_reference* }
 char_reference = { ASCII_ALPHANUMERIC | "." | "_" } 
 
 iterator = { "{" ~ expr ~ ("," ~ expr)*? ~ "}" }
-
-
 
 expr = { term ~ (operator ~ term)* }
 term = _{ number | "(" ~ expr ~ ")" | string_double_quote 

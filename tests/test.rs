@@ -1396,6 +1396,17 @@ fn it_evaluates_if_formulas() {
     assert_eq!(evaluate_formula_number(&"=IF(FALSE,1,)"), 0.0);
     assert_eq!(evaluate_formula_number(&"=IF(TRUE,,1)"), 0.0);
     assert_eq!(evaluate_formula_number(&"=IF(TRUE, ,1)"), 0.0);
+    assert_eq!(evaluate_formula_string(&"=IF(TRUE,TRUE,FALSE)"), "TRUE");
+    assert_eq!(
+        evaluate_formula_string(&"=IF( TRUE , TRUE , FALSE )"),
+        "TRUE"
+    );
+    assert_eq!(evaluate_formula_string(&"=IF(TRUE , TRUE, FALSE )"), "TRUE");
+    assert_eq!(evaluate_formula_number(&"=IF(1,IF(FALSE,1,2),0)"), 2.0);
+    assert_eq!(
+        evaluate_formula_number(&"=IF(1=0,IF(FALSE,1,2),IF(TRUE,1,2))"),
+        1.0
+    );
     // assert_eq!(
     //     evaluate_formula_string(&"=IF(1/0,IF(FALSE,1,2),0)"),
     //     "#DIV/0!",
