@@ -1105,31 +1105,74 @@ fn calculate_operation(
         }
         types::Operator::Equal => {
             let (value2, value1) = get_values(exp, f);
-            calculate_comparison_operator(value1, value2, |n1, n2| (n1 - n2).abs() == 0.0)
+            match (value1.clone(), value2.clone()) {
+                (types::Value::Date(l), types::Value::Date(r)) => {
+                    compare_dates(l, r, |d1, d2| d1 == d2)
+                }
+                _ => calculate_comparison_operator(value1, value2, |n1, n2| (n1 - n2).abs() == 0.0),
+            }
         }
         types::Operator::NotEqual => {
             let (value2, value1) = get_values(exp, f);
-            calculate_comparison_operator(value1, value2, |n1, n2| (n1 - n2).abs() > 0.0)
+            match (value1.clone(), value2.clone()) {
+                (types::Value::Date(l), types::Value::Date(r)) => {
+                    compare_dates(l, r, |d1, d2| d1 != d2)
+                }
+                _ => calculate_comparison_operator(value1, value2, |n1, n2| (n1 - n2).abs() > 0.0),
+            }
         }
         types::Operator::Greater => {
             let (value2, value1) = get_values(exp, f);
-            calculate_comparison_operator(value1, value2, |n1, n2| n1 > n2)
+            match (value1.clone(), value2.clone()) {
+                (types::Value::Date(l), types::Value::Date(r)) => {
+                    compare_dates(l, r, |d1, d2| d1 > d2)
+                }
+                _ => calculate_comparison_operator(value1, value2, |n1, n2| n1 > n2),
+            }
         }
         types::Operator::Less => {
             let (value2, value1) = get_values(exp, f);
-            calculate_comparison_operator(value1, value2, |n1, n2| n1 < n2)
+            match (value1.clone(), value2.clone()) {
+                (types::Value::Date(l), types::Value::Date(r)) => {
+                    compare_dates(l, r, |d1, d2| d1 < d2)
+                }
+                _ => calculate_comparison_operator(value1, value2, |n1, n2| n1 < n2),
+            }
         }
         types::Operator::GreaterOrEqual => {
             let (value2, value1) = get_values(exp, f);
-            calculate_comparison_operator(value1, value2, |n1, n2| n1 >= n2)
+            match (value1.clone(), value2.clone()) {
+                (types::Value::Date(l), types::Value::Date(r)) => {
+                    compare_dates(l, r, |d1, d2| d1 >= d2)
+                }
+                _ => calculate_comparison_operator(value1, value2, |n1, n2| n1 >= n2),
+            }
         }
         types::Operator::LessOrEqual => {
             let (value2, value1) = get_values(exp, f);
-            calculate_comparison_operator(value1, value2, |n1, n2| n1 <= n2)
+            match (value1.clone(), value2.clone()) {
+                (types::Value::Date(l), types::Value::Date(r)) => {
+                    compare_dates(l, r, |d1, d2| d1 <= d2)
+                }
+                _ => calculate_comparison_operator(value1, value2, |n1, n2| n1 <= n2),
+            }
         }
         types::Operator::Function(func) => calculate_function(func, exp, f),
     }
 }
+
+fn compare_dates(
+    date1: DateTime<FixedOffset>,
+    date2: DateTime<FixedOffset>,
+    f: fn(d1: DateTime<FixedOffset>, d2: DateTime<FixedOffset>) -> bool,
+) -> types::Value {
+    if f(date1, date2) {
+        types::Value::Boolean(types::Boolean::True)
+    } else {
+        types::Value::Boolean(types::Boolean::False)
+    }
+}
+
 /// Evaluates a string that was parsed and stored in Expression Struct.
 /// Takes an optional closure with the trait bound Fn(String) -> types::Value.
 pub fn calculate_formula(
