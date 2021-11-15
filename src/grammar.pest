@@ -38,9 +38,9 @@ logical_operator = _{ equal | not_equal | greater_or_equal | greater
 
 function = _{ abs | sum | product | average | negate | days | right | left | iff | custom_function  }
     abs     = { "ABS" ~ "(" ~ expr ~ ")" }
-    sum     = { "SUM" ~ function_param }   
-    product = { "PRODUCT" ~ function_param }
-    average = { "AVERAGE" ~ function_param }
+    sum     = { "SUM" ~ function_param_with_atomic_expr}   
+    product = { "PRODUCT" ~ function_param_with_atomic_expr}
+    average = { "AVERAGE" ~ function_param_with_atomic_expr}
     negate  = { "-" ~ (function_param | iterator | reference) }
     days    = { "DAYS" ~ function_param }
     right   = { "RIGHT" ~ function_param }
@@ -56,11 +56,7 @@ logical_function = _{ or | and | xor | not }
 
 function_param      = _{ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
 empty_param         = { "(" ~ ")" }
-iff_function_param  = _{ "(" ~ expr ~ "," ~ expr ~  "," ~ expr ~ ")" | 
-                        "(" ~ expr ~ "," ~ expr ~  ")" |
-                        "(" ~ expr ~ "," ~ expr ~  "," ~ ")" |
-                        "(" ~ expr ~ expr ~ expr ~ ")" }
-
+function_param_with_atomic_expr = _{ "(" ~ param_inner? ~ param_with_blank*? ~ ")" }
 three_params  = _{ 
     "(" ~ ")" |
     "(" ~ first_param ~ param ~ param ~ ")" }
@@ -69,6 +65,9 @@ atomic_expr = ${ expr }
 param_inner = _{ atomic_expr | expr}
 first_param = { param_inner? }
 param       = { ","? ~ param_inner? }
+param_with_blank   = _{ param1 | blank}
+blank         = {","}
+param1          = {"," ~ param_inner}
 
 boolean = _{ t | f }
     t    = { ( "T" | "t") ~ ( "R" | "r") ~ ( "U" | "u") ~ ( "E" | "e") }

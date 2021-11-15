@@ -352,8 +352,10 @@ fn it_evaluate_functions_sum() {
         evaluate_formula_number(&"=SUM(1*1, ABS(2), ABS(2+1), 4)"),
         10.0,
     );
-    //TODO
-    //assert_eq!(evaluate_formula_number(&"=SUM(1, 2, , 3)"), 6.0,);
+    assert_eq!(evaluate_formula_number(&"=SUM(1, 2, , 3)"), 6.0,);
+    assert_eq!(evaluate_formula_number(&"=SUM( 1 , 2,,3,)"), 6.0,);
+    assert_eq!(evaluate_formula_number(&"=SUM( 1 , 2,,,3,)"), 6.0,);
+    assert_eq!(evaluate_formula_number(&"=SUM(,)"), 0.0,);
 }
 
 #[test]
@@ -372,6 +374,10 @@ fn it_evaluate_functions_avg() {
         2.25,
     );
     assert_eq!(evaluate_formula_number(&"=AVERAGE({100,200})"), 150.0,);
+    assert_eq!(evaluate_formula_number(&"=AVERAGE( 1 , 2,,3)"), 1.5,);
+    assert_eq!(evaluate_formula_number(&"=AVERAGE( 1 , )"), 0.5,);
+    assert_eq!(evaluate_formula_number(&"=AVERAGE(,)"), 0.0,);
+    assert_eq!(evaluate_formula_number(&"=AVERAGE(1,,2,3,)",), 1.2);
     //assert_eq!(evaluate_formula_number(&"=AVERAGE({{100,200}})"), 150.0);
 }
 
@@ -381,6 +387,8 @@ fn it_evaluate_functions_product() {
         evaluate_formula_number(&"=PRODUCT(ABS(1),2*1, 3,4*1)"),
         24.0,
     );
+    assert_eq!(evaluate_formula_number(&"=PRODUCT( 1 , 2,,3)"), 6.0,);
+    assert_eq!(evaluate_formula_number(&"=PRODUCT(,)"), 0.0,);
 }
 
 #[test]

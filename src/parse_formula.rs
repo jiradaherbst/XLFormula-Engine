@@ -119,7 +119,52 @@ fn build_formula_collective_operator(
 ) -> types::Formula {
     let mut vec = Vec::new();
     for term in pair.into_inner() {
-        vec.push(build_formula_with_climber(term.into_inner(), f));
+        if (term.as_str().parse::<String>().unwrap() == "")
+            | (term.as_str().parse::<String>().unwrap() == ",")
+            | (term.as_str().parse::<String>().unwrap() == ", ")
+            | (term.as_str().parse::<String>().unwrap() == " ,")
+        {
+            vec.push(types::Formula::Value(types::Value::Blank))
+        } else {
+            vec.push(build_formula_with_climber(term.into_inner(), f))
+        }
+    }
+    let op_type = match collective_operation {
+        Rule::sum => types::Operator::Function(types::Function::Sum),
+        Rule::product => types::Operator::Function(types::Function::Product),
+        Rule::average => types::Operator::Function(types::Function::Average),
+        Rule::or => types::Operator::Function(types::Function::Or),
+        Rule::and => types::Operator::Function(types::Function::And),
+        Rule::xor => types::Operator::Function(types::Function::Xor),
+        Rule::days => types::Operator::Function(types::Function::Days),
+        Rule::right => types::Operator::Function(types::Function::Right),
+        Rule::left => types::Operator::Function(types::Function::Left),
+        Rule::iff => types::Operator::Function(types::Function::Iff),
+        _ => unreachable!(),
+    };
+    let operation = types::Expression {
+        op: op_type,
+        values: vec,
+    };
+    types::Formula::Operation(operation)
+}
+
+fn build_formula_collective_operator_average(
+    collective_operation: Rule,
+    pair: pest::iterators::Pair<Rule>,
+    f: Option<&impl Fn(String, Vec<f32>) -> types::Value>,
+) -> types::Formula {
+    let mut vec = Vec::new();
+    for term in pair.into_inner() {
+        if (term.as_str().parse::<String>().unwrap() == "")
+            | (term.as_str().parse::<String>().unwrap() == ",")
+            | (term.as_str().parse::<String>().unwrap() == ", ")
+            | (term.as_str().parse::<String>().unwrap() == " ,")
+        {
+            vec.push(types::Formula::Value(types::Value::Number(0.0)))
+        } else {
+            vec.push(build_formula_with_climber(term.into_inner(), f))
+        }
     }
     let op_type = match collective_operation {
         Rule::sum => types::Operator::Function(types::Function::Sum),
@@ -263,7 +308,7 @@ fn build_formula_with_climber(
             Rule::abs => build_formula_unary_operator(Rule::abs, pair, f),
             Rule::sum => build_formula_collective_operator(Rule::sum, pair, f),
             Rule::product => build_formula_collective_operator(Rule::product, pair, f),
-            Rule::average => build_formula_collective_operator(Rule::average, pair, f),
+            Rule::average => build_formula_collective_operator_average(Rule::average, pair, f),
             Rule::or => build_formula_collective_operator(Rule::or, pair, f),
             Rule::and => build_formula_collective_operator(Rule::and, pair, f),
             Rule::xor => build_formula_collective_operator(Rule::xor, pair, f),
