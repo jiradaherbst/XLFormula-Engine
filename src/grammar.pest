@@ -49,9 +49,9 @@ function = _{ abs | sum | product | average | negate | days | right | left | iff
     custom_function = { reference ~ (function_param | empty_param) } 
     
 logical_function = _{ or | and | xor | not } 
-    or      =  { "OR" ~ function_param } 
-    and     =  { "AND" ~ function_param }
-    xor     =  { "XOR" ~ function_param }
+    or      =  { "OR" ~ function_param_with_atomic_expr } 
+    and     =  { "AND" ~ function_param_with_atomic_expr }
+    xor     =  { "XOR" ~ function_param_with_atomic_expr }
     not     =  { "NOT" ~ "(" ~ expr ~ ")" }
 
 function_param      = _{ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
@@ -65,7 +65,7 @@ atomic_expr = ${ expr }
 param_inner = _{ atomic_expr | expr}
 first_param = { param_inner? }
 param       = { ","? ~ param_inner? }
-param_with_blank   = _{ param1 | blank}
+param_with_blank   = _{ param1 | blank }
 blank         = {","}
 param1          = {"," ~ param_inner}
 
