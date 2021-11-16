@@ -229,5 +229,16 @@ fn main() -> Result<(), ParseError> {
     let formula = parse_formula::parse_string_to_formula(&"=OR({F,B})", None::<NoCustomFunction>);
     let result = calculate::calculate_formula(formula, Some(&data_function));
     println!("Result is {}", calculate::result_to_string(result));
+
+    let formula =
+        parse_formula::parse_string_to_formula(&"=SUM(1, 2, , 3)", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
+
+    ///////////// IF function
+    let formula =
+        parse_formula::parse_string_to_formula(&"=IF(TRUE,1,0)", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
     Ok(())
 }

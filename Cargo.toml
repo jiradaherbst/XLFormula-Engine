@@ -1,6 +1,6 @@
 [package]
 name = "xlformula_engine"
-version = "0.1.14"
+version = "0.1.15"
 authors = ["Jirada Herbst <jirada.herbst@data2impact.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"

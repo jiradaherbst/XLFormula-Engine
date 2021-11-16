@@ -10,18 +10,19 @@ It supports:
 * Comparison operations =, >, >=, <, <=, <>
 * String operation & (concatenation)
 * Build-in variables TRUE, FALSE
-* Excel functions ABS(), SUM(), PRODUCT(), AVERAGE(), RIGHT(), LEFT()
+* Excel functions ABS(), SUM(), PRODUCT(), AVERAGE(), RIGHT(), LEFT(), IF()
 * Operations on lists of values (one dimensional range)
 * Add or subtract dates and excel funtion DAYS()
 * Custom functions with number arguments
-* Handle blank/null values in calculation
+* Handle blank/null values in calculation 
+* Handle empty/missing parameters of function calls as blank values
 
 ## Installation
 
 Add the corresponding entry to your Cargo.toml dependency list:
 ```toml
 [dependencies]
-xlformula_engine = "0.1.14"
+xlformula_engine = "0.1.15"
 ```
 and add this to your crate root:
 ```rust
@@ -123,6 +124,10 @@ let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 
 let formula = parse_formula::parse_string_to_formula(&"=LEFT(\"apple\")", None::<NoCustomFunction>);
+let result = calculate::calculate_formula(formula, None::<NoReference>);
+println!("Result is {}", calculate::result_to_string(result));
+
+let formula = parse_formula::parse_string_to_formula(&"=IF(TRUE,1,0)", None::<NoCustomFunction>);
 let result = calculate::calculate_formula(formula, None::<NoReference>);
 println!("Result is {}", calculate::result_to_string(result));
 }
@@ -301,6 +306,10 @@ fn main() -> {
     println!("Result is {}", calculate::result_to_string(result));
     let formula = parse_formula::parse_string_to_formula(&"=XOR({F,B,T,B,F,{F,B,T,B,F}})", None::<NoCustomFunction>);
     let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
+
+    let formula = parse_formula::parse_string_to_formula(&"=SUM(1, 2, , 3)", None::<NoCustomFunction>);
+    let result = calculate::calculate_formula(formula, None::<NoReference>);
     println!("Result is {}", calculate::result_to_string(result));
 }
 ```
