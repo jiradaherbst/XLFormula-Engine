@@ -314,13 +314,17 @@ fn calculate_comparison_operator(
     f: fn(num1: f32, num2: f32) -> bool,
 ) -> types::Value {
     match lhs {
-        types::Value::Boolean(_) => lhs,
-        types::Value::Error(_) => lhs,
-        types::Value::Text(_) => lhs,
+        types::Value::Text(l) => match rhs {
+            types::Value::Text(r) => {
+                if l.eq(&r) {
+                    types::Value::Boolean(types::Boolean::True)
+                } else {
+                    types::Value::Boolean(types::Boolean::False)
+                }
+            }
+            _ => types::Value::Error(types::Error::Value),
+        },
         types::Value::Number(l) => match rhs {
-            types::Value::Boolean(_) => rhs,
-            types::Value::Error(_) => rhs,
-            types::Value::Text(_) => rhs,
             types::Value::Number(r) => {
                 if f(l, r) {
                     types::Value::Boolean(types::Boolean::True)
@@ -328,8 +332,6 @@ fn calculate_comparison_operator(
                     types::Value::Boolean(types::Boolean::False)
                 }
             }
-            types::Value::Iterator(_) => unreachable!(),
-            types::Value::Date(_) => unreachable!(),
             types::Value::Blank => {
                 if f(l, 0.0) {
                     types::Value::Boolean(types::Boolean::True)
@@ -337,13 +339,9 @@ fn calculate_comparison_operator(
                     types::Value::Boolean(types::Boolean::False)
                 }
             }
+            _ => types::Value::Error(types::Error::Value),
         },
-        types::Value::Iterator(_) => unreachable!(),
-        types::Value::Date(_) => unreachable!(),
         types::Value::Blank => match rhs {
-            types::Value::Boolean(_) => rhs,
-            types::Value::Error(_) => rhs,
-            types::Value::Text(_) => rhs,
             types::Value::Number(r) => {
                 if f(0.0, r) {
                     types::Value::Boolean(types::Boolean::True)
@@ -351,17 +349,13 @@ fn calculate_comparison_operator(
                     types::Value::Boolean(types::Boolean::False)
                 }
             }
-            types::Value::Iterator(_) => unreachable!(),
-            types::Value::Date(_) => unreachable!(),
             types::Value::Blank => types::Value::Boolean(types::Boolean::True),
-            // {
-            //     if f(0.0, 0.0) {
-            //         types::Value::Boolean(types::Boolean::True)
-            //     } else {
-            //         types::Value::Boolean(types::Boolean::False)
-            //     }
-            // }
+            _ => types::Value::Error(types::Error::Value),
         },
+        types::Value::Boolean(_) => unreachable!(),
+        types::Value::Error(_) => unreachable!(),
+        types::Value::Iterator(_) => unreachable!(),
+        types::Value::Date(_) => unreachable!(),
     }
 }
 

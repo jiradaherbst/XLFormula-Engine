@@ -240,5 +240,20 @@ fn main() -> Result<(), ParseError> {
         parse_formula::parse_string_to_formula(&"=IF(TRUE,1,0)", None::<NoCustomFunction>);
     let result = calculate::calculate_formula(formula, Some(&data_function));
     println!("Result is {}", calculate::result_to_string(result));
+
+    let data_function = |s: String| match s.as_str() {
+        "ReferenceKey" => types::Value::Text("100".to_string()),
+        "ReferenceName" => types::Value::Text("Test".to_string()),
+        _ => types::Value::Error(types::Error::Value),
+    };
+
+    let formula = parse_formula::parse_string_to_formula(
+        &"=IF(ReferenceKey=\"10\",\"\",ReferenceKey&\" - \")&ReferenceName",
+        None::<NoCustomFunction>,
+    );
+
+    let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
+
     Ok(())
 }

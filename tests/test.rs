@@ -1463,32 +1463,18 @@ fn it_evaluates_if_formulas() -> Result<(), ParseError> {
     Ok(())
 }
 
-//TODO??
-// #[test]
-// fn it_evaluate_custom_functions_with_reference() {
-//     let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
-//         "Increase" => types::Value::Number(params[0] + 1.0),
-//         _ => types::Value::Error(types::Error::Value),
-//     };
-//     let data_functions = |s: String| match s.as_str() {
-//         "A" => types::Value::Number(1.0),
-//         "B" => types::Value::Number(2.0),
-//         _ => types::Value::Error(types::Error::Value),
-//     };
-//     assert_eq!(
-//         evaluate_formula_number_with_custom_function_and_reference(
-//             &"=Increase(A)",
-//             Some(&custom_functions),
-//             Some(&data_functions),
-//         ),
-//         2.0
-//     );
-//     assert_eq!(
-//         evaluate_formula_number_with_custom_function_and_reference(
-//             &"=SimpleSum(A,B)",
-//             Some(&custom_functions),
-//             Some(&data_functions),
-//         ),
-//         3.0
-//     );
-// }
+#[test]
+fn it_evaluates_if_formulas_with_text() {
+    let data_function = |s: String| match s.as_str() {
+        "ReferenceKey" => types::Value::Text("100".to_string()),
+        "ReferenceName" => types::Value::Text("Test".to_string()),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_string_with_reference(
+            &"=IF(ReferenceKey=\"10\",\"\",ReferenceKey&\" - \")&ReferenceName",
+            Some(&data_function)
+        ),
+        "100 - Test"
+    );
+}
