@@ -34,8 +34,8 @@ fn calculate_string_operation_rhs(
         types::Value::Error(_) => rhs,
         types::Value::Number(r) => types::Value::Text(f(&l, &r.to_string())),
         types::Value::Text(r) => types::Value::Text(f(&l, &r)),
-        types::Value::Iterator(_) => unreachable!(),
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Iterator(_) => types::Value::Error(types::Error::Value),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
         types::Value::Blank => types::Value::Text(f(&l, "")),
     }
 }
@@ -50,8 +50,8 @@ fn calculate_string_operator(
         types::Value::Error(_) => lhs,
         types::Value::Number(l) => calculate_string_operation_rhs(&l.to_string(), rhs, f),
         types::Value::Text(l) => calculate_string_operation_rhs(&l, rhs, f),
-        types::Value::Iterator(_) => unreachable!(),
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Iterator(_) => types::Value::Error(types::Error::Value),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
         types::Value::Blank => calculate_string_operation_rhs("", rhs, f),
     }
 }
@@ -70,9 +70,9 @@ fn calcualte_numeric_operator_rhs_text(
                 Err(_) => types::Value::Error(types::Error::Cast),
             },
             types::Value::Number(r) => types::Value::Number(f(nl, r)),
-            types::Value::Iterator(_) => unreachable!(),
-            types::Value::Date(_) => unreachable!(),
-            types::Value::Blank => unreachable!(),
+            types::Value::Iterator(_) => types::Value::Error(types::Error::Value),
+            types::Value::Date(_) => types::Value::Error(types::Error::Value),
+            types::Value::Blank => types::Value::Error(types::Error::Value),
         },
         Err(_) => types::Value::Error(types::Error::Cast),
     }
@@ -99,10 +99,10 @@ fn calculate_numeric_operator_rhs_number(
                 }
                 calculate_numeric_operator(lhs, temp, f)
             } else {
-                types::Value::Error(types::Error::Formula)
+                types::Value::Error(types::Error::Argument)
             }
         }
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
         types::Value::Blank => types::Value::Number(f(l, 0.0)),
     }
 }
@@ -128,10 +128,10 @@ fn calculate_numeric_operator_product_rhs_number(
                 }
                 calculate_numeric_product_operator(lhs, temp, f)
             } else {
-                types::Value::Error(types::Error::Formula)
+                types::Value::Error(types::Error::Argument)
             }
         }
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
         types::Value::Blank => match lhs {
             types::Value::Blank => types::Value::Blank,
             _ => types::Value::Number(l),
@@ -152,7 +152,7 @@ fn calculate_numeric_operator_rhs_iterator(
                 }
                 calculate_numeric_operator(temp, rhs, f)
             } else {
-                types::Value::Error(types::Error::Formula)
+                types::Value::Error(types::Error::Argument)
             }
         }
         types::Value::Iterator(mut rhs_vec) => {
@@ -169,21 +169,21 @@ fn calculate_numeric_operator_rhs_iterator(
             }
             types::Value::Iterator(result_vec)
         }
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
 fn add_days_to_date(d: DateTime<FixedOffset>, rhs: types::Value) -> types::Value {
     match rhs {
         types::Value::Number(x) => types::Value::Date(d + Duration::days(x as i64)),
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
 fn subtract_days_from_date(d: DateTime<FixedOffset>, rhs: types::Value) -> types::Value {
     match rhs {
         types::Value::Number(x) => types::Value::Date(d - Duration::days(x as i64)),
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -199,7 +199,7 @@ fn calculate_numeric_operator(
         types::Value::Text(t) => calcualte_numeric_operator_rhs_text(t, rhs, f),
         types::Value::Number(l) => calculate_numeric_operator_rhs_number(l, lhs, rhs, f),
         types::Value::Iterator(lhs_vec) => calculate_numeric_operator_rhs_iterator(lhs_vec, rhs, f),
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
         types::Value::Blank => calculate_numeric_operator_rhs_number(0.0, lhs, rhs, f),
     }
 }
@@ -216,7 +216,7 @@ fn calculate_numeric_product_operator(
         types::Value::Text(t) => calcualte_numeric_operator_rhs_text(t, rhs, f),
         types::Value::Number(l) => calculate_numeric_operator_product_rhs_number(l, lhs, rhs, f),
         types::Value::Iterator(lhs_vec) => calculate_numeric_operator_rhs_iterator(lhs_vec, rhs, f),
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
         types::Value::Blank => calculate_numeric_operator_product_rhs_number(1.0, lhs, rhs, f),
     }
 }
@@ -251,10 +251,10 @@ fn calculate_average_operator_rhs_number(
                 }
                 calculate_numeric_operator(lhs, temp, f)
             } else {
-                types::Value::Error(types::Error::Formula)
+                types::Value::Error(types::Error::Argument)
             }
         }
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
         types::Value::Blank => {
             *element_count -= 1;
             types::Value::Number(f(l, 0.0))
@@ -277,10 +277,10 @@ fn calculate_average_operator_rhs_iterator(
                 }
                 calculate_numeric_operator(temp, rhs, f)
             } else {
-                types::Value::Error(types::Error::Formula)
+                types::Value::Error(types::Error::Argument)
             }
         }
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -300,7 +300,7 @@ fn calculate_average_operator(
         types::Value::Iterator(lhs_vec) => {
             calculate_average_operator_rhs_iterator(element_count, lhs_vec, rhs, f)
         }
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
         types::Value::Blank => {
             *element_count -= 1;
             calculate_average_operator_rhs_number(element_count, 0.0, lhs, rhs, f)
@@ -352,10 +352,10 @@ fn calculate_comparison_operator(
             types::Value::Blank => types::Value::Boolean(types::Boolean::True),
             _ => types::Value::Error(types::Error::Value),
         },
-        types::Value::Boolean(_) => unreachable!(),
-        types::Value::Error(_) => unreachable!(),
-        types::Value::Iterator(_) => unreachable!(),
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Boolean(_) => types::Value::Error(types::Error::Value),
+        types::Value::Error(_) => types::Value::Error(types::Error::Value),
+        types::Value::Iterator(_) => types::Value::Error(types::Error::Value),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -397,10 +397,10 @@ fn calculate_boolean_operator_rhs_boolean(
                             types::Value::Boolean(types::Boolean::False)
                         }
                     }
-                    _ => unreachable!(),
+                    _ => types::Value::Error(types::Error::Value),
                 }
             } else {
-                types::Value::Error(types::Error::Formula)
+                types::Value::Error(types::Error::Argument)
             }
         }
         types::Value::Blank => {
@@ -410,7 +410,7 @@ fn calculate_boolean_operator_rhs_boolean(
                 types::Value::Boolean(types::Boolean::False)
             }
         }
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -424,7 +424,7 @@ fn calculate_boolean_operator_rhs_error(rh: types::Value) -> types::Value {
             }
         }
         types::Value::Error(_) => types::Value::Error(types::Error::Cast),
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -448,14 +448,14 @@ fn calculate_boolean_operator_rhs_iterator(
                             types::Value::Boolean(types::Boolean::False)
                         }
                     }
-                    _ => types::Value::Error(types::Error::Formula),
+                    _ => types::Value::Error(types::Error::Value),
                 }
             } else {
-                types::Value::Error(types::Error::Formula)
+                types::Value::Error(types::Error::Argument)
             }
         }
 
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -478,7 +478,7 @@ fn calculate_boolean_operator(
             cast_value_to_boolean(rhs),
             f,
         ),
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -501,7 +501,7 @@ fn calculate_boolean_operator_or(
             cast_value_to_boolean(rhs),
             f,
         ),
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -524,7 +524,7 @@ fn calculate_boolean_operator_xor(
             cast_value_to_boolean(rhs),
             f,
         ),
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -534,8 +534,8 @@ fn calculate_abs(value: types::Value) -> types::Value {
         types::Value::Error(_) => value,
         types::Value::Text(_) => value,
         types::Value::Number(l) => types::Value::Number(l.abs()),
-        types::Value::Iterator(_) => unreachable!(),
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Iterator(_) => types::Value::Error(types::Error::Value),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
         types::Value::Blank => types::Value::Number(0.0),
     }
 }
@@ -570,8 +570,8 @@ fn calculate_negation(value: types::Value) -> types::Value {
                 types::Value::Boolean(types::Boolean::False)
             }
         }
-        types::Value::Iterator(_) => unreachable!(),
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Iterator(_) => types::Value::Error(types::Error::Value),
+        types::Value::Date(_) => types::Value::Error(types::Error::Value),
         types::Value::Blank => types::Value::Boolean(types::Boolean::True),
     }
 }
@@ -587,7 +587,7 @@ fn calculate_negate(value: types::Value) -> types::Value {
             types::Value::Iterator(result_vec)
         }
         types::Value::Blank => types::Value::Blank,
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -633,7 +633,7 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
             }
             types::Value::Iterator(boolean_vec)
         }
-        types::Value::Date(_) => unreachable!(),
+        types::Value::Date(_) => types::Value::Error(types::Error::Cast),
         types::Value::Blank => types::Value::Blank,
     }
 }
@@ -656,10 +656,10 @@ fn convert_iterator_to_result(
                             types::Value::Boolean(types::Boolean::False)
                         }
                     }
-                    _ => types::Value::Error(types::Error::Formula),
+                    _ => types::Value::Error(types::Error::Value),
                 }
             } else {
-                types::Value::Error(types::Error::Formula)
+                types::Value::Error(types::Error::Argument)
             }
         }
         _ => result,
@@ -684,10 +684,10 @@ fn convert_iterator_to_result_or(
                             types::Value::Boolean(types::Boolean::False)
                         }
                     }
-                    _ => types::Value::Error(types::Error::Formula),
+                    _ => types::Value::Error(types::Error::Value),
                 }
             } else {
-                types::Value::Error(types::Error::Formula)
+                types::Value::Error(types::Error::Argument)
             }
         }
         _ => result,
@@ -712,10 +712,10 @@ fn convert_iterator_to_result_xor(
                             types::Value::Boolean(types::Boolean::False)
                         }
                     }
-                    _ => types::Value::Error(types::Error::Formula),
+                    _ => types::Value::Error(types::Error::Value),
                 }
             } else {
-                types::Value::Error(types::Error::Formula)
+                types::Value::Error(types::Error::Argument)
             }
         }
         _ => result,
@@ -729,11 +729,11 @@ fn get_values(
     (
         match exp.values.pop() {
             Some(formula) => calculate_formula(formula, f),
-            None => types::Value::Error(types::Error::Formula),
+            None => types::Value::Error(types::Error::Argument),
         },
         match exp.values.pop() {
             Some(formula) => calculate_formula(formula, f),
-            None => types::Value::Error(types::Error::Formula),
+            None => types::Value::Error(types::Error::Argument),
         },
     )
 }
@@ -744,7 +744,7 @@ fn get_value(
 ) -> types::Value {
     match exp.values.pop() {
         Some(formula) => calculate_formula(formula, f),
-        None => types::Value::Error(types::Error::Formula),
+        None => types::Value::Error(types::Error::Argument),
     }
 }
 
@@ -755,11 +755,11 @@ fn get_date_values(
     (
         match exp.values.pop() {
             Some(formula) => calculate_formula(formula, f),
-            None => types::Value::Error(types::Error::Formula),
+            None => types::Value::Error(types::Error::Argument),
         },
         match exp.values.pop() {
             Some(formula) => calculate_formula(formula, f),
-            None => types::Value::Error(types::Error::Formula),
+            None => types::Value::Error(types::Error::Argument),
         },
     )
 }
@@ -773,18 +773,18 @@ fn get_number_and_string_values(
             types::Value::Number(1.0),
             match exp.values.pop() {
                 Some(formula) => calculate_formula(formula, f),
-                None => types::Value::Error(types::Error::Formula),
+                None => types::Value::Error(types::Error::Argument),
             },
         )
     } else {
         (
             match exp.values.pop() {
                 Some(formula) => calculate_formula(formula, f),
-                None => types::Value::Error(types::Error::Formula),
+                None => types::Value::Error(types::Error::Argument),
             },
             match exp.values.pop() {
                 Some(formula) => calculate_formula(formula, f),
-                None => types::Value::Error(types::Error::Formula),
+                None => types::Value::Error(types::Error::Argument),
             },
         )
     }
@@ -837,9 +837,9 @@ fn calculate_reference(
             types::Value::Iterator(v) => types::Value::Iterator(v),
             types::Value::Date(d) => types::Value::Date(d),
             types::Value::Blank => types::Value::Blank,
-            _ => types::Value::Error(types::Error::Value), //unreachable!(),
+            _ => types::Value::Error(types::Error::Reference),
         },
-        None => types::Value::Error(types::Error::Formula),
+        None => types::Value::Error(types::Error::Reference),
     }
 }
 
@@ -850,7 +850,7 @@ fn calculate_bool(
 ) -> types::Value {
     let mut result = match exp.values.pop() {
         Some(formula) => calculate_formula(formula, f),
-        None => types::Value::Error(types::Error::Formula),
+        None => types::Value::Error(types::Error::Argument),
     };
     result = cast_value_to_boolean(result);
     while let Some(top) = exp.values.pop() {
@@ -866,7 +866,7 @@ fn calculate_or(
 ) -> types::Value {
     let mut result = match exp.values.pop() {
         Some(formula) => calculate_formula(formula, f),
-        None => types::Value::Error(types::Error::Formula),
+        None => types::Value::Error(types::Error::Argument),
     };
     result = cast_value_to_boolean(result);
     while let Some(top) = exp.values.pop() {
@@ -882,7 +882,7 @@ fn calculate_xor(
 ) -> types::Value {
     let mut result = match exp.values.pop() {
         Some(formula) => calculate_formula(formula, f),
-        None => types::Value::Error(types::Error::Formula),
+        None => types::Value::Error(types::Error::Argument),
     };
     result = cast_value_to_boolean(result);
     while let Some(top) = exp.values.pop() {
@@ -1025,7 +1025,7 @@ fn calculate_iff(iff_arguments: (types::Value, types::Value, types::Value)) -> t
         types::Value::Blank => false_value,
         types::Value::Error(_) => bool_expression,
         types::Value::Text(_) => types::Value::Error(types::Error::Value),
-        _ => unreachable!(),
+        _ => types::Value::Error(types::Error::Value),
     }
 }
 
@@ -1206,10 +1206,10 @@ fn show_error(error: types::Error) -> String {
     match error {
         types::Error::Div0 => String::from("#DIV/0!"),
         types::Error::Cast => String::from("#CAST!"),
-        types::Error::Formula => String::from("Null Formula"),
         types::Error::Parse => String::from("#PARSE!"),
         types::Error::Value => String::from("#VALUE!"),
         types::Error::Argument => String::from("#ARG!"),
+        types::Error::Reference => String::from("#REF!"),
     }
 }
 

@@ -40,10 +40,10 @@ pub enum Operator {
 pub enum Error {
     Div0,
     Cast,
-    Formula,
     Parse,
     Value,
     Argument,
+    Reference,
 }
 
 /// Defines boolean types.

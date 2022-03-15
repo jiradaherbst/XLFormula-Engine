@@ -46,7 +46,7 @@ pub fn parse_string_to_formula(
         Some(parse_result) => match parse_result.as_rule() {
             Rule::expr => build_formula_with_climber(parse_result.into_inner(), f),
             Rule::string_constant => parse_string_constant(parse_result),
-            _ => unreachable!(),
+            _ => types::Formula::Value(types::Value::Error(types::Error::Parse)),
         },
         None => types::Formula::Value(types::Value::Error(types::Error::Parse)),
     }
@@ -129,7 +129,16 @@ fn build_formula_collective_operator(
             vec.push(build_formula_with_climber(term.into_inner(), f))
         }
     }
-    let op_type = match collective_operation {
+    let op_type = rule_to_function_operator(collective_operation);
+    let operation = types::Expression {
+        op: op_type,
+        values: vec,
+    };
+    types::Formula::Operation(operation)
+}
+
+fn rule_to_function_operator(collective_operation: Rule) -> types::Operator {
+    match collective_operation {
         Rule::sum => types::Operator::Function(types::Function::Sum),
         Rule::product => types::Operator::Function(types::Function::Product),
         Rule::average => types::Operator::Function(types::Function::Average),
@@ -141,12 +150,7 @@ fn build_formula_collective_operator(
         Rule::left => types::Operator::Function(types::Function::Left),
         Rule::iff => types::Operator::Function(types::Function::Iff),
         _ => unreachable!(),
-    };
-    let operation = types::Expression {
-        op: op_type,
-        values: vec,
-    };
-    types::Formula::Operation(operation)
+    }
 }
 
 fn build_formula_collective_operator_average(
@@ -166,19 +170,7 @@ fn build_formula_collective_operator_average(
             vec.push(build_formula_with_climber(term.into_inner(), f))
         }
     }
-    let op_type = match collective_operation {
-        Rule::sum => types::Operator::Function(types::Function::Sum),
-        Rule::product => types::Operator::Function(types::Function::Product),
-        Rule::average => types::Operator::Function(types::Function::Average),
-        Rule::or => types::Operator::Function(types::Function::Or),
-        Rule::and => types::Operator::Function(types::Function::And),
-        Rule::xor => types::Operator::Function(types::Function::Xor),
-        Rule::days => types::Operator::Function(types::Function::Days),
-        Rule::right => types::Operator::Function(types::Function::Right),
-        Rule::left => types::Operator::Function(types::Function::Left),
-        Rule::iff => types::Operator::Function(types::Function::Iff),
-        _ => unreachable!(),
-    };
+    let op_type = rule_to_function_operator(collective_operation);
     let operation = types::Expression {
         op: op_type,
         values: vec,
@@ -205,19 +197,7 @@ fn build_formula_collective_operator_and(
             vec.push(build_formula_with_climber(term.into_inner(), f))
         }
     }
-    let op_type = match collective_operation {
-        Rule::sum => types::Operator::Function(types::Function::Sum),
-        Rule::product => types::Operator::Function(types::Function::Product),
-        Rule::average => types::Operator::Function(types::Function::Average),
-        Rule::or => types::Operator::Function(types::Function::Or),
-        Rule::and => types::Operator::Function(types::Function::And),
-        Rule::xor => types::Operator::Function(types::Function::Xor),
-        Rule::days => types::Operator::Function(types::Function::Days),
-        Rule::right => types::Operator::Function(types::Function::Right),
-        Rule::left => types::Operator::Function(types::Function::Left),
-        Rule::iff => types::Operator::Function(types::Function::Iff),
-        _ => unreachable!(),
-    };
+    let op_type = rule_to_function_operator(collective_operation);
     let operation = types::Expression {
         op: op_type,
         values: vec,
@@ -287,9 +267,9 @@ fn build_formula_custom_function(
             types::Value::Iterator(v) => types::Formula::Value(types::Value::Iterator(v)),
             types::Value::Date(d) => types::Formula::Value(types::Value::Date(d)),
             types::Value::Blank => types::Formula::Value(types::Value::Blank),
-            _ => types::Formula::Value(types::Value::Error(types::Error::Value)), //unreachable!(),
+            _ => types::Formula::Value(types::Value::Error(types::Error::Reference)),
         },
-        None => types::Formula::Value(types::Value::Error(types::Error::Formula)),
+        None => types::Formula::Value(types::Value::Error(types::Error::Reference)),
     }
 }
 
@@ -311,7 +291,7 @@ fn build_formula_binary_operator(
         Rule::less => types::Operator::Less,
         Rule::greater_or_equal => types::Operator::GreaterOrEqual,
         Rule::less_or_equal => types::Operator::LessOrEqual,
-        _ => unreachable!(0),
+        _ => unreachable!(),
     };
     let operation = types::Expression {
         op: op_type,
