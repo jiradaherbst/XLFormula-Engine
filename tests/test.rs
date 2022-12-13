@@ -762,6 +762,34 @@ fn it_evaluate_custom_functions_() {
 }
 
 #[test]
+fn it_evaluate_custom_functions_with_reference() {
+    let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
+        "Increase" => types::Value::Number(params[0] + 1.0),
+        "SimpleSum" => types::Value::Number(params[0] + params[1]),
+        "CustomSum" => types::Value::Number(params[0] + params[1] + params[2]),
+        "EqualFive" => types::Value::Number(5.0),
+        "CountText" => types::Value::Text(10.0.to_string()),
+        "CountNumber" => types::Value::Number(20.0),
+        _ => types::Value::Error(types::Error::Value),
+    };
+
+    let data_function = |s: String| match s.as_str() {
+        "start" => types::Value::Number(5.0),
+        "end" => types::Value::Number(10.0),
+        _ => types::Value::Error(types::Error::Value),
+    };
+
+    assert_eq!(
+        _evaluate_formula_number_with_custom_function_and_reference(
+            &"=Increase(start)",
+            Some(&custom_functions),
+            Some(&data_function)
+        ),
+        6.0
+    );
+}
+
+#[test]
 fn it_evaluate_left_and_right_functions() {
     assert_eq!(evaluate_formula_string(&"=RIGHT(\"apple\", 3)"), "ple",);
     assert_eq!(evaluate_formula_string(&"=RIGHT(\"apple\")"), "e",);
