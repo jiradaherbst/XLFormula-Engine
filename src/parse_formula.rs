@@ -218,13 +218,6 @@ fn build_formula_iff(pair: pest::iterators::Pair<Rule>) -> types::Formula {
     types::Formula::Operation(operation)
 }
 
-/*
-Span { str: "Increase(start)", start: 1, end: 16, inner:
-[ Pair { rule: reference, span: Span { str: "Increase", start: 1, end: 9 }, inner: [] }
-, Pair { rule: expr, span: Span { str: "start", start: 10, end: 15, inner: [Pair { rule: reference, span: Span { str: "start", start: 10, end: 15 }, inner: [] }]}}
-]}
-*/
-
 fn build_formula_custom_function(pair: pest::iterators::Pair<Rule>) -> types::Formula {
     // println!("build_formula_custom_function - {:?}", pair);
 

@@ -1213,7 +1213,8 @@ fn compare_dates(
 }
 
 /// Evaluates a string that was parsed and stored in Expression Struct.
-/// Takes an optional closure with the trait bound Fn(String) -> types::Value.
+/// Takes an optional closure of custom functions with the trait bound Fn(String, Vec<types::Value>) -> types::Value.
+/// Takes an optional closure of custom variables with the trait bound Fn(String) -> types::Value.
 pub fn calculate_formula(
     formula: types::Formula,
     f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
