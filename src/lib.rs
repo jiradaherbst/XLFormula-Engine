@@ -39,16 +39,16 @@
 //!use xlformula_engine::NoReference;
 //!use xlformula_engine::NoCustomFunction;
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=1+2", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=1+2");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=(1*(2+3))*2", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=(1*(2+3))*2");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=1+3/0", None::<NoCustomFunction>); // error (#DIV/0!)
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=1+3/0"); // error (#DIV/0!)
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!```
 //!The last string is evaluated to #DIV/0!.
@@ -61,12 +61,12 @@
 //!use xlformula_engine::NoReference;
 //!use xlformula_engine::NoCustomFunction;
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=\"Hello \" & \" World!\"", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=\"Hello \" & \" World!\"");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=1 + \"Hello\"", None::<NoCustomFunction>); // error (#CAST!)
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=1 + \"Hello\""); // error (#CAST!)
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!```
 //!Concatenating number and string results in a #CAST! error.
@@ -79,12 +79,12 @@
 //!use xlformula_engine::NoReference;
 //!use xlformula_engine::NoCustomFunction;
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"1.2", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"1.2");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"Hello World", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"Hello World");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!```
 //!
@@ -96,32 +96,32 @@
 //!use xlformula_engine::NoReference;
 //!use xlformula_engine::NoCustomFunction;
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=ABS(-1)", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=ABS(-1)");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=SUM(1,2,\"3\")", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=SUM(1,2,\"3\")");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=PRODUCT(ABS(1),2*1, 3,4*1)", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=PRODUCT(ABS(1),2*1, 3,4*1)");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=RIGHT(\"apple\", 3)", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=RIGHT(\"apple\", 3)");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=LEFT(\"apple\", 3)", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=LEFT(\"apple\", 3)");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=LEFT(\"apple\")", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=LEFT(\"apple\")");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=IF(TRUE,1,0)", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=IF(TRUE,1,0)");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!```
 //!
@@ -133,16 +133,16 @@
 //!use xlformula_engine::NoReference;
 //!use xlformula_engine::NoCustomFunction;
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=2>=1", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=2>=1");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=OR(1>1,1<>1)", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=OR(1>1,1<>1)");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=AND(\"test\",\"True\", 1, true) ", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=AND(\"test\",\"True\", 1, true) ");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!```
 //!
@@ -159,8 +159,8 @@
 //!"B" => types::Value::Number(3.0),
 //!_ => types::Value::Error(types::Error::Value),
 //!};
-//!let formula = parse_formula::parse_string_to_formula(&"=A+B", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, Some(&data_function));
+//!let formula = parse_formula::parse_string_to_formula(&"=A+B");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, Some(&data_function));
 //!println!("Result is {}", calculate::result_to_string(result));
 //!```
 //!
@@ -172,16 +172,16 @@
 //!use xlformula_engine::NoReference;
 //!use xlformula_engine::NoCustomFunction;
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"={1,2,3}+{1,2,3}", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"={1,2,3}+{1,2,3}");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));    
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=XOR({0,0,0})", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=XOR({0,0,0})");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=AVERAGE({1,2,3},1,2,3)", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!let formula = parse_formula::parse_string_to_formula(&"=AVERAGE({1,2,3},1,2,3)");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!```
 //!
@@ -204,16 +204,16 @@
 //!_ => types::Value::Error(types::Error::Value),
 //!};
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=DAYS(end, start)", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, Some(&data_function));
+//!let formula = parse_formula::parse_string_to_formula(&"=DAYS(end, start)");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, Some(&data_function));
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=start+1", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, Some(&data_function));
+//!let formula = parse_formula::parse_string_to_formula(&"=start+1");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, Some(&data_function));
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=end-3", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, Some(&data_function));
+//!let formula = parse_formula::parse_string_to_formula(&"=end-3");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, Some(&data_function));
 //!println!("Result is {}", calculate::result_to_string(result));
 //! Ok(())
 //!}
@@ -227,26 +227,26 @@
 //!use xlformula_engine::types;
 //!use xlformula_engine::NoReference;
 //!
-//!let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
-//!"Increase" => types::Value::Number(params[0] + 1.0),
-//!"SimpleSum" => types::Value::Number(params[0] + params[1]),
+//!let custom_functions = |s: String, params: Vec<types::Value>| match s.as_str() {
+//!"Increase" => types::Value::Number(params[0].as_num().unwrap() + 1.0),
+//!"SimpleSum" => types::Value::Number(params[0].as_num().unwrap() + params[1].as_num().unwrap()),
 //!"EqualFive" => types::Value::Number(5.0),
 //!_ => types::Value::Error(types::Error::Value),
 //!};
 //!
 //!let formula =
-//!parse_formula::parse_string_to_formula(&"=Increase(1)+1", Some(&custom_functions));
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!parse_formula::parse_string_to_formula(&"=Increase(1)+1");
+//!let result = calculate::calculate_formula(formula, Some(&custom_functions), None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula =
-//!parse_formula::parse_string_to_formula(&"=EqualFive()+1", Some(&custom_functions));
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!parse_formula::parse_string_to_formula(&"=EqualFive()+1");
+//!let result = calculate::calculate_formula(formula, Some(&custom_functions), None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula =
-//!parse_formula::parse_string_to_formula(&"=SimpleSum(1,2)", Some(&custom_functions));
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!parse_formula::parse_string_to_formula(&"=SimpleSum(1,2)");
+//!let result = calculate::calculate_formula(formula, Some(&custom_functions), None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!```
 //!
@@ -266,28 +266,28 @@
 //!_ => types::Value::Error(types::Error::Value),
 //!};
 //!
-//!let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
+//!let custom_functions = |s: String, params: Vec<types::Value>| match s.as_str() {
 //!"BLANK" => types::Value::Blank,
 //!_ => types::Value::Error(types::Error::Value),
 //!};
 //!
-//!let formula = parse_formula::parse_string_to_formula(&"=SUM(B, 1)", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, Some(&data_function));
+//!let formula = parse_formula::parse_string_to_formula(&"=SUM(B, 1)");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, Some(&data_function));
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula =
-//!parse_formula::parse_string_to_formula(&"=SUM(BLANK(), 1)", Some(&custom_functions));
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!parse_formula::parse_string_to_formula(&"=SUM(BLANK(), 1)");
+//!let result = calculate::calculate_formula(formula, Some(&custom_functions), None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!//takes list as input
-//!let formula = parse_formula::parse_string_to_formula(&"=SUM({B, 1})", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, Some(&data_function));
+//!let formula = parse_formula::parse_string_to_formula(&"=SUM({B, 1})");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, Some(&data_function));
 //!println!("Result is {}", calculate::result_to_string(result));
 //!
 //!let formula =
-//!parse_formula::parse_string_to_formula(&"=SUM(1, 2, , 3)", None::<NoCustomFunction>);
-//!let result = calculate::calculate_formula(formula, None::<NoReference>);
+//!parse_formula::parse_string_to_formula(&"=SUM(1, 2, , 3)");
+//!let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
 //!println!("Result is {}", calculate::result_to_string(result));
 //!```
 
@@ -304,4 +304,4 @@ pub mod types;
 pub mod parse_formula;
 
 pub type NoReference<'a> = &'a fn(String) -> types::Value;
-pub type NoCustomFunction<'a> = &'a fn(String, Vec<f32>) -> types::Value;
+pub type NoCustomFunction<'a> = &'a fn(String, Vec<types::Value>) -> types::Value;

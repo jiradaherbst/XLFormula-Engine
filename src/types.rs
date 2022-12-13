@@ -1,6 +1,6 @@
 use chrono::{DateTime, FixedOffset};
 /// Defines Excel Functions.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub enum Function {
     Abs,
     Sum,
@@ -15,10 +15,11 @@ pub enum Function {
     Right,
     Left,
     Iff,
+    Custom(String),
 }
 
 /// Defines Excel Operators.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub enum Operator {
     Plus,
     Minus,
@@ -63,6 +64,50 @@ pub enum Value {
     Error(Error),
     Date(DateTime<FixedOffset>),
     Blank,
+}
+
+impl Value {
+    pub fn as_num(&self) -> Result<f32, Error> {
+        match self {
+            Value::Number(v) => Ok(*v),
+            Value::Text(v) => match v.parse::<f32>() {
+                Err(_) => Err(Error::Cast),
+                Ok(v) => Ok(v),
+            },
+            Value::Boolean(v) => match v {
+                Boolean::True => Ok(1.0),
+                Boolean::False => Ok(0.0),
+            },
+            Value::Blank => Ok(0.0),
+            _ => Err(Error::Cast),
+        }
+    }
+
+    pub fn as_string(&self) -> Result<String, Error> {
+        match self {
+            Value::Number(v) => Ok(format!("{}", v)),
+            Value::Text(v) => Ok(v.clone()),
+            Value::Boolean(v) => match v {
+                Boolean::True => Ok("1.0".to_owned()),
+                Boolean::False => Ok("0.0".to_owned()),
+            },
+            Value::Blank => Ok("".to_owned()),
+            _ => Err(Error::Cast),
+        }
+    }
+
+    pub fn as_bool(&self) -> Result<bool, Error> {
+        match self {
+            Value::Number(v) => Ok(*v > 0.0),
+            Value::Text(v) => Ok(v.len() > 0),
+            Value::Boolean(v) => match v {
+                Boolean::True => Ok(true),
+                Boolean::False => Ok(false),
+            },
+            Value::Blank => Ok(false),
+            _ => Err(Error::Cast),
+        }
+    }
 }
 
 /// Defines each term in Expression Struct.
