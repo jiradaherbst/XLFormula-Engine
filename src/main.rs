@@ -257,9 +257,9 @@ fn main() -> Result<(), ParseError> {
     println!("Result is {}", calculate::result_to_string(result));
 
     let data_function = |s: String| match s.as_str() {
-        "T" => types::Value::Boolean(types::Boolean::True),
+        "T" => types::Value::Boolean(true),
         "B" => types::Value::Blank,
-        "F" => types::Value::Boolean(types::Boolean::False),
+        "F" => types::Value::Boolean(false),
         _ => types::Value::Error(types::Error::Value),
     };
 

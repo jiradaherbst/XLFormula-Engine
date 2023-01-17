@@ -47,19 +47,19 @@ pub enum Error {
     Reference,
 }
 
-/// Defines boolean types.
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum Boolean {
-    True,
-    False,
-}
+// /// Defines boolean types.
+// #[derive(Debug, Copy, Clone, PartialEq)]
+// pub enum Boolean {
+//     True,
+//     False,
+// }
 
 /// The result of an evaluation.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Number(f32),
     Text(String),
-    Boolean(Boolean),
+    Boolean(bool),
     Iterator(Vec<Value>),
     Error(Error),
     Date(DateTime<FixedOffset>),
@@ -75,8 +75,8 @@ impl Value {
                 Ok(v) => Ok(v),
             },
             Value::Boolean(v) => match v {
-                Boolean::True => Ok(1.0),
-                Boolean::False => Ok(0.0),
+                true => Ok(1.0),
+                false => Ok(0.0),
             },
             Value::Blank => Ok(0.0),
             _ => Err(Error::Cast),
@@ -88,8 +88,8 @@ impl Value {
             Value::Number(v) => Ok(format!("{}", v)),
             Value::Text(v) => Ok(v.clone()),
             Value::Boolean(v) => match v {
-                Boolean::True => Ok("1.0".to_owned()),
-                Boolean::False => Ok("0.0".to_owned()),
+                true => Ok("1.0".to_owned()),
+                false => Ok("0.0".to_owned()),
             },
             Value::Blank => Ok("".to_owned()),
             _ => Err(Error::Cast),
@@ -101,12 +101,84 @@ impl Value {
             Value::Number(v) => Ok(*v > 0.0),
             Value::Text(v) => Ok(v.len() > 0),
             Value::Boolean(v) => match v {
-                Boolean::True => Ok(true),
-                Boolean::False => Ok(false),
+                true => Ok(true),
+                false => Ok(false),
             },
             Value::Blank => Ok(false),
             _ => Err(Error::Cast),
         }
+    }
+}
+
+impl From<u8> for Value {
+    fn from(v: u8) -> Self {
+        Value::Number(v as f32)
+    }
+}
+
+impl From<u32> for Value {
+    fn from(v: u32) -> Self {
+        Value::Number(v as f32)
+    }
+}
+
+impl From<i32> for Value {
+    fn from(v: i32) -> Self {
+        Value::Number(v as f32)
+    }
+}
+
+impl From<f32> for Value {
+    fn from(v: f32) -> Self {
+        Value::Number(v)
+    }
+}
+
+impl From<&u8> for Value {
+    fn from(v: &u8) -> Self {
+        Value::Number(*v as f32)
+    }
+}
+
+impl From<&u32> for Value {
+    fn from(v: &u32) -> Self {
+        Value::Number(*v as f32)
+    }
+}
+
+impl From<&i32> for Value {
+    fn from(v: &i32) -> Self {
+        Value::Number(*v as f32)
+    }
+}
+
+impl From<&f32> for Value {
+    fn from(v: &f32) -> Self {
+        Value::Number(*v)
+    }
+}
+
+impl From<&str> for Value {
+    fn from(v: &str) -> Self {
+        Value::Text(v.to_owned())
+    }
+}
+
+impl From<String> for Value {
+    fn from(v: String) -> Self {
+        Value::Text(v)
+    }
+}
+
+impl From<&String> for Value {
+    fn from(v: &String) -> Self {
+        Value::Text(v.clone())
+    }
+}
+
+impl From<bool> for Value {
+    fn from(v: bool) -> Self {
+        Value::Boolean(v)
     }
 }
 

@@ -1,17 +1,17 @@
 [package]
-name = "xlformula_engine"
-version = "0.1.17"
-authors = ["Jirada Herbst <jirada.herbst@data2impact.com>"]
-edition = "2018"
-license = "MIT OR Apache-2.0"
+name        = "xlformula_engine"
+version     = "0.1.17"
+authors     = ["Jirada Herbst <jirada.herbst@data2impact.com>"]
+edition     = "2018"
+license     = "MIT OR Apache-2.0"
 description = "A tool to parse and evaluate Excel formulas"
-readme = "README.md"
-homepage = "https://github.com/jiradaherbst/XLFormula-Engine"
-repository = "https://github.com/jiradaherbst/XLFormula-Engine"
-keywords = ["formula", "parser", "excel", "pest"]
+readme      = "README.md"
+homepage    = "https://github.com/jiradaherbst/XLFormula-Engine"
+repository  = "https://github.com/jiradaherbst/XLFormula-Engine"
+keywords    = ["formula", "parser", "excel", "pest"]
 
 [dependencies]
-pest = "2.1.3"
-pest_derive = "2.1.0"
+pest             = "2.5.3"
+pest_derive      = "2.5.3"
 assert_approx_eq = "1.1.0"
-chrono = "0.4.19"
+chrono           = "0.4.23"

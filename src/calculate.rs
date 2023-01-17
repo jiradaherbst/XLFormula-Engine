@@ -318,9 +318,9 @@ fn calculate_comparison_operator(
         types::Value::Text(l) => match rhs {
             types::Value::Text(r) => {
                 if l.eq(&r) {
-                    types::Value::Boolean(types::Boolean::True)
+                    types::Value::Boolean(true)
                 } else {
-                    types::Value::Boolean(types::Boolean::False)
+                    types::Value::Boolean(false)
                 }
             }
             _ => types::Value::Error(types::Error::Value),
@@ -328,16 +328,16 @@ fn calculate_comparison_operator(
         types::Value::Number(l) => match rhs {
             types::Value::Number(r) => {
                 if f(l, r) {
-                    types::Value::Boolean(types::Boolean::True)
+                    types::Value::Boolean(true)
                 } else {
-                    types::Value::Boolean(types::Boolean::False)
+                    types::Value::Boolean(false)
                 }
             }
             types::Value::Blank => {
                 if f(l, 0.0) {
-                    types::Value::Boolean(types::Boolean::True)
+                    types::Value::Boolean(true)
                 } else {
-                    types::Value::Boolean(types::Boolean::False)
+                    types::Value::Boolean(false)
                 }
             }
             _ => types::Value::Error(types::Error::Value),
@@ -345,12 +345,12 @@ fn calculate_comparison_operator(
         types::Value::Blank => match rhs {
             types::Value::Number(r) => {
                 if f(0.0, r) {
-                    types::Value::Boolean(types::Boolean::True)
+                    types::Value::Boolean(true)
                 } else {
-                    types::Value::Boolean(types::Boolean::False)
+                    types::Value::Boolean(false)
                 }
             }
-            types::Value::Blank => types::Value::Boolean(types::Boolean::True),
+            types::Value::Blank => types::Value::Boolean(true),
             _ => types::Value::Error(types::Error::Value),
         },
         types::Value::Boolean(_) => types::Value::Error(types::Error::Value),
@@ -360,29 +360,22 @@ fn calculate_comparison_operator(
     }
 }
 
-fn to_bool(value: types::Boolean) -> bool {
-    match value {
-        types::Boolean::True => true,
-        types::Boolean::False => false,
-    }
-}
-
 fn calculate_boolean_operator_rhs_boolean(
-    l: types::Boolean,
+    l: bool,
     rh: types::Value,
     f: fn(bool1: bool, bool2: bool) -> bool,
 ) -> types::Value {
     match rh {
         types::Value::Boolean(r) => {
-            if f(to_bool(l), to_bool(r)) {
-                types::Value::Boolean(types::Boolean::True)
+            if f(l, r) {
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         types::Value::Error(_) => match l {
-            types::Boolean::True => types::Value::Boolean(types::Boolean::True),
-            types::Boolean::False => types::Value::Boolean(types::Boolean::False),
+            true => types::Value::Boolean(true),
+            false => types::Value::Boolean(false),
         },
         types::Value::Iterator(mut value_vec) => {
             if let Some(mut temp) = value_vec.pop() {
@@ -392,10 +385,10 @@ fn calculate_boolean_operator_rhs_boolean(
                 let rhs = cast_value_to_boolean(temp);
                 match rhs {
                     types::Value::Boolean(r) => {
-                        if f(to_bool(l), to_bool(r)) {
-                            types::Value::Boolean(types::Boolean::True)
+                        if f(l, r) {
+                            types::Value::Boolean(true)
                         } else {
-                            types::Value::Boolean(types::Boolean::False)
+                            types::Value::Boolean(false)
                         }
                     }
                     _ => types::Value::Error(types::Error::Value),
@@ -405,10 +398,10 @@ fn calculate_boolean_operator_rhs_boolean(
             }
         }
         types::Value::Blank => {
-            if to_bool(l) {
-                types::Value::Boolean(types::Boolean::True)
+            if l {
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         _ => types::Value::Error(types::Error::Value),
@@ -418,10 +411,10 @@ fn calculate_boolean_operator_rhs_boolean(
 fn calculate_boolean_operator_rhs_error(rh: types::Value) -> types::Value {
     match rh {
         types::Value::Boolean(r) => {
-            if to_bool(r) {
-                types::Value::Boolean(types::Boolean::True)
+            if r {
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         types::Value::Error(_) => types::Value::Error(types::Error::Cast),
@@ -443,10 +436,10 @@ fn calculate_boolean_operator_rhs_iterator(
                 let lhs = cast_value_to_boolean(temp);
                 match lhs {
                     types::Value::Boolean(l) => {
-                        if f(to_bool(l), to_bool(r)) {
-                            types::Value::Boolean(types::Boolean::True)
+                        if f(l, r) {
+                            types::Value::Boolean(true)
                         } else {
-                            types::Value::Boolean(types::Boolean::False)
+                            types::Value::Boolean(false)
                         }
                     }
                     _ => types::Value::Error(types::Error::Value),
@@ -474,11 +467,9 @@ fn calculate_boolean_operator(
         types::Value::Iterator(lhs_vec) => {
             calculate_boolean_operator_rhs_iterator(cast_value_to_boolean(rhs), lhs_vec, f)
         }
-        types::Value::Blank => calculate_boolean_operator_rhs_boolean(
-            types::Boolean::True,
-            cast_value_to_boolean(rhs),
-            f,
-        ),
+        types::Value::Blank => {
+            calculate_boolean_operator_rhs_boolean(true, cast_value_to_boolean(rhs), f)
+        }
         _ => types::Value::Error(types::Error::Value),
     }
 }
@@ -497,11 +488,9 @@ fn calculate_boolean_operator_or(
         types::Value::Iterator(lhs_vec) => {
             calculate_boolean_operator_rhs_iterator(cast_value_to_boolean(rhs), lhs_vec, f)
         }
-        types::Value::Blank => calculate_boolean_operator_rhs_boolean(
-            types::Boolean::False,
-            cast_value_to_boolean(rhs),
-            f,
-        ),
+        types::Value::Blank => {
+            calculate_boolean_operator_rhs_boolean(false, cast_value_to_boolean(rhs), f)
+        }
         _ => types::Value::Error(types::Error::Value),
     }
 }
@@ -520,11 +509,9 @@ fn calculate_boolean_operator_xor(
         types::Value::Iterator(lhs_vec) => {
             calculate_boolean_operator_rhs_iterator(cast_value_to_boolean(rhs), lhs_vec, f)
         }
-        types::Value::Blank => calculate_boolean_operator_rhs_boolean(
-            types::Boolean::False,
-            cast_value_to_boolean(rhs),
-            f,
-        ),
+        types::Value::Blank => {
+            calculate_boolean_operator_rhs_boolean(false, cast_value_to_boolean(rhs), f)
+        }
         _ => types::Value::Error(types::Error::Value),
     }
 }
@@ -544,10 +531,10 @@ fn calculate_abs(value: types::Value) -> types::Value {
 fn calculate_negation(value: types::Value) -> types::Value {
     match value {
         types::Value::Boolean(l) => {
-            if !(to_bool(l)) {
-                types::Value::Boolean(types::Boolean::True)
+            if !l {
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         types::Value::Error(_) => value,
@@ -555,10 +542,10 @@ fn calculate_negation(value: types::Value) -> types::Value {
             let l = cast_text_to_boolean(&t);
             match l {
                 Some(l) => {
-                    if !(to_bool(l)) {
-                        types::Value::Boolean(types::Boolean::True)
+                    if !l {
+                        types::Value::Boolean(true)
                     } else {
-                        types::Value::Boolean(types::Boolean::False)
+                        types::Value::Boolean(false)
                     }
                 }
                 None => types::Value::Error(types::Error::Cast),
@@ -566,14 +553,14 @@ fn calculate_negation(value: types::Value) -> types::Value {
         }
         types::Value::Number(l) => {
             if l == 0.0 {
-                types::Value::Boolean(types::Boolean::True)
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         types::Value::Iterator(_) => types::Value::Error(types::Error::Value),
         types::Value::Date(_) => types::Value::Error(types::Error::Value),
-        types::Value::Blank => types::Value::Boolean(types::Boolean::True),
+        types::Value::Blank => types::Value::Boolean(true),
     }
 }
 
@@ -592,11 +579,11 @@ fn calculate_negate(value: types::Value) -> types::Value {
     }
 }
 
-fn cast_text_to_boolean(s: &str) -> Option<types::Boolean> {
+fn cast_text_to_boolean(s: &str) -> Option<bool> {
     if s.eq_ignore_ascii_case("TRUE") {
-        Some(types::Boolean::True)
+        Some(true)
     } else if s.eq_ignore_ascii_case("FALSE") {
-        Some(types::Boolean::False)
+        Some(false)
     } else {
         None
     }
@@ -610,10 +597,10 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
             let l = cast_text_to_boolean(&t);
             match l {
                 Some(l) => {
-                    if to_bool(l) {
-                        types::Value::Boolean(types::Boolean::True)
+                    if l {
+                        types::Value::Boolean(true)
                     } else {
-                        types::Value::Boolean(types::Boolean::False)
+                        types::Value::Boolean(false)
                     }
                 }
                 None => types::Value::Error(types::Error::Cast),
@@ -621,9 +608,9 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
         }
         types::Value::Number(l) => {
             if l != 0.0 {
-                types::Value::Boolean(types::Boolean::True)
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         types::Value::Iterator(mut value_vec) => {
@@ -651,10 +638,10 @@ fn convert_iterator_to_result(
                 }
                 match cast_value_to_boolean(temp) {
                     types::Value::Boolean(bool_result) => {
-                        if to_bool(bool_result) {
-                            types::Value::Boolean(types::Boolean::True)
+                        if bool_result {
+                            types::Value::Boolean(true)
                         } else {
-                            types::Value::Boolean(types::Boolean::False)
+                            types::Value::Boolean(false)
                         }
                     }
                     _ => types::Value::Error(types::Error::Value),
@@ -679,10 +666,10 @@ fn convert_iterator_to_result_or(
                 }
                 match cast_value_to_boolean(temp) {
                     types::Value::Boolean(bool_result) => {
-                        if to_bool(bool_result) {
-                            types::Value::Boolean(types::Boolean::True)
+                        if bool_result {
+                            types::Value::Boolean(true)
                         } else {
-                            types::Value::Boolean(types::Boolean::False)
+                            types::Value::Boolean(false)
                         }
                     }
                     _ => types::Value::Error(types::Error::Value),
@@ -707,10 +694,10 @@ fn convert_iterator_to_result_xor(
                 }
                 match cast_value_to_boolean(temp) {
                     types::Value::Boolean(bool_result) => {
-                        if to_bool(bool_result) {
-                            types::Value::Boolean(types::Boolean::True)
+                        if bool_result {
+                            types::Value::Boolean(true)
                         } else {
-                            types::Value::Boolean(types::Boolean::False)
+                            types::Value::Boolean(false)
                         }
                     }
                     _ => types::Value::Error(types::Error::Value),
@@ -1027,7 +1014,7 @@ fn calculate_iff(iff_arguments: (types::Value, types::Value, types::Value)) -> t
     let (false_value, true_value, bool_expression) = iff_arguments;
     match bool_expression {
         types::Value::Boolean(bool_value) => {
-            if to_bool(bool_value) {
+            if bool_value {
                 true_value
             } else {
                 false_value
@@ -1206,9 +1193,9 @@ fn compare_dates(
     f: fn(d1: DateTime<FixedOffset>, d2: DateTime<FixedOffset>) -> bool,
 ) -> types::Value {
     if f(date1, date2) {
-        types::Value::Boolean(types::Boolean::True)
+        types::Value::Boolean(true)
     } else {
-        types::Value::Boolean(types::Boolean::False)
+        types::Value::Boolean(false)
     }
 }
 
@@ -1271,10 +1258,10 @@ fn show_error(error: types::Error) -> String {
     }
 }
 
-fn show_boolean(boolean: types::Boolean) -> String {
+fn show_boolean(boolean: bool) -> String {
     match boolean {
-        types::Boolean::True => String::from("TRUE"),
-        types::Boolean::False => String::from("FALSE"),
+        true => String::from("TRUE"),
+        false => String::from("FALSE"),
     }
 }
 

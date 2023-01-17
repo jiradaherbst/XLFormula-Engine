@@ -573,8 +573,8 @@ fn it_evaluate_references_other_formulas() {
 #[test]
 fn it_evaluate_references_boolean_formulas() {
     let data_function = |s: String| match s.as_str() {
-        "A" => types::Value::Boolean(types::Boolean::True),
-        "B" => types::Value::Boolean(types::Boolean::False),
+        "A" => types::Value::Boolean(true),
+        "B" => types::Value::Boolean(false),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
@@ -586,8 +586,8 @@ fn it_evaluate_references_boolean_formulas() {
 #[test]
 fn it_evaluate_references_error_value_formulas() {
     let data_function = |s: String| match s.as_str() {
-        "A" => types::Value::Boolean(types::Boolean::True),
-        "B" => types::Value::Error(types::Error::Value), //types::Value::Boolean(types::Boolean::False),
+        "A" => types::Value::Boolean(true),
+        "B" => types::Value::Error(types::Error::Value), //types::Value::Boolean(false),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
@@ -1076,9 +1076,9 @@ fn it_evaluates_blanks_with_operators_and_reference() {
 #[test]
 fn it_evaluates_blanks_in_boolean_operations() {
     let data_function = |s: String| match s.as_str() {
-        "T" => types::Value::Boolean(types::Boolean::True),
+        "T" => types::Value::Boolean(true),
         "B" => types::Value::Blank,
-        "F" => types::Value::Boolean(types::Boolean::False),
+        "F" => types::Value::Boolean(false),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
@@ -1336,9 +1336,9 @@ fn it_evaluates_blank_in_iterators() {
 #[test]
 fn it_evaluates_blank_with_iterators_in_boolean_operations() {
     let data_function = |s: String| match s.as_str() {
-        "T" => types::Value::Boolean(types::Boolean::True),
+        "T" => types::Value::Boolean(true),
         "B" => types::Value::Blank,
-        "F" => types::Value::Boolean(types::Boolean::False),
+        "F" => types::Value::Boolean(false),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
