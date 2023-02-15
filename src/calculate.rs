@@ -1,7 +1,8 @@
 use crate::parse_formula;
 use crate::types;
+// use crate::{NoCustomFunction, NoReference};
 use chrono::{DateTime, Duration, FixedOffset};
-type NoCustomFunction<'a> = &'a fn(String, Vec<f32>) -> types::Value;
+// type NoCustomFunction<'a> = &'a fn(String, Vec<types::Value>) -> types::Value;
 
 fn calculate_divide_operator(num1: f32, num2: f32) -> f32 {
     num1 / num2
@@ -317,9 +318,9 @@ fn calculate_comparison_operator(
         types::Value::Text(l) => match rhs {
             types::Value::Text(r) => {
                 if l.eq(&r) {
-                    types::Value::Boolean(types::Boolean::True)
+                    types::Value::Boolean(true)
                 } else {
-                    types::Value::Boolean(types::Boolean::False)
+                    types::Value::Boolean(false)
                 }
             }
             _ => types::Value::Error(types::Error::Value),
@@ -327,16 +328,16 @@ fn calculate_comparison_operator(
         types::Value::Number(l) => match rhs {
             types::Value::Number(r) => {
                 if f(l, r) {
-                    types::Value::Boolean(types::Boolean::True)
+                    types::Value::Boolean(true)
                 } else {
-                    types::Value::Boolean(types::Boolean::False)
+                    types::Value::Boolean(false)
                 }
             }
             types::Value::Blank => {
                 if f(l, 0.0) {
-                    types::Value::Boolean(types::Boolean::True)
+                    types::Value::Boolean(true)
                 } else {
-                    types::Value::Boolean(types::Boolean::False)
+                    types::Value::Boolean(false)
                 }
             }
             _ => types::Value::Error(types::Error::Value),
@@ -344,12 +345,12 @@ fn calculate_comparison_operator(
         types::Value::Blank => match rhs {
             types::Value::Number(r) => {
                 if f(0.0, r) {
-                    types::Value::Boolean(types::Boolean::True)
+                    types::Value::Boolean(true)
                 } else {
-                    types::Value::Boolean(types::Boolean::False)
+                    types::Value::Boolean(false)
                 }
             }
-            types::Value::Blank => types::Value::Boolean(types::Boolean::True),
+            types::Value::Blank => types::Value::Boolean(true),
             _ => types::Value::Error(types::Error::Value),
         },
         types::Value::Boolean(_) => types::Value::Error(types::Error::Value),
@@ -359,29 +360,22 @@ fn calculate_comparison_operator(
     }
 }
 
-fn to_bool(value: types::Boolean) -> bool {
-    match value {
-        types::Boolean::True => true,
-        types::Boolean::False => false,
-    }
-}
-
 fn calculate_boolean_operator_rhs_boolean(
-    l: types::Boolean,
+    l: bool,
     rh: types::Value,
     f: fn(bool1: bool, bool2: bool) -> bool,
 ) -> types::Value {
     match rh {
         types::Value::Boolean(r) => {
-            if f(to_bool(l), to_bool(r)) {
-                types::Value::Boolean(types::Boolean::True)
+            if f(l, r) {
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         types::Value::Error(_) => match l {
-            types::Boolean::True => types::Value::Boolean(types::Boolean::True),
-            types::Boolean::False => types::Value::Boolean(types::Boolean::False),
+            true => types::Value::Boolean(true),
+            false => types::Value::Boolean(false),
         },
         types::Value::Iterator(mut value_vec) => {
             if let Some(mut temp) = value_vec.pop() {
@@ -391,10 +385,10 @@ fn calculate_boolean_operator_rhs_boolean(
                 let rhs = cast_value_to_boolean(temp);
                 match rhs {
                     types::Value::Boolean(r) => {
-                        if f(to_bool(l), to_bool(r)) {
-                            types::Value::Boolean(types::Boolean::True)
+                        if f(l, r) {
+                            types::Value::Boolean(true)
                         } else {
-                            types::Value::Boolean(types::Boolean::False)
+                            types::Value::Boolean(false)
                         }
                     }
                     _ => types::Value::Error(types::Error::Value),
@@ -404,10 +398,10 @@ fn calculate_boolean_operator_rhs_boolean(
             }
         }
         types::Value::Blank => {
-            if to_bool(l) {
-                types::Value::Boolean(types::Boolean::True)
+            if l {
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         _ => types::Value::Error(types::Error::Value),
@@ -417,10 +411,10 @@ fn calculate_boolean_operator_rhs_boolean(
 fn calculate_boolean_operator_rhs_error(rh: types::Value) -> types::Value {
     match rh {
         types::Value::Boolean(r) => {
-            if to_bool(r) {
-                types::Value::Boolean(types::Boolean::True)
+            if r {
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         types::Value::Error(_) => types::Value::Error(types::Error::Cast),
@@ -442,10 +436,10 @@ fn calculate_boolean_operator_rhs_iterator(
                 let lhs = cast_value_to_boolean(temp);
                 match lhs {
                     types::Value::Boolean(l) => {
-                        if f(to_bool(l), to_bool(r)) {
-                            types::Value::Boolean(types::Boolean::True)
+                        if f(l, r) {
+                            types::Value::Boolean(true)
                         } else {
-                            types::Value::Boolean(types::Boolean::False)
+                            types::Value::Boolean(false)
                         }
                     }
                     _ => types::Value::Error(types::Error::Value),
@@ -473,11 +467,9 @@ fn calculate_boolean_operator(
         types::Value::Iterator(lhs_vec) => {
             calculate_boolean_operator_rhs_iterator(cast_value_to_boolean(rhs), lhs_vec, f)
         }
-        types::Value::Blank => calculate_boolean_operator_rhs_boolean(
-            types::Boolean::True,
-            cast_value_to_boolean(rhs),
-            f,
-        ),
+        types::Value::Blank => {
+            calculate_boolean_operator_rhs_boolean(true, cast_value_to_boolean(rhs), f)
+        }
         _ => types::Value::Error(types::Error::Value),
     }
 }
@@ -496,11 +488,9 @@ fn calculate_boolean_operator_or(
         types::Value::Iterator(lhs_vec) => {
             calculate_boolean_operator_rhs_iterator(cast_value_to_boolean(rhs), lhs_vec, f)
         }
-        types::Value::Blank => calculate_boolean_operator_rhs_boolean(
-            types::Boolean::False,
-            cast_value_to_boolean(rhs),
-            f,
-        ),
+        types::Value::Blank => {
+            calculate_boolean_operator_rhs_boolean(false, cast_value_to_boolean(rhs), f)
+        }
         _ => types::Value::Error(types::Error::Value),
     }
 }
@@ -519,11 +509,9 @@ fn calculate_boolean_operator_xor(
         types::Value::Iterator(lhs_vec) => {
             calculate_boolean_operator_rhs_iterator(cast_value_to_boolean(rhs), lhs_vec, f)
         }
-        types::Value::Blank => calculate_boolean_operator_rhs_boolean(
-            types::Boolean::False,
-            cast_value_to_boolean(rhs),
-            f,
-        ),
+        types::Value::Blank => {
+            calculate_boolean_operator_rhs_boolean(false, cast_value_to_boolean(rhs), f)
+        }
         _ => types::Value::Error(types::Error::Value),
     }
 }
@@ -543,10 +531,10 @@ fn calculate_abs(value: types::Value) -> types::Value {
 fn calculate_negation(value: types::Value) -> types::Value {
     match value {
         types::Value::Boolean(l) => {
-            if !(to_bool(l)) {
-                types::Value::Boolean(types::Boolean::True)
+            if !l {
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         types::Value::Error(_) => value,
@@ -554,10 +542,10 @@ fn calculate_negation(value: types::Value) -> types::Value {
             let l = cast_text_to_boolean(&t);
             match l {
                 Some(l) => {
-                    if !(to_bool(l)) {
-                        types::Value::Boolean(types::Boolean::True)
+                    if !l {
+                        types::Value::Boolean(true)
                     } else {
-                        types::Value::Boolean(types::Boolean::False)
+                        types::Value::Boolean(false)
                     }
                 }
                 None => types::Value::Error(types::Error::Cast),
@@ -565,14 +553,14 @@ fn calculate_negation(value: types::Value) -> types::Value {
         }
         types::Value::Number(l) => {
             if l == 0.0 {
-                types::Value::Boolean(types::Boolean::True)
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         types::Value::Iterator(_) => types::Value::Error(types::Error::Value),
         types::Value::Date(_) => types::Value::Error(types::Error::Value),
-        types::Value::Blank => types::Value::Boolean(types::Boolean::True),
+        types::Value::Blank => types::Value::Boolean(true),
     }
 }
 
@@ -591,11 +579,11 @@ fn calculate_negate(value: types::Value) -> types::Value {
     }
 }
 
-fn cast_text_to_boolean(s: &str) -> Option<types::Boolean> {
+fn cast_text_to_boolean(s: &str) -> Option<bool> {
     if s.eq_ignore_ascii_case("TRUE") {
-        Some(types::Boolean::True)
+        Some(true)
     } else if s.eq_ignore_ascii_case("FALSE") {
-        Some(types::Boolean::False)
+        Some(false)
     } else {
         None
     }
@@ -609,10 +597,10 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
             let l = cast_text_to_boolean(&t);
             match l {
                 Some(l) => {
-                    if to_bool(l) {
-                        types::Value::Boolean(types::Boolean::True)
+                    if l {
+                        types::Value::Boolean(true)
                     } else {
-                        types::Value::Boolean(types::Boolean::False)
+                        types::Value::Boolean(false)
                     }
                 }
                 None => types::Value::Error(types::Error::Cast),
@@ -620,9 +608,9 @@ fn cast_value_to_boolean(value: types::Value) -> types::Value {
         }
         types::Value::Number(l) => {
             if l != 0.0 {
-                types::Value::Boolean(types::Boolean::True)
+                types::Value::Boolean(true)
             } else {
-                types::Value::Boolean(types::Boolean::False)
+                types::Value::Boolean(false)
             }
         }
         types::Value::Iterator(mut value_vec) => {
@@ -650,10 +638,10 @@ fn convert_iterator_to_result(
                 }
                 match cast_value_to_boolean(temp) {
                     types::Value::Boolean(bool_result) => {
-                        if to_bool(bool_result) {
-                            types::Value::Boolean(types::Boolean::True)
+                        if bool_result {
+                            types::Value::Boolean(true)
                         } else {
-                            types::Value::Boolean(types::Boolean::False)
+                            types::Value::Boolean(false)
                         }
                     }
                     _ => types::Value::Error(types::Error::Value),
@@ -678,10 +666,10 @@ fn convert_iterator_to_result_or(
                 }
                 match cast_value_to_boolean(temp) {
                     types::Value::Boolean(bool_result) => {
-                        if to_bool(bool_result) {
-                            types::Value::Boolean(types::Boolean::True)
+                        if bool_result {
+                            types::Value::Boolean(true)
                         } else {
-                            types::Value::Boolean(types::Boolean::False)
+                            types::Value::Boolean(false)
                         }
                     }
                     _ => types::Value::Error(types::Error::Value),
@@ -706,10 +694,10 @@ fn convert_iterator_to_result_xor(
                 }
                 match cast_value_to_boolean(temp) {
                     types::Value::Boolean(bool_result) => {
-                        if to_bool(bool_result) {
-                            types::Value::Boolean(types::Boolean::True)
+                        if bool_result {
+                            types::Value::Boolean(true)
                         } else {
-                            types::Value::Boolean(types::Boolean::False)
+                            types::Value::Boolean(false)
                         }
                     }
                     _ => types::Value::Error(types::Error::Value),
@@ -724,15 +712,16 @@ fn convert_iterator_to_result_xor(
 
 fn get_values(
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
 ) -> (types::Value, types::Value) {
     (
         match exp.values.pop() {
-            Some(formula) => calculate_formula(formula, f),
+            Some(formula) => calculate_formula(formula, f, r),
             None => types::Value::Error(types::Error::Argument),
         },
         match exp.values.pop() {
-            Some(formula) => calculate_formula(formula, f),
+            Some(formula) => calculate_formula(formula, f, r),
             None => types::Value::Error(types::Error::Argument),
         },
     )
@@ -740,25 +729,27 @@ fn get_values(
 
 fn get_value(
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
 ) -> types::Value {
     match exp.values.pop() {
-        Some(formula) => calculate_formula(formula, f),
+        Some(formula) => calculate_formula(formula, f, r),
         None => types::Value::Error(types::Error::Argument),
     }
 }
 
 fn get_date_values(
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
 ) -> (types::Value, types::Value) {
     (
         match exp.values.pop() {
-            Some(formula) => calculate_formula(formula, f),
+            Some(formula) => calculate_formula(formula, f, r),
             None => types::Value::Error(types::Error::Argument),
         },
         match exp.values.pop() {
-            Some(formula) => calculate_formula(formula, f),
+            Some(formula) => calculate_formula(formula, f, r),
             None => types::Value::Error(types::Error::Argument),
         },
     )
@@ -766,24 +757,25 @@ fn get_date_values(
 
 fn get_number_and_string_values(
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
 ) -> (types::Value, types::Value) {
     if exp.values.len() == 1 {
         (
             types::Value::Number(1.0),
             match exp.values.pop() {
-                Some(formula) => calculate_formula(formula, f),
+                Some(formula) => calculate_formula(formula, f, r),
                 None => types::Value::Error(types::Error::Argument),
             },
         )
     } else {
         (
             match exp.values.pop() {
-                Some(formula) => calculate_formula(formula, f),
+                Some(formula) => calculate_formula(formula, f, r),
                 None => types::Value::Error(types::Error::Argument),
             },
             match exp.values.pop() {
-                Some(formula) => calculate_formula(formula, f),
+                Some(formula) => calculate_formula(formula, f, r),
                 None => types::Value::Error(types::Error::Argument),
             },
         )
@@ -792,19 +784,20 @@ fn get_number_and_string_values(
 
 fn get_iff_values(
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
 ) -> (types::Value, types::Value, types::Value) {
     (
         match exp.values.pop() {
-            Some(formula) => calculate_formula(formula, f),
+            Some(formula) => calculate_formula(formula, f, r),
             None => types::Value::Blank,
         },
         match exp.values.pop() {
-            Some(formula) => calculate_formula(formula, f),
+            Some(formula) => calculate_formula(formula, f, r),
             None => types::Value::Blank,
         },
         match exp.values.pop() {
-            Some(formula) => calculate_formula(formula, f),
+            Some(formula) => calculate_formula(formula, f, r),
             None => types::Value::Blank,
         },
     )
@@ -812,26 +805,29 @@ fn get_iff_values(
 
 fn calculate_iterator(
     mut vec: Vec<types::Formula>,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
 ) -> types::Value {
+    // println!("iterator");
     let mut value_vec = Vec::new();
     while let Some(top) = vec.pop() {
-        value_vec.push(calculate_formula(top, f));
+        value_vec.push(calculate_formula(top, f, r));
     }
     types::Value::Iterator(value_vec)
 }
 
 fn calculate_reference(
     string: String,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
 ) -> types::Value {
-    match f {
-        Some(f) => match f(string) {
+    // println!("reference");
+    match r {
+        Some(r) => match r(string) {
             types::Value::Number(x) => types::Value::Number(x),
-            types::Value::Text(s) => calculate_formula(
-                parse_formula::parse_string_to_formula(&s, None::<NoCustomFunction>),
-                Some(f),
-            ),
+            types::Value::Text(s) => {
+                calculate_formula(parse_formula::parse_string_to_formula(&s), f, Some(r))
+            }
             types::Value::Boolean(x) => types::Value::Boolean(x),
             types::Value::Error(types::Error::Value) => types::Value::Error(types::Error::Value),
             types::Value::Iterator(v) => types::Value::Iterator(v),
@@ -845,48 +841,51 @@ fn calculate_reference(
 
 fn calculate_bool(
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
     f_bool: fn(bool1: bool, bool2: bool) -> bool,
 ) -> types::Value {
     let mut result = match exp.values.pop() {
-        Some(formula) => calculate_formula(formula, f),
+        Some(formula) => calculate_formula(formula, f, r),
         None => types::Value::Error(types::Error::Argument),
     };
     result = cast_value_to_boolean(result);
     while let Some(top) = exp.values.pop() {
-        result = calculate_boolean_operator(result, calculate_formula(top, f), f_bool);
+        result = calculate_boolean_operator(result, calculate_formula(top, f, r), f_bool);
     }
     convert_iterator_to_result(result, f_bool)
 }
 
 fn calculate_or(
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
     f_bool: fn(bool1: bool, bool2: bool) -> bool,
 ) -> types::Value {
     let mut result = match exp.values.pop() {
-        Some(formula) => calculate_formula(formula, f),
+        Some(formula) => calculate_formula(formula, f, r),
         None => types::Value::Error(types::Error::Argument),
     };
     result = cast_value_to_boolean(result);
     while let Some(top) = exp.values.pop() {
-        result = calculate_boolean_operator_or(result, calculate_formula(top, f), f_bool);
+        result = calculate_boolean_operator_or(result, calculate_formula(top, f, r), f_bool);
     }
     convert_iterator_to_result_or(result, f_bool)
 }
 
 fn calculate_xor(
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
     f_bool: fn(bool1: bool, bool2: bool) -> bool,
 ) -> types::Value {
     let mut result = match exp.values.pop() {
-        Some(formula) => calculate_formula(formula, f),
+        Some(formula) => calculate_formula(formula, f, r),
         None => types::Value::Error(types::Error::Argument),
     };
     result = cast_value_to_boolean(result);
     while let Some(top) = exp.values.pop() {
-        result = calculate_boolean_operator_xor(result, calculate_formula(top, f), f_bool);
+        result = calculate_boolean_operator_xor(result, calculate_formula(top, f, r), f_bool);
     }
     convert_iterator_to_result_xor(result, f_bool)
 }
@@ -894,12 +893,16 @@ fn calculate_xor(
 fn calculate_collective_operator(
     mut collective_value: types::Value,
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
     f_collective: fn(num1: f32, num2: f32) -> f32,
 ) -> types::Value {
     while let Some(top) = exp.values.pop() {
-        collective_value =
-            calculate_numeric_operator(collective_value, calculate_formula(top, f), f_collective);
+        collective_value = calculate_numeric_operator(
+            collective_value,
+            calculate_formula(top, f, r),
+            f_collective,
+        );
     }
     collective_value
 }
@@ -907,13 +910,14 @@ fn calculate_collective_operator(
 fn calculate_collective_product_operator(
     mut collective_value: types::Value,
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
     f_collective: fn(num1: f32, num2: f32) -> f32,
 ) -> types::Value {
     while let Some(top) = exp.values.pop() {
         collective_value = calculate_numeric_product_operator(
             collective_value,
-            calculate_formula(top, f),
+            calculate_formula(top, f, r),
             f_collective,
         );
     }
@@ -926,7 +930,8 @@ fn calculate_collective_product_operator(
 fn calculate_average(
     mut collective_value: types::Value,
     mut exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
     f_collective: fn(num1: f32, num2: f32) -> f32,
 ) -> types::Value {
     let mut element_count = 0;
@@ -935,7 +940,7 @@ fn calculate_average(
         collective_value = calculate_average_operator(
             &mut element_count,
             collective_value,
-            calculate_formula(top, f),
+            calculate_formula(top, f, r),
             f_collective,
         );
     }
@@ -1009,7 +1014,7 @@ fn calculate_iff(iff_arguments: (types::Value, types::Value, types::Value)) -> t
     let (false_value, true_value, bool_expression) = iff_arguments;
     match bool_expression {
         types::Value::Boolean(bool_value) => {
-            if to_bool(bool_value) {
+            if bool_value {
                 true_value
             } else {
                 false_value
@@ -1032,38 +1037,65 @@ fn calculate_iff(iff_arguments: (types::Value, types::Value, types::Value)) -> t
 fn calculate_function(
     func: types::Function,
     exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
 ) -> types::Value {
+    // println!("calc func");
     match func {
-        types::Function::Abs => calculate_abs(get_value(exp, f)),
+        types::Function::Abs => calculate_abs(get_value(exp, f, r)),
         types::Function::Sum => {
-            calculate_collective_operator(types::Value::Number(0.0), exp, f, |n1, n2| n1 + n2)
+            calculate_collective_operator(types::Value::Number(0.0), exp, f, r, |n1, n2| n1 + n2)
         }
         types::Function::Product => {
-            calculate_collective_product_operator(types::Value::Blank, exp, f, |n1, n2| n1 * n2)
+            calculate_collective_product_operator(types::Value::Blank, exp, f, r, |n1, n2| n1 * n2)
         }
         types::Function::Average => {
-            calculate_average(types::Value::Number(0.00), exp, f, |n1, n2| n1 + n2)
+            calculate_average(types::Value::Number(0.00), exp, f, r, |n1, n2| n1 + n2)
         }
-        types::Function::Or => calculate_or(exp, f, |n1, n2| n1 || n2),
-        types::Function::And => calculate_bool(exp, f, |n1, n2| n1 && n2),
-        types::Function::Xor => calculate_xor(exp, f, |n1, n2| n1 ^ n2),
-        types::Function::Not => calculate_negation(get_value(exp, f)),
-        types::Function::Negate => calculate_negate(get_value(exp, f)),
-        types::Function::Days => calculate_days(get_date_values(exp, f)),
-        types::Function::Right => calculate_right(get_number_and_string_values(exp, f)),
-        types::Function::Left => calculate_left(get_number_and_string_values(exp, f)),
-        types::Function::Iff => calculate_iff(get_iff_values(exp, f)),
+        types::Function::Or => calculate_or(exp, f, r, |n1, n2| n1 || n2),
+        types::Function::And => calculate_bool(exp, f, r, |n1, n2| n1 && n2),
+        types::Function::Xor => calculate_xor(exp, f, r, |n1, n2| n1 ^ n2),
+        types::Function::Not => calculate_negation(get_value(exp, f, r)),
+        types::Function::Negate => calculate_negate(get_value(exp, f, r)),
+        types::Function::Days => calculate_days(get_date_values(exp, f, r)),
+        types::Function::Right => calculate_right(get_number_and_string_values(exp, f, r)),
+        types::Function::Left => calculate_left(get_number_and_string_values(exp, f, r)),
+        types::Function::Iff => calculate_iff(get_iff_values(exp, f, r)),
+        types::Function::Custom(name) => {
+            let values: Vec<types::Value> = exp
+                .values
+                .iter()
+                .map(|v| calculate_formula(v.clone(), f, r))
+                .collect();
+
+            match f {
+                Some(f) => match f(name, values) {
+                    types::Value::Number(x) => types::Value::Number(x),
+                    types::Value::Text(s) => types::Value::Text(s),
+                    types::Value::Boolean(x) => types::Value::Boolean(x),
+                    types::Value::Error(types::Error::Value) => {
+                        types::Value::Error(types::Error::Value)
+                    }
+                    types::Value::Iterator(v) => types::Value::Iterator(v),
+                    types::Value::Date(d) => types::Value::Date(d),
+                    types::Value::Blank => types::Value::Blank,
+                    _ => types::Value::Error(types::Error::Reference),
+                },
+                None => types::Value::Error(types::Error::Reference),
+            }
+        }
     }
 }
 
 fn calculate_operation(
     exp: types::Expression,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
 ) -> types::Value {
-    match exp.op {
+    // println!("operation");
+    match &exp.op {
         types::Operator::Plus => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             match value1 {
                 types::Value::Date(d) => add_days_to_date(d, value2),
                 _ => calculate_numeric_operator(value1, value2, |n1, n2| n1 + n2),
@@ -1071,7 +1103,7 @@ fn calculate_operation(
         }
 
         types::Operator::Minus => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             match value1 {
                 types::Value::Date(d) => subtract_days_from_date(d, value2),
                 _ => calculate_numeric_operator(value1, value2, |n1, n2| n1 - n2),
@@ -1079,26 +1111,26 @@ fn calculate_operation(
         }
 
         types::Operator::Multiply => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             calculate_numeric_operator(value1, value2, |n1, n2| n1 * n2)
         }
         types::Operator::Divide => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             match value2 {
                 types::Value::Number(x) if x == 0.0 => types::Value::Error(types::Error::Div0),
                 _ => calculate_numeric_operator(value1, value2, calculate_divide_operator),
             }
         }
         types::Operator::Power => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             calculate_numeric_operator(value1, value2, calculate_power_operator)
         }
         types::Operator::Concat => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             calculate_string_operator(value1, value2, calculate_concat_operator)
         }
         types::Operator::Equal => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             match (value1.clone(), value2.clone()) {
                 (types::Value::Date(l), types::Value::Date(r)) => {
                     compare_dates(l, r, |d1, d2| d1 == d2)
@@ -1107,7 +1139,7 @@ fn calculate_operation(
             }
         }
         types::Operator::NotEqual => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             match (value1.clone(), value2.clone()) {
                 (types::Value::Date(l), types::Value::Date(r)) => {
                     compare_dates(l, r, |d1, d2| d1 != d2)
@@ -1116,7 +1148,7 @@ fn calculate_operation(
             }
         }
         types::Operator::Greater => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             match (value1.clone(), value2.clone()) {
                 (types::Value::Date(l), types::Value::Date(r)) => {
                     compare_dates(l, r, |d1, d2| d1 > d2)
@@ -1125,7 +1157,7 @@ fn calculate_operation(
             }
         }
         types::Operator::Less => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             match (value1.clone(), value2.clone()) {
                 (types::Value::Date(l), types::Value::Date(r)) => {
                     compare_dates(l, r, |d1, d2| d1 < d2)
@@ -1134,7 +1166,7 @@ fn calculate_operation(
             }
         }
         types::Operator::GreaterOrEqual => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             match (value1.clone(), value2.clone()) {
                 (types::Value::Date(l), types::Value::Date(r)) => {
                     compare_dates(l, r, |d1, d2| d1 >= d2)
@@ -1143,7 +1175,7 @@ fn calculate_operation(
             }
         }
         types::Operator::LessOrEqual => {
-            let (value2, value1) = get_values(exp, f);
+            let (value2, value1) = get_values(exp, f, r);
             match (value1.clone(), value2.clone()) {
                 (types::Value::Date(l), types::Value::Date(r)) => {
                     compare_dates(l, r, |d1, d2| d1 <= d2)
@@ -1151,7 +1183,7 @@ fn calculate_operation(
                 _ => calculate_comparison_operator(value1, value2, |n1, n2| n1 <= n2),
             }
         }
-        types::Operator::Function(func) => calculate_function(func, exp, f),
+        types::Operator::Function(func) => calculate_function(func.clone(), exp, f, r),
     }
 }
 
@@ -1161,23 +1193,28 @@ fn compare_dates(
     f: fn(d1: DateTime<FixedOffset>, d2: DateTime<FixedOffset>) -> bool,
 ) -> types::Value {
     if f(date1, date2) {
-        types::Value::Boolean(types::Boolean::True)
+        types::Value::Boolean(true)
     } else {
-        types::Value::Boolean(types::Boolean::False)
+        types::Value::Boolean(false)
     }
 }
 
 /// Evaluates a string that was parsed and stored in Expression Struct.
-/// Takes an optional closure with the trait bound Fn(String) -> types::Value.
+/// Takes an optional closure of custom functions with the trait bound Fn(String, Vec<types::Value>) -> types::Value.
+/// Takes an optional closure of custom variables with the trait bound Fn(String) -> types::Value.
 pub fn calculate_formula(
     formula: types::Formula,
-    f: Option<&impl Fn(String) -> types::Value>,
+    f: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
+    r: Option<&impl Fn(String) -> types::Value>,
 ) -> types::Value {
     match formula {
-        types::Formula::Operation(exp) => calculate_operation(exp, f),
-        types::Formula::Value(val) => val,
-        types::Formula::Reference(string) => calculate_reference(string, f),
-        types::Formula::Iterator(vec) => calculate_iterator(vec, f),
+        types::Formula::Operation(exp) => calculate_operation(exp, f, r),
+        types::Formula::Value(val) => {
+            // println!("value");
+            val
+        }
+        types::Formula::Reference(string) => calculate_reference(string, f, r),
+        types::Formula::Iterator(vec) => calculate_iterator(vec, f, r),
     }
 }
 
@@ -1191,6 +1228,14 @@ pub fn result_to_string(_value: types::Value) -> String {
         types::Value::Iterator(value_vec) => show_iterator(value_vec),
         types::Value::Date(date) => date.to_string(),
         types::Value::Blank => show_blank(),
+    }
+}
+
+/// Converts a result from Value Enum to a printable string.
+pub fn result_to_number(value: types::Value) -> Result<f32, types::Error> {
+    match value {
+        types::Value::Number(number) => Ok(number),
+        _ => Err(types::Error::Argument),
     }
 }
 
@@ -1213,10 +1258,10 @@ fn show_error(error: types::Error) -> String {
     }
 }
 
-fn show_boolean(boolean: types::Boolean) -> String {
+fn show_boolean(boolean: bool) -> String {
     match boolean {
-        types::Boolean::True => String::from("TRUE"),
-        types::Boolean::False => String::from("FALSE"),
+        true => String::from("TRUE"),
+        false => String::from("FALSE"),
     }
 }
 

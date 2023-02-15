@@ -11,14 +11,16 @@ use chrono::{DateTime, Duration, FixedOffset};
 use assert_approx_eq::assert_approx_eq;
 
 fn evaluate_formula_number(s: &str) -> f32 {
-    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
-    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result =
+        calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
 fn evaluate_formula_string(s: &str) -> String {
-    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
-    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result =
+        calculate::calculate_formula(formula, None::<NoCustomFunction>, None::<NoReference>);
     calculate::result_to_string(result)
 }
 
@@ -26,8 +28,8 @@ fn evaluate_formula_string_with_reference(
     s: &str,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> String {
-    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
-    let result = calculate::calculate_formula(formula, f);
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, f);
     calculate::result_to_string(result)
 }
 
@@ -35,8 +37,8 @@ fn evaluate_formula_number_with_reference(
     s: &str,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> f32 {
-    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
-    let result = calculate::calculate_formula(formula, f);
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, f);
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
@@ -44,8 +46,8 @@ fn evaluate_formula_number_with_reference_no_conversion(
     s: &str,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> types::Value {
-    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
-    let result = calculate::calculate_formula(formula, f);
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, f);
     result
     //calculate::result_to_string(result).parse::<f32>().unwrap()
 }
@@ -54,8 +56,8 @@ fn evaluate_formula_boolean_with_reference(
     s: &str,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> String {
-    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
-    let result = calculate::calculate_formula(formula, f);
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, f);
     calculate::result_to_string(result) //.parse::<f32>().unwrap()
 }
 
@@ -63,38 +65,38 @@ fn evaluate_formula_date_with_reference(
     s: &str,
     f: Option<&impl Fn(String) -> types::Value>,
 ) -> String {
-    let formula = parse_formula::parse_string_to_formula(s, None::<NoCustomFunction>);
-    let result = calculate::calculate_formula(formula, f);
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula(formula, None::<NoCustomFunction>, f);
     calculate::result_to_string(result)
 }
 
 fn evaluate_formula_number_with_custom_function(
     s: &str,
-    custom_function: Option<&impl Fn(String, Vec<f32>) -> types::Value>,
+    custom_function: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
     //reference: Option<&impl Fn(String) -> types::Value>,
 ) -> f32 {
-    let formula = parse_formula::parse_string_to_formula(s, custom_function);
-    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula(formula, custom_function, None::<NoReference>);
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
 fn evaluate_formula_string_with_custom_function(
     s: &str,
-    custom_function: Option<&impl Fn(String, Vec<f32>) -> types::Value>,
+    custom_function: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
     //reference: Option<&impl Fn(String) -> types::Value>,
 ) -> String {
-    let formula = parse_formula::parse_string_to_formula(s, custom_function);
-    let result = calculate::calculate_formula(formula, None::<NoReference>);
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula(formula, custom_function, None::<NoReference>);
     calculate::result_to_string(result)
 }
 
 fn _evaluate_formula_number_with_custom_function_and_reference(
     s: &str,
-    custom_function: Option<&impl Fn(String, Vec<f32>) -> types::Value>,
+    custom_function: Option<&impl Fn(String, Vec<types::Value>) -> types::Value>,
     reference: Option<&impl Fn(String) -> types::Value>,
 ) -> f32 {
-    let formula = parse_formula::parse_string_to_formula(s, custom_function);
-    let result = calculate::calculate_formula(formula, reference);
+    let formula = parse_formula::parse_string_to_formula(s);
+    let result = calculate::calculate_formula(formula, custom_function, reference);
     calculate::result_to_string(result).parse::<f32>().unwrap()
 }
 
@@ -571,8 +573,8 @@ fn it_evaluate_references_other_formulas() {
 #[test]
 fn it_evaluate_references_boolean_formulas() {
     let data_function = |s: String| match s.as_str() {
-        "A" => types::Value::Boolean(types::Boolean::True),
-        "B" => types::Value::Boolean(types::Boolean::False),
+        "A" => types::Value::Boolean(true),
+        "B" => types::Value::Boolean(false),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
@@ -584,8 +586,8 @@ fn it_evaluate_references_boolean_formulas() {
 #[test]
 fn it_evaluate_references_error_value_formulas() {
     let data_function = |s: String| match s.as_str() {
-        "A" => types::Value::Boolean(types::Boolean::True),
-        "B" => types::Value::Error(types::Error::Value), //types::Value::Boolean(types::Boolean::False),
+        "A" => types::Value::Boolean(true),
+        "B" => types::Value::Error(types::Error::Value), //types::Value::Boolean(false),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
@@ -720,10 +722,14 @@ fn it_evaluate_date() -> Result<(), ParseError> {
 
 #[test]
 fn it_evaluate_custom_functions_() {
-    let custom_functions = |s: String, params: Vec<f32>| match s.as_str() {
-        "Increase" => types::Value::Number(params[0] + 1.0),
-        "SimpleSum" => types::Value::Number(params[0] + params[1]),
-        "CustomSum" => types::Value::Number(params[0] + params[1] + params[2]),
+    let custom_functions = |s: String, params: Vec<types::Value>| match s.as_str() {
+        "Increase" => types::Value::Number(params[0].as_num().unwrap() + 1.0),
+        "SimpleSum" => {
+            types::Value::Number(params[0].as_num().unwrap() + params[1].as_num().unwrap())
+        }
+        "CustomSum" => types::Value::Number(
+            params[0].as_num().unwrap() + params[1].as_num().unwrap() + params[2].as_num().unwrap(),
+        ),
         "EqualFive" => types::Value::Number(5.0),
         "CountText" => types::Value::Text(10.0.to_string()),
         "CountNumber" => types::Value::Number(20.0),
@@ -758,6 +764,38 @@ fn it_evaluate_custom_functions_() {
             Some(&custom_functions)
         ),
         "P20"
+    );
+}
+
+#[test]
+fn it_evaluate_custom_functions_with_reference() {
+    let custom_functions = |s: String, params: Vec<types::Value>| match s.as_str() {
+        "Increase" => types::Value::Number(params[0].as_num().unwrap() + 1.0),
+        "SimpleSum" => {
+            types::Value::Number(params[0].as_num().unwrap() + params[1].as_num().unwrap())
+        }
+        "CustomSum" => types::Value::Number(
+            params[0].as_num().unwrap() + params[1].as_num().unwrap() + params[2].as_num().unwrap(),
+        ),
+        "EqualFive" => types::Value::Number(5.0),
+        "CountText" => types::Value::Text(10.0.to_string()),
+        "CountNumber" => types::Value::Number(20.0),
+        _ => types::Value::Error(types::Error::Value),
+    };
+
+    let data_function = |s: String| match s.as_str() {
+        "start" => types::Value::Number(5.0),
+        "end" => types::Value::Number(10.0),
+        _ => types::Value::Error(types::Error::Value),
+    };
+
+    assert_eq!(
+        _evaluate_formula_number_with_custom_function_and_reference(
+            &"=Increase(start)",
+            Some(&custom_functions),
+            Some(&data_function)
+        ),
+        6.0
     );
 }
 
@@ -1038,9 +1076,9 @@ fn it_evaluates_blanks_with_operators_and_reference() {
 #[test]
 fn it_evaluates_blanks_in_boolean_operations() {
     let data_function = |s: String| match s.as_str() {
-        "T" => types::Value::Boolean(types::Boolean::True),
+        "T" => types::Value::Boolean(true),
         "B" => types::Value::Blank,
-        "F" => types::Value::Boolean(types::Boolean::False),
+        "F" => types::Value::Boolean(false),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
@@ -1197,7 +1235,7 @@ fn it_evaluates_blanks_string_operations() {
 
 #[test]
 fn it_evaluates_blank_constructors() {
-    let custom_functions = |s: String, _params: Vec<f32>| match s.as_str() {
+    let custom_functions = |s: String, _params: Vec<types::Value>| match s.as_str() {
         "BLANK" => types::Value::Blank,
         _ => types::Value::Error(types::Error::Value),
     };
@@ -1298,9 +1336,9 @@ fn it_evaluates_blank_in_iterators() {
 #[test]
 fn it_evaluates_blank_with_iterators_in_boolean_operations() {
     let data_function = |s: String| match s.as_str() {
-        "T" => types::Value::Boolean(types::Boolean::True),
+        "T" => types::Value::Boolean(true),
         "B" => types::Value::Blank,
-        "F" => types::Value::Boolean(types::Boolean::False),
+        "F" => types::Value::Boolean(false),
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
