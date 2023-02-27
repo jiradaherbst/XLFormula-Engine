@@ -37,23 +37,23 @@ logical_operator = _{ equal | not_equal | greater_or_equal | greater
     less_or_equal   = { "<=" }
 
 function = _{ abs | sum | product | average | negate | days | right | left | iff | isblank | custom_function  }
-    abs     = { "ABS" ~ "(" ~ expr ~ ")" }
-    sum     = { "SUM" ~ function_param_with_atomic_expr}   
-    product = { "PRODUCT" ~ function_param_with_atomic_expr}
-    average = { "AVERAGE" ~ function_param_with_atomic_expr}
-    negate  = { "-" ~ (function_param | iterator | reference) }
-    days    = { "DAYS" ~ function_param }
-    right   = { "RIGHT" ~ function_param }
-    left    = { "LEFT" ~ function_param }
-    iff     = { "IF" ~ three_params }
-    isblank = { "ISBLANK" ~ function_param}
+    abs     = { ^"ABS" ~ "(" ~ expr ~ ")" }
+    sum     = { ^"SUM" ~ function_param_with_atomic_expr}
+    product = { ^"PRODUCT" ~ function_param_with_atomic_expr}
+    average = { ^"AVERAGE" ~ function_param_with_atomic_expr}
+    negate  = { ^"-" ~ (function_param | iterator | reference) }
+    days    = { ^"DAYS" ~ function_param }
+    right   = { ^"RIGHT" ~ function_param }
+    left    = { ^"LEFT" ~ function_param }
+    iff     = { ^"IF" ~ three_params }
+    isblank = { ^"ISBLANK" ~ function_param}
     custom_function = { reference ~ (function_param | empty_param) } 
-    
+
 logical_function = _{ or | and | xor | not } 
-    or      =  { "OR" ~ function_param_with_atomic_expr } 
-    and     =  { "AND" ~ function_param_with_atomic_expr }
-    xor     =  { "XOR" ~ function_param_with_atomic_expr }
-    not     =  { "NOT" ~ "(" ~ expr ~ ")" }
+    or      =  { ^"OR" ~ function_param_with_atomic_expr }
+    and     =  { ^"AND" ~ function_param_with_atomic_expr }
+    xor     =  { ^"XOR" ~ function_param_with_atomic_expr }
+    not     =  { ^"NOT" ~ "(" ~ expr ~ ")" }
 
 function_param      = _{ "(" ~ expr ~ ("," ~ expr)*? ~ ")" }
 empty_param         = { "(" ~ ")" }

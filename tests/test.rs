@@ -503,6 +503,9 @@ fn it_evaluate_boolean_not() {
     assert_eq!(evaluate_formula_string(&"=NOT(\"false\")"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=NOT(\"test\")"), "#CAST!",);
     assert_eq!(evaluate_formula_string(&"=NOT(0)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=not(11<=3)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=Not(11<=3)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=nOT(11<=3)"), "TRUE",);
 }
 
 //////////////////////////// References //////////////////////////////////
@@ -707,6 +710,10 @@ fn it_evaluate_date() -> Result<(), ParseError> {
     };
     assert_eq!(
         evaluate_formula_number_with_reference(&"=DAYS(end, start)", Some(&data_function)),
+        182.00
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=days(end, start)", Some(&data_function)),
         182.00
     );
     assert_eq!(
