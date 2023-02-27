@@ -418,6 +418,8 @@ fn it_evaluate_comparison_operators() {
     assert_eq!(evaluate_formula_string(&"=1*1/1+2<1^1"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=2>=1"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=11<=3"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=\"Joshu\"=\"Joshu\""), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=\"Joshu\"<>\"NotJoshu\""), "TRUE",);
 }
 
 #[test]
