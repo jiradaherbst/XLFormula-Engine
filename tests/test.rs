@@ -452,19 +452,19 @@ fn it_evaluate_boolean_and() {
     assert_eq!(evaluate_formula_string(&"=AND(1)"), "TRUE",);
     assert_eq!(
         evaluate_formula_string(&"=AND(\"test\", \"test\")"),
-        "#CAST!",
+        "#VALUE!",
     );
     assert_eq!(
         evaluate_formula_string(&"=AND(\"test\",\"True\", 1, true) "),
-        "TRUE",
+        "#VALUE!",
     );
     assert_eq!(
         evaluate_formula_string(&"=AND(\"True\",\"test\", 1, true) "),
-        "TRUE",
+        "#VALUE!",
     );
     assert_eq!(
         evaluate_formula_string(&"=AND(\"True\", 1, true, \"test\")"),
-        "TRUE",
+        "#VALUE!",
     );
     assert_eq!(evaluate_formula_string(&"=AND(1, )"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=AND(1,,,1)"), "FALSE",);
@@ -595,7 +595,7 @@ fn it_evaluate_references_error_value_formulas() {
     };
     assert_eq!(
         evaluate_formula_boolean_with_reference(&"=AND(A,B)", Some(&data_function)),
-        "TRUE"
+        "#VALUE!"
     );
 }
 
@@ -1111,6 +1111,20 @@ fn it_evaluates_blanks_in_boolean_operations() {
     assert_eq!(
         evaluate_formula_boolean_with_reference(&"=XOR(F,B,T,B,F)", Some(&data_function)),
         "TRUE"
+    );
+}
+
+#[test]
+fn evaluate_invalid_reference_in_functions() {
+    let data_function = |s: String| match s.as_str() {
+        _ => types::Value::Error(types::Error::Value),
+    };
+    // test with a non existing reference
+    let formula = parse_formula::parse_string_to_formula("=AND(T, NO_REFERENCE)".as_ref(), None::<NoCustomFunction>);
+    assert_eq!(calculate::calculate_formula(formula, Some(&data_function)), types::Value::Error(types::Error::Value));
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND(T, NO_REFERENCE)", Some(&data_function)),
+        "#VALUE!"
     );
 }
 
