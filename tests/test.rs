@@ -1120,8 +1120,14 @@ fn evaluate_invalid_reference_in_functions() {
         _ => types::Value::Error(types::Error::Value),
     };
     // test with a non existing reference
-    let formula = parse_formula::parse_string_to_formula("=AND(T, NO_REFERENCE)".as_ref(), None::<NoCustomFunction>);
-    assert_eq!(calculate::calculate_formula(formula, Some(&data_function)), types::Value::Error(types::Error::Value));
+    let formula = parse_formula::parse_string_to_formula(
+        "=AND(T, NO_REFERENCE)".as_ref(),
+        None::<NoCustomFunction>,
+    );
+    assert_eq!(
+        calculate::calculate_formula(formula, Some(&data_function)),
+        types::Value::Error(types::Error::Value)
+    );
     assert_eq!(
         evaluate_formula_boolean_with_reference(&"=AND(T, NO_REFERENCE)", Some(&data_function)),
         "#VALUE!"
@@ -1518,17 +1524,27 @@ fn it_evaluates_isblank_function() {
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
-        evaluate_formula_string_with_reference(
-            &"=ISBLANK(ReferenceKey)",
-            Some(&data_function)
-        ),
+        evaluate_formula_string_with_reference(&"=ISBLANK(ReferenceKey)", Some(&data_function)),
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_string_with_reference(
-            &"=ISBLANK(ReferenceName)",
+        evaluate_formula_string_with_reference(&"=ISBLANK(ReferenceName)", Some(&data_function)),
+        "FALSE"
+    );
+}
+
+#[test]
+fn test_inner_function_with_whitespace() {
+    let data_function = |s: String| match s.as_str() {
+        "any_dropdowns" => types::Value::Number(1.0),
+        "primary_carrier" => types::Value::Text("Allianz*".to_owned()),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(
+            &"=AND(RIGHT(primary_carrier, 1)=\"*\", 1 > 0)",
             Some(&data_function)
         ),
-        "FALSE"
+        "TRUE"
     );
 }

@@ -62,8 +62,7 @@ three_params  = _{
     "(" ~ ")" |
     "(" ~ first_param ~ param ~ param ~ ")" }
 
-atomic_expr = ${ expr }
-param_inner = _{ atomic_expr | expr}
+param_inner = _{ expr}
 first_param = { param_inner? }
 param       = { ","? ~ param_inner? }
 param_with_blank   = _{ param1 | blank }
@@ -81,7 +80,7 @@ iterator = { "{" ~ expr ~ ("," ~ expr)*? ~ "}" }
 
 expr = { term ~ (operator ~ term)* }
 term = _{ number | "(" ~ expr ~ ")" | string_double_quote 
-        | string_single_quote | logical_function | function  | boolean | reference | iterator } 
+        | string_single_quote | logical_function | function | boolean | reference | iterator }
 term_constant = _{ string_constant }
 
 formula = _{ SOI ~ "=" ~ expr ~ EOI | SOI ~ term_constant ~ EOI } 
