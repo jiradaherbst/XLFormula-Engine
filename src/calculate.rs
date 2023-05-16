@@ -1043,6 +1043,24 @@ fn calculate_iff(iff_arguments: (types::Value, types::Value, types::Value)) -> t
     }
 }
 
+fn calculate_isblank(value: types::Value) -> types::Value {
+    match value {
+        types::Value::Blank => types::Value::Boolean(types::Boolean::True),
+        types::Value::Text(s) => {
+            if s.is_empty() {
+                types::Value::Boolean(types::Boolean::True)
+            } else {
+                types::Value::Boolean(types::Boolean::False)
+            }
+        }
+        types::Value::Error(types::Error::Value) => types::Value::Boolean(types::Boolean::True),
+        types::Value::Error(types::Error::Reference) => types::Value::Boolean(types::Boolean::True),
+        
+        _ => types::Value::Boolean(types::Boolean::False),
+        
+    }
+}
+
 fn calculate_function(
     func: types::Function,
     exp: types::Expression,
@@ -1068,6 +1086,7 @@ fn calculate_function(
         types::Function::Right => calculate_right(get_number_and_string_values(exp, f)),
         types::Function::Left => calculate_left(get_number_and_string_values(exp, f)),
         types::Function::Iff => calculate_iff(get_iff_values(exp, f)),
+        types::Function::IsBlank => calculate_isblank(get_value(exp, f)),
     }
 }
 

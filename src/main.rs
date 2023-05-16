@@ -255,5 +255,19 @@ fn main() -> Result<(), ParseError> {
     let result = calculate::calculate_formula(formula, Some(&data_function));
     println!("Result is {}", calculate::result_to_string(result));
 
+    ///////////// ISBLANK function
+    let data_function = |s: String| match s.as_str() {
+        // "ReferenceKey" => types::Value::Text("100".to_string()),
+        "ReferenceName" => types::Value::Text("Test".to_string()),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    let formula = parse_formula::parse_string_to_formula(&"=ISBLANK(ReferenceKey)", None::<NoCustomFunction>,);
+    let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
+
+    let formula = parse_formula::parse_string_to_formula(&"=ISBLANK(ReferenceName)", None::<NoCustomFunction>,);
+    let result = calculate::calculate_formula(formula, Some(&data_function));
+    println!("Result is {}", calculate::result_to_string(result));
+
     Ok(())
 }

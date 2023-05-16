@@ -1486,3 +1486,26 @@ fn it_evaluates_if_formulas_with_text() {
         "100 - Test"
     );
 }
+
+#[test]
+fn it_evaluates_isblank_function() {
+    let data_function = |s: String| match s.as_str() {
+        // "ReferenceKey" => types::Value::Text("100".to_string()),
+        "ReferenceName" => types::Value::Text("Test".to_string()),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_string_with_reference(
+            &"=ISBLANK(ReferenceKey)",
+            Some(&data_function)
+        ),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(
+            &"=ISBLANK(ReferenceName)",
+            Some(&data_function)
+        ),
+        "FALSE"
+    );
+}

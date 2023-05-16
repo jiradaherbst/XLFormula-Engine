@@ -149,6 +149,7 @@ fn rule_to_function_operator(collective_operation: Rule) -> types::Operator {
         Rule::right => types::Operator::Function(types::Function::Right),
         Rule::left => types::Operator::Function(types::Function::Left),
         Rule::iff => types::Operator::Function(types::Function::Iff),
+        Rule::isblank => types::Operator::Function(types::Function::IsBlank),
         _ => unreachable!(),
     }
 }
@@ -341,6 +342,7 @@ fn build_formula_with_climber(
             Rule::left => build_formula_collective_operator(Rule::left, pair, f),
             Rule::custom_function => build_formula_custom_function(pair, f),
             Rule::iff => build_formula_iff(pair, f),
+            Rule::isblank => build_formula_collective_operator(Rule::isblank, pair, f),
             Rule::atomic_expr => build_formula_with_climber(pair.into_inner(), f),
             _ => unreachable!(),
         },

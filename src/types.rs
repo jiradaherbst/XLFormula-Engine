@@ -15,6 +15,7 @@ pub enum Function {
     Right,
     Left,
     Iff,
+    IsBlank,
 }
 
 /// Defines Excel Operators.
