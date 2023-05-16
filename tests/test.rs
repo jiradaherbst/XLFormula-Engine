@@ -1139,6 +1139,14 @@ fn it_evaluates_blanks_in_comparison_operators() {
         evaluate_formula_string_with_reference(&"=B=0", Some(&data_function)),
         "TRUE",
     );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"=B='test'", Some(&data_function)),
+        "FALSE",
+    );
+    assert_eq!(
+        evaluate_formula_string_with_reference(&"='test'=B", Some(&data_function)),
+        "FALSE",
+    );
 }
 
 #[test]
