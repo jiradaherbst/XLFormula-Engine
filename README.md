@@ -22,7 +22,7 @@ It supports:
 Add the corresponding entry to your Cargo.toml dependency list:
 ```toml
 [dependencies]
-xlformula_engine = "0.1.17"
+xlformula_engine = "0.1.18"
 ```
 and add this to your crate root:
 ```rust
