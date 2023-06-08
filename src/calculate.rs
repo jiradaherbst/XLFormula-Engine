@@ -339,23 +339,11 @@ fn calculate_comparison_operator(
                     types::Value::Boolean(types::Boolean::False)
                 }
             }
-            types::Value::Blank => {
-                if f(l, 0.0) {
-                    types::Value::Boolean(types::Boolean::True)
-                } else {
-                    types::Value::Boolean(types::Boolean::False)
-                }
-            }
+            types::Value::Blank => types::Value::Boolean(types::Boolean::False),
             _ => types::Value::Error(types::Error::Value),
         },
         types::Value::Blank => match rhs {
-            types::Value::Number(r) => {
-                if f(0.0, r) {
-                    types::Value::Boolean(types::Boolean::True)
-                } else {
-                    types::Value::Boolean(types::Boolean::False)
-                }
-            }
+            types::Value::Number(_) => types::Value::Boolean(types::Boolean::False),
             types::Value::Text(r) => {
                 if r.is_empty() {
                     types::Value::Boolean(types::Boolean::True)
@@ -1050,9 +1038,7 @@ fn calculate_isblank(value: types::Value) -> types::Value {
         }
         types::Value::Error(types::Error::Value) => types::Value::Boolean(types::Boolean::True),
         types::Value::Error(types::Error::Reference) => types::Value::Boolean(types::Boolean::True),
-        
         _ => types::Value::Boolean(types::Boolean::False),
-        
     }
 }
 
