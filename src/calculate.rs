@@ -339,23 +339,11 @@ fn calculate_comparison_operator(
                     types::Value::Boolean(types::Boolean::False)
                 }
             }
-            types::Value::Blank => {
-                if f(l, 0.0) {
-                    types::Value::Boolean(types::Boolean::True)
-                } else {
-                    types::Value::Boolean(types::Boolean::False)
-                }
-            }
+            types::Value::Blank => types::Value::Boolean(types::Boolean::False),
             _ => types::Value::Error(types::Error::Value),
         },
         types::Value::Blank => match rhs {
-            types::Value::Number(r) => {
-                if f(0.0, r) {
-                    types::Value::Boolean(types::Boolean::True)
-                } else {
-                    types::Value::Boolean(types::Boolean::False)
-                }
-            }
+            types::Value::Number(_) => types::Value::Boolean(types::Boolean::False),
             types::Value::Text(r) => {
                 if r.is_empty() {
                     types::Value::Boolean(types::Boolean::True)
@@ -393,10 +381,6 @@ fn calculate_boolean_operator_rhs_boolean(
                 types::Value::Boolean(types::Boolean::False)
             }
         }
-        types::Value::Error(_) => match l {
-            types::Boolean::True => types::Value::Boolean(types::Boolean::True),
-            types::Boolean::False => types::Value::Boolean(types::Boolean::False),
-        },
         types::Value::Iterator(mut value_vec) => {
             if let Some(mut temp) = value_vec.pop() {
                 while let Some(top) = value_vec.pop() {
@@ -483,7 +467,6 @@ fn calculate_boolean_operator(
         types::Value::Boolean(l) => {
             calculate_boolean_operator_rhs_boolean(l, cast_value_to_boolean(rhs), f)
         }
-        types::Value::Error(_) => calculate_boolean_operator_rhs_error(cast_value_to_boolean(rhs)),
         types::Value::Iterator(lhs_vec) => {
             calculate_boolean_operator_rhs_iterator(cast_value_to_boolean(rhs), lhs_vec, f)
         }
@@ -1055,9 +1038,7 @@ fn calculate_isblank(value: types::Value) -> types::Value {
         }
         types::Value::Error(types::Error::Value) => types::Value::Boolean(types::Boolean::True),
         types::Value::Error(types::Error::Reference) => types::Value::Boolean(types::Boolean::True),
-        
         _ => types::Value::Boolean(types::Boolean::False),
-        
     }
 }
 
@@ -1136,6 +1117,9 @@ fn calculate_operation(
                 (types::Value::Date(l), types::Value::Date(r)) => {
                     compare_dates(l, r, |d1, d2| d1 == d2)
                 }
+                (types::Value::Text(l), types::Value::Text(r)) => {
+                    compare_strings(l, r, |s1, s2| s1 == s2)
+                }
                 _ => calculate_comparison_operator(value1, value2, |n1, n2| (n1 - n2).abs() == 0.0),
             }
         }
@@ -1144,6 +1128,9 @@ fn calculate_operation(
             match (value1.clone(), value2.clone()) {
                 (types::Value::Date(l), types::Value::Date(r)) => {
                     compare_dates(l, r, |d1, d2| d1 != d2)
+                }
+                (types::Value::Text(l), types::Value::Text(r)) => {
+                    compare_strings(l, r, |s1, s2| s1 != s2)
                 }
                 _ => calculate_comparison_operator(value1, value2, |n1, n2| (n1 - n2).abs() > 0.0),
             }
@@ -1194,6 +1181,18 @@ fn compare_dates(
     f: fn(d1: DateTime<FixedOffset>, d2: DateTime<FixedOffset>) -> bool,
 ) -> types::Value {
     if f(date1, date2) {
+        types::Value::Boolean(types::Boolean::True)
+    } else {
+        types::Value::Boolean(types::Boolean::False)
+    }
+}
+
+fn compare_strings(
+    string1: String,
+    string2: String,
+    f: fn(s1: String, s2: String) -> bool,
+) -> types::Value {
+    if f(string1, string2) {
         types::Value::Boolean(types::Boolean::True)
     } else {
         types::Value::Boolean(types::Boolean::False)

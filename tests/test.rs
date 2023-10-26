@@ -418,6 +418,8 @@ fn it_evaluate_comparison_operators() {
     assert_eq!(evaluate_formula_string(&"=1*1/1+2<1^1"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=2>=1"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=11<=3"), "FALSE",);
+    assert_eq!(evaluate_formula_string(&"=\"Joshu\"=\"Joshu\""), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=\"Joshu\"<>\"NotJoshu\""), "TRUE",);
 }
 
 #[test]
@@ -450,19 +452,19 @@ fn it_evaluate_boolean_and() {
     assert_eq!(evaluate_formula_string(&"=AND(1)"), "TRUE",);
     assert_eq!(
         evaluate_formula_string(&"=AND(\"test\", \"test\")"),
-        "#CAST!",
+        "#VALUE!",
     );
     assert_eq!(
         evaluate_formula_string(&"=AND(\"test\",\"True\", 1, true) "),
-        "TRUE",
+        "#VALUE!",
     );
     assert_eq!(
         evaluate_formula_string(&"=AND(\"True\",\"test\", 1, true) "),
-        "TRUE",
+        "#VALUE!",
     );
     assert_eq!(
         evaluate_formula_string(&"=AND(\"True\", 1, true, \"test\")"),
-        "TRUE",
+        "#VALUE!",
     );
     assert_eq!(evaluate_formula_string(&"=AND(1, )"), "FALSE",);
     assert_eq!(evaluate_formula_string(&"=AND(1,,,1)"), "FALSE",);
@@ -501,6 +503,9 @@ fn it_evaluate_boolean_not() {
     assert_eq!(evaluate_formula_string(&"=NOT(\"false\")"), "TRUE",);
     assert_eq!(evaluate_formula_string(&"=NOT(\"test\")"), "#CAST!",);
     assert_eq!(evaluate_formula_string(&"=NOT(0)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=not(11<=3)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=Not(11<=3)"), "TRUE",);
+    assert_eq!(evaluate_formula_string(&"=nOT(11<=3)"), "TRUE",);
 }
 
 //////////////////////////// References //////////////////////////////////
@@ -590,7 +595,7 @@ fn it_evaluate_references_error_value_formulas() {
     };
     assert_eq!(
         evaluate_formula_boolean_with_reference(&"=AND(A,B)", Some(&data_function)),
-        "TRUE"
+        "#VALUE!"
     );
 }
 
@@ -705,6 +710,10 @@ fn it_evaluate_date() -> Result<(), ParseError> {
     };
     assert_eq!(
         evaluate_formula_number_with_reference(&"=DAYS(end, start)", Some(&data_function)),
+        182.00
+    );
+    assert_eq!(
+        evaluate_formula_number_with_reference(&"=days(end, start)", Some(&data_function)),
         182.00
     );
     assert_eq!(
@@ -1106,6 +1115,26 @@ fn it_evaluates_blanks_in_boolean_operations() {
 }
 
 #[test]
+fn evaluate_invalid_reference_in_functions() {
+    let data_function = |s: String| match s.as_str() {
+        _ => types::Value::Error(types::Error::Value),
+    };
+    // test with a non existing reference
+    let formula = parse_formula::parse_string_to_formula(
+        "=AND(T, NO_REFERENCE)".as_ref(),
+        None::<NoCustomFunction>,
+    );
+    assert_eq!(
+        calculate::calculate_formula(formula, Some(&data_function)),
+        types::Value::Error(types::Error::Value)
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=AND(T, NO_REFERENCE)", Some(&data_function)),
+        "#VALUE!"
+    );
+}
+
+#[test]
 fn it_evaluates_blanks_in_comparison_operators() {
     let data_function = |s: String| match s.as_str() {
         "B" => types::Value::Blank,
@@ -1125,7 +1154,7 @@ fn it_evaluates_blanks_in_comparison_operators() {
     );
     assert_eq!(
         evaluate_formula_string_with_reference(&"=1>B", Some(&data_function)),
-        "TRUE",
+        "FALSE",
     );
     assert_eq!(
         evaluate_formula_string_with_reference(&"=B>1", Some(&data_function)),
@@ -1133,11 +1162,23 @@ fn it_evaluates_blanks_in_comparison_operators() {
     );
     assert_eq!(
         evaluate_formula_string_with_reference(&"=0=B", Some(&data_function)),
-        "TRUE",
+        "FALSE",
     );
     assert_eq!(
         evaluate_formula_string_with_reference(&"=B=0", Some(&data_function)),
-        "TRUE",
+        "FALSE",
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=B=\"\"", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=\"\"=B", Some(&data_function)),
+        "TRUE"
+    );
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(&"=\"something\"=B", Some(&data_function)),
+        "FALSE"
     );
     assert_eq!(
         evaluate_formula_string_with_reference(&"=B='test'", Some(&data_function)),
@@ -1162,11 +1203,11 @@ fn it_evaluates_blanks_in_comparison_operators_with_references() {
     );
     assert_eq!(
         evaluate_formula_string_with_reference(&"=B>=A", Some(&data_function)),
-        "TRUE",
+        "FALSE",
     );
     assert_eq!(
         evaluate_formula_string_with_reference(&"=A<B", Some(&data_function)),
-        "TRUE",
+        "FALSE",
     );
     assert_eq!(
         evaluate_formula_string_with_reference(&"=B<A", Some(&data_function)),
@@ -1495,17 +1536,27 @@ fn it_evaluates_isblank_function() {
         _ => types::Value::Error(types::Error::Value),
     };
     assert_eq!(
-        evaluate_formula_string_with_reference(
-            &"=ISBLANK(ReferenceKey)",
-            Some(&data_function)
-        ),
+        evaluate_formula_string_with_reference(&"=ISBLANK(ReferenceKey)", Some(&data_function)),
         "TRUE"
     );
     assert_eq!(
-        evaluate_formula_string_with_reference(
-            &"=ISBLANK(ReferenceName)",
+        evaluate_formula_string_with_reference(&"=ISBLANK(ReferenceName)", Some(&data_function)),
+        "FALSE"
+    );
+}
+
+#[test]
+fn test_inner_function_with_whitespace() {
+    let data_function = |s: String| match s.as_str() {
+        "any_dropdowns" => types::Value::Number(1.0),
+        "primary_carrier" => types::Value::Text("Allianz*".to_owned()),
+        _ => types::Value::Error(types::Error::Value),
+    };
+    assert_eq!(
+        evaluate_formula_boolean_with_reference(
+            &"=AND(RIGHT(primary_carrier, 1)=\"*\", 1 > 0)",
             Some(&data_function)
         ),
-        "FALSE"
+        "TRUE"
     );
 }
